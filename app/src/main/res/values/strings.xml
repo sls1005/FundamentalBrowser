@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">Fundamental Browser</string>
+    <string name="space_redirected_space"> (redirected) </string>
+    <string name="log">Log</string>
+    <string name="settings">Settings</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
+    <string name="none">None</string>
+    <string name="libs_title">Libraries</string>
+    <string name="main_url_field_hint">Enter URL or text</string>
+    <string name="decode">Decode</string>
+    <string name="clear">Clear</string>
+    <string name="restore">Restore</string>
+    <string name="search">Search</string>
+    <string name="copy">Copy</string>
+    <string name="paste">Paste</string>
+    <string name="main_button_go">Go</string>
+    <string name="settings_title1">Options</string>
+    <string name="allow_javascript">Allow JavaScript</string>
+    <string name="load_images">Load images</string>
+    <string name="load_resources">Load resources</string>
+    <string name="foreground_logging">Foreground logging</string>
+    <string name="accept_cookies">Accept cookies</string>
+    <string name="accept_3rd_party_cookies">Accept third-party cookies</string>
+    <string name="settings_title2">Max log messages</string>
+    <string name="settings_text1">This is the maximum number of log messages.</string>
+    <string name="settings_title_3">Search URL</string>
+    <string name="settings_text2">This is the URL that will be used when the search button is pressed, and will be joined with the search keywords to form an actual URL. The search button can only be used when this is set.\nExample: <code>https://example.com/search/?q=</code></string>
+    <string name="settings_title3">Clear data</string>
+    <string name="clear_cache">Clear cache</string>
+    <string name="clear_usernames_passwords">Clear usernames and passwords</string>
+    <string name="clear_cookies">Clear cookies</string>
+    <string name="settings_title4">About</string>
+    <string name="settings_text3">The source code of this app is available at https://github.com/sls1005/FundamentalBrowser, under the MIT License.</string>
+    <string name="settings_text4">Disclaimer: JavaScript is a trademark or registered trademark of Oracle Corporation.</string>
+    <string name="see_doc">See documentation</string>
+    <string name="see_libs">See open source libraries used</string>
+    <string name="number_field_title1">Enter a number</string>
+    <string name="url_field_title1">Enter a URL</string>
+    <string name="menu1_item1">Show/hide URL bar</string>
+    <string name="menu1_item2">Edit URL</string>
+    <string name="menu1_item3">Refresh</string>
+    <string name="menu1_item4">JavaScript</string>
+    <string name="menu1_item9">View log</string>
+    <string name="error1">Error: Search URL is not set. Please set it in Settings.</string>
+</resources>
