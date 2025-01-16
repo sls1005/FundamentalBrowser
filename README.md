@@ -52,11 +52,11 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 #### Separated buttons for searching and URL loading
 
-To enable the search button, firstly set the search URL. It is not the same as the 'Go' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search it.
+To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Go' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search it.
 
 #### Console mode
 
-To enter the console mode, enter some code with the `javascript:` prefix and press the 'Go' button while the log window is opened, or load it before loading any page or any search. You must prefix each commend with `javascript:` to keep it in this mode. This can also be used as an interpreter. Remember not to use the 'Search' button, which will not execute any code in the URL field, but will search it.
+To enter the console mode, input some code with the `javascript:` prefix in the URL field and press the 'Go' button while the log window is opened, or load it before loading any page or any search. You must prefix each commend with `javascript:` to keep it in this mode. This can also be used as an interpreter. Remember not to use the 'Search' button, which will not execute any code in the URL field, but will search it.
 
 ![](screenshots/screenshot3.jpg)
 
