@@ -16,7 +16,6 @@ class SettingsActivity : ConfiguratedActivity() {
     @SuppressLint("CutPasteId")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        title = getString(R.string.settings)
         setContentView(R.layout.activity_settings)
         findViewById<SwitchMaterial>(R.id.switch_accept_cookies).setOnCheckedChangeListener { _, checked ->
             CookieManager.getInstance().setAcceptCookie(checked)
@@ -92,7 +91,7 @@ class SettingsActivity : ConfiguratedActivity() {
             }).show()
         }
         findViewById<Button>(R.id.button_doc).setOnClickListener {
-
+            startActivity(Intent(this, DocumentationActivity::class.java))
         }
         findViewById<Button>(R.id.button_libraries).setOnClickListener {
             startActivity(

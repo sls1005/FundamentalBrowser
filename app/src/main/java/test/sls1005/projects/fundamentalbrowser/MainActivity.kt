@@ -64,11 +64,7 @@ class MainActivity : ConfiguratedActivity() {
                             }
                         }
                         if (foregroundLoggingEnabled) {
-                            Snackbar.make(v, msg, 5000).apply {
-                                setBackgroundTint(getColor(R.color.snackbar_background))
-                                setTextColor(getColor(R.color.white))
-                                show()
-                            }
+                            showMsg(msg, v)
                         }
                     }
                     return false
@@ -89,11 +85,7 @@ class MainActivity : ConfiguratedActivity() {
                         ) { foregroundLoggingEnabled }
                     ) {
                         synchronized(v) {
-                            Snackbar.make(v, msg, 5000).apply {
-                                setBackgroundTint(getColor(R.color.snackbar_background))
-                                setTextColor(getColor(R.color.white))
-                                show()
-                            }
+                            showMsg(msg, v)
                         }
                     }
                     return super.shouldInterceptRequest(v, req)
@@ -149,10 +141,7 @@ class MainActivity : ConfiguratedActivity() {
             val self = findViewById<Button>(R.id.button_go).apply {
                 setClickable(false)
             }
-            val urlField = findViewById<EditText>(R.id.url_field).apply {
-                setEnabled(false)
-            }
-            val url = urlField.text.toString().replace('\n', ' ')
+            val url = findViewById<EditText>(R.id.url_field).text.toString().replace('\n', ' ')
             currentURL = url
             textToDisplayInUrlField = url
             val v1 = findViewById<WebView>(R.id.view1)
@@ -165,7 +154,8 @@ class MainActivity : ConfiguratedActivity() {
                     showLog()
                 }
                 v1.loadUrl(url)
-                urlField.setEnabled(true)
+            } else if (url.isEmpty()) {
+                showMsg(getString(R.string.error3), self)
             } else {
                 hideUrlBar()
                 hideLogIfShowing()
@@ -198,26 +188,22 @@ class MainActivity : ConfiguratedActivity() {
         }
         findViewById<Button>(R.id.button_search).setOnClickListener {
             val self = findViewById<Button>(R.id.button_search)
-            if (searchURL.isNotEmpty()) {
+            val rawInput = findViewById<EditText>(R.id.url_field).text.toString()
+            if (searchURL.isEmpty()) {
+                showMsg(getString(R.string.error1), self)
+            } else if (rawInput.isEmpty()) {
+                showMsg(getString(R.string.error2), self)
+            } else {
                 self.setClickable(false)
-                val url = searchURL + findViewById<EditText>(R.id.url_field).run {
-                    setEnabled(false)
-                    Uri.encode(
-                        text.toString().replace('\n', ' ')
-                    )
-                }
+                val url = searchURL + Uri.encode(
+                    rawInput.replace('\n', ' ')
+                )
                 hideUrlBar()
                 hideLogIfShowing()
                 currentURL = url
                 textToDisplayInUrlField = url
                 findViewById<WebView>(R.id.view1).loadUrl(url)
                 self.setClickable(true)
-            } else {
-                Snackbar.make(self, getString(R.string.error1), 5000).apply {
-                    setBackgroundTint(getColor(R.color.snackbar_background))
-                    setTextColor(getColor(R.color.white))
-                    show()
-                }
             }
         }
         findViewById<Button>(R.id.button_copy).setOnClickListener {
@@ -567,5 +553,13 @@ class MainActivity : ConfiguratedActivity() {
 
     private inline fun hasNotLoadedAnyPage(): Boolean {
         return (findViewById<WebView>(R.id.view1).originalUrl == null)
+    }
+
+    private inline fun showMsg(msg: String, v: View) {
+        Snackbar.make(v, msg, 5000).apply {
+            setBackgroundTint(getColor(R.color.snackbar_background))
+            setTextColor(getColor(R.color.white))
+            show()
+        }
     }
 }

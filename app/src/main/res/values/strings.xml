@@ -43,4 +43,6 @@
     <string name="menu1_item4">JavaScript</string>
     <string name="menu1_item9">View log</string>
     <string name="error1">Error: Search URL is not set. Please set it in Settings.</string>
+    <string name="error2">Please enter some keywords.</string>
+    <string name="error3">Please enter a URL.</string>
 </resources>

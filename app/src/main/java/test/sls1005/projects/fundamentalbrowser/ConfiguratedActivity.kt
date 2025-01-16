@@ -78,7 +78,7 @@ open class ConfiguratedActivity : AppCompatActivity() {
         }
         val a = ByteArray(5)
         var k = maxLogMsgs
-        a[0] = byte1.toByte()
+        a[0] = byte1
         for (i in 1 .. 4) {
             a[i] = k.mod(256).toUByte().toByte()
             k = k shr 8

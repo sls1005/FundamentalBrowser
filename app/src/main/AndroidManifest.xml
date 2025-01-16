@@ -24,7 +24,13 @@
             android:name=".SettingsActivity"
             android:exported="false"
             android:theme="@style/Theme.FundamentalBrowser"
-            android:title="Settings">
+            android:label="Settings">
+        </activity>
+        <activity
+            android:name=".DocumentationActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FundamentalBrowser"
+            android:label="Documentation">
         </activity>
         <activity
             android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
