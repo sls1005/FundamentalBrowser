@@ -1,3 +1,5 @@
+# Fundamental Browser
+
 Fundamental Browser is a simple and basic browser designed for running on Android. It is based on `WebView` and is intended to be developer-friendly, like [Eruda](https://github.com/liriliri/eruda-android).
 
 This is usable but not yet finished. Several buttons and options will not respond.
