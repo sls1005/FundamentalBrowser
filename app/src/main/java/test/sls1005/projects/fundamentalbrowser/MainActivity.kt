@@ -141,7 +141,19 @@ class MainActivity : ConfiguratedActivity() {
             val self = findViewById<Button>(R.id.button_go).apply {
                 setClickable(false)
             }
-            val url = findViewById<EditText>(R.id.url_field).text.toString().replace('\n', ' ')
+            val url = findViewById<EditText>(R.id.url_field).text.toString().let {
+                if (shouldRemoveLfAndSpacesFromUrl) {
+                    buildString(it.length / 2) {
+                        for (c in it) {
+                            if (c != ' ' && c != '\n') {
+                                append(c)
+                            }
+                        }
+                    }
+                } else {
+                    it
+                }
+            }
             currentURL = url
             textToDisplayInUrlField = url
             val v1 = findViewById<WebView>(R.id.view1)
@@ -256,6 +268,18 @@ class MainActivity : ConfiguratedActivity() {
                 }
             }
         }
+        findViewById<Button>(R.id.button_run).setOnClickListener {
+            val self = findViewById<Button>(R.id.button_run).apply {
+                setClickable(false)
+            }
+            val code = findViewById<EditText>(R.id.url_field).text.toString()
+            logMsgs.clear()
+            if (! isShowingLog()) {
+                showLog()
+            }
+            findViewById<WebView>(R.id.view1).loadUrl("javascript:" + code)
+            self.setClickable(true)
+        }
         findViewById<HorizontalScrollView>(R.id.button_area).postDelayed({
             val self = findViewById<HorizontalScrollView>(R.id.button_area)
             self.fullScroll(View.FOCUS_RIGHT)
@@ -290,7 +314,8 @@ class MainActivity : ConfiguratedActivity() {
         }.also {
             CookieManager.getInstance().setAcceptThirdPartyCookies(it, shouldAccept3rdPartyCookies)
         }
-        //logMsgs.add("$shouldAccept3rdPartyCookies $maxLogMsgs $searchURL")
+        showRunButtonIfApplicable()
+        //logMsgs.add("$shouldAccept3rdPartyCookies $shouldRemoveLfAndSpacesFromUrl $maxLogMsgs $searchURL")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -439,6 +464,7 @@ class MainActivity : ConfiguratedActivity() {
                 setEnabled(true)
             }
         }
+        showRunButtonIfApplicable()
         for (v in listOf(
             findViewById<WebView>(R.id.view1),
             findViewById<TextView>(R.id.log)
@@ -465,6 +491,7 @@ class MainActivity : ConfiguratedActivity() {
                 visibility = GONE
             }
         }
+        hideRunButtonIfShowing()
         findViewById<EditText>(R.id.url_field).apply {
             setEnabled(false)
             textToDisplayInUrlField = text.toString()
@@ -548,6 +575,27 @@ class MainActivity : ConfiguratedActivity() {
     private inline fun hideLogIfShowing() {
         if (isShowingLog()) {
             hideLog()
+        }
+    }
+
+    private fun showRunButtonIfApplicable() {
+        findViewById<Button>(R.id.button_run).apply {
+            if (isShowingUrlBar() && shouldDisplayRunButton) {
+                visibility = VISIBLE
+                setEnabled(true)
+            } else {
+                visibility = GONE
+                setEnabled(false)
+            }
+        }
+    }
+
+    private fun hideRunButtonIfShowing() {
+        findViewById<Button>(R.id.button_run).apply {
+            if (visibility == VISIBLE) {
+                visibility = GONE
+                setEnabled(false)
+            }
         }
     }
 

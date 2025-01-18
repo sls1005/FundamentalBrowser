@@ -24,13 +24,14 @@
     <string name="accept_3rd_party_cookies">Accept third-party cookies</string>
     <string name="settings_title2">Max log messages</string>
     <string name="settings_text1">This is the maximum number of log messages.</string>
-    <string name="settings_title_3">Search URL</string>
-    <string name="settings_text2">This is the URL that will be used when the search button is pressed, and will be joined with the search keywords to form an actual URL. The search button can only be used when this is set.\nExample: <code>https://example.com/search/?q=</code></string>
-    <string name="settings_title3">Clear data</string>
+    <string name="settings_title3">Search URL</string>
+    <string name="settings_text2">This is the URL that will be used when the search button is pressed, and will be joined with the search keywords to form an actual URL. The search button can only be used when this is set.\nExample: <code>https://example.com/search?q=</code></string>
+    <string name="settings_title4">Experimental</string>
+    <string name="settings_title5">Clear data</string>
     <string name="clear_cache">Clear cache</string>
     <string name="clear_usernames_passwords">Clear usernames and passwords</string>
     <string name="clear_cookies">Clear cookies</string>
-    <string name="settings_title4">About</string>
+    <string name="settings_title6">About</string>
     <string name="settings_text3">The source code of this app is available at https://github.com/sls1005/FundamentalBrowser, under the MIT License.</string>
     <string name="settings_text4">Disclaimer: JavaScript is a trademark or registered trademark of Oracle Corporation.</string>
     <string name="see_doc">See documentation</string>
@@ -45,4 +46,8 @@
     <string name="error1">Error: Search URL is not set. Please set it in Settings.</string>
     <string name="error2">Please enter some keywords.</string>
     <string name="error3">Please enter a URL.</string>
+    <string name="remove_spaces_and_linebreaks_when_loading">Remove spaces and linebreaks when loading a URL</string>
+    <string name="switch_remove_spaces_and_linebreaks_extra_text">It is recommend to turn this on.</string>
+    <string name="show_button_run">Show button for running input as a script</string>
+    <string name="switch_show_button_run_extra_text">This only works if JavaScript is enabled. This feature is experimental.</string>
 </resources>

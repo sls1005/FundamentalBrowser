@@ -27,6 +27,9 @@ class SettingsActivity : ConfiguratedActivity() {
                 }
             }
         }
+        findViewById<SwitchMaterial>(R.id.switch_accept_3rd_party_cookies).setOnCheckedChangeListener { _, checked ->
+            shouldAccept3rdPartyCookies = checked
+        }
         findViewById<SwitchMaterial>(R.id.switch_allow_js).setOnCheckedChangeListener { _, checked ->
             shouldUseJavaScript = checked
         }
@@ -39,8 +42,11 @@ class SettingsActivity : ConfiguratedActivity() {
         findViewById<SwitchMaterial>(R.id.switch_foreground_logging).setOnCheckedChangeListener { _, checked ->
             foregroundLoggingEnabled = checked
         }
-        findViewById<SwitchMaterial>(R.id.switch_accept_3rd_party_cookies).setOnCheckedChangeListener { _, checked ->
-            shouldAccept3rdPartyCookies = checked
+        findViewById<SwitchMaterial>(R.id.switch_remove_lf_and_space_from_url).setOnCheckedChangeListener { _, checked ->
+            shouldRemoveLfAndSpacesFromUrl = checked
+        }
+        findViewById<SwitchMaterial>(R.id.switch_show_button_run).setOnCheckedChangeListener { _, checked ->
+            shouldDisplayRunButton = checked
         }
         findViewById<Button>(R.id.button_clear_cache).setOnClickListener {
             WebView(this@SettingsActivity).clearCache(true)
@@ -104,21 +110,30 @@ class SettingsActivity : ConfiguratedActivity() {
 
     override fun onResume() {
         super.onResume()
-        findViewById<SwitchMaterial>(R.id.switch_allow_js).setChecked(shouldUseJavaScript)
-        findViewById<SwitchMaterial>(R.id.switch_load_images).setChecked(shouldLoadImages)
-        findViewById<SwitchMaterial>(R.id.switch_load_resources).setChecked(shouldLoadResources)
-        findViewById<SwitchMaterial>(R.id.switch_foreground_logging).setChecked(foregroundLoggingEnabled)
         findViewById<SwitchMaterial>(R.id.switch_accept_cookies).apply {
-            CookieManager.getInstance().acceptCookie().also {
-                setChecked(it)
+            CookieManager.getInstance().acceptCookie().also { checked ->
+                setChecked(checked)
                 (this@SettingsActivity).findViewById<SwitchMaterial>(R.id.switch_accept_3rd_party_cookies).apply {
-                    setEnabled(it)
-                    if (!it) {
+                    setEnabled(checked)
+                    if (!checked) {
                         shouldAccept3rdPartyCookies = false
                         setChecked(false)
+                    } else {
+                        setChecked(shouldAccept3rdPartyCookies)
                     }
                 }
             }
+        }
+        listOf(
+            Pair(R.id.switch_allow_js, shouldUseJavaScript),
+            Pair(R.id.switch_load_images, shouldLoadImages),
+            Pair(R.id.switch_load_resources, shouldLoadResources),
+            Pair(R.id.switch_foreground_logging, foregroundLoggingEnabled),
+            Pair(R.id.switch_remove_lf_and_space_from_url, shouldRemoveLfAndSpacesFromUrl),
+            Pair(R.id.switch_show_button_run, shouldDisplayRunButton)
+        ).forEach { it ->
+            val (id, flag) = it
+            findViewById<SwitchMaterial>(id).setChecked(flag)
         }
         findViewById<TextView>(R.id.max_log_msgs).text = maxLogMsgs.toString()
         findViewById<TextView>(R.id.search_url).text = searchURL.let {
