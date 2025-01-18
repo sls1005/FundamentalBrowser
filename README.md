@@ -62,11 +62,15 @@ To enter the console mode, input some code with the `javascript:` prefix in the 
 
 ![](screenshots/screenshot3.jpg)
 
+Alternatively, you can use the (experimental) 'Run' button to run the code, in which case you don't have to (and must not) add the `javascript:` prefix.
+
+![](screenshots/screenshot4.jpg)
+
 Using a commend prefixed with `javascript:` in any other situation will cause it to be executed normally, as if loading a URL. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages; things like `alert` or `confirm` might not work.
 
 ### Note
 
-* Although newline chatacters are allowed in the URL field, they will not be treated as linebreaks, but as whitespaces. So be careful about your **code** that uses linebreaks, if you use any.
+* Since this app allows multiline editing, the 'Go' and 'Search' buttons (but not the 'Run' button) will by default replace newline characters in the URL field with spaces, or encode them as `%20` (meaning space). So be careful about your *code* that uses them, if any.
 
 * Remember to (or not to) update your 'System WebView.' It may affect the behavior of this application.
 
