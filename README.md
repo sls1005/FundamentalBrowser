@@ -28,11 +28,11 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 - [ ] Customizable headers
 
-- [ ] Support desktop mode.
+- [x] Support desktop mode (on mobile).
 
-- [ ] Selectable or customizable locales (for the content rather than UI)
+- [x] Selectable or customizable locales (for the content rather than UI)
 
-- [ ] Support searching in content.
+- [x] Support searching in content.
 
 - [x] Log everything so that nothing is secretly down- or up-loaded.
 
@@ -68,7 +68,7 @@ Alternatively, you can use the (experimental) 'Run' button to run the code, in w
 
 ![](screenshots/screenshot4.jpg)
 
-Using a commend prefixed with `javascript:` in any other situation will cause it to be executed normally, as if loading a URL. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages; things like `alert` or `confirm` might not work.
+Using a commend prefixed with `javascript:` in any other situation will cause it to be executed normally, as if loading a URL. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.
 
 ### Note
 

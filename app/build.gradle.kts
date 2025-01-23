@@ -1,9 +1,7 @@
-import com.android.build.api.dsl.ApkSigningConfig
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    id("com.google.android.gms.oss-licenses-plugin")
+    id("com.mikepenz.aboutlibraries.plugin")
 }
 
 android {
@@ -14,8 +12,8 @@ android {
         applicationId = "test.sls1005.projects.fundamentalbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.4.0-beta"
+        versionCode = 8
+        versionName = "0.5.0-beta"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -53,7 +51,8 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
-    implementation(libs.play.services.oss.licenses)
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries)
     //implementation(libs.kotlinx.coroutine.android)
     //implementation(libs.androidx.constraintlayout)
     //implementation(libs.androidx.lifecycle.livedata.ktx)
@@ -61,4 +60,17 @@ dependencies {
     //implementation(libs.androidx.navigation.fragment.ktx)
     //implementation(libs.androidx.navigation.ui.ktx)
     //implementation(libs.androidx.webkit)
+}
+
+tasks.register<Copy>("Include license") {
+    include("LICENSE")
+    from("..")
+    into("src/main/assets/")
+}.also {
+    val task = it.get()
+    afterEvaluate {
+        tasks.named("preReleaseBuild") {
+            dependsOn(task)
+        }
+    }
 }

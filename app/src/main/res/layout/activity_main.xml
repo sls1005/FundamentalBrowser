@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="20dp"
-        android:maxHeight="500dp"
+        android:maxHeight="300dp"
         android:paddingStart="5dp"
         android:paddingEnd="5dp"
         android:layout_marginStart="5dp"
@@ -30,6 +30,14 @@
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
             android:gravity="end">
+            <Button
+                android:id="@+id/button_close"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="5dp"
+                android:layout_marginEnd="5dp"
+                android:text="@string/close"
+                android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_decode"
                 android:layout_width="wrap_content"
@@ -97,6 +105,52 @@
                 android:visibility="gone"/>
         </LinearLayout>
     </HorizontalScrollView>
+    <RelativeLayout
+        android:id="@+id/search_area"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone">
+        <EditText
+            android:id="@+id/content_search_field"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_toLeftOf="@id/search_previous"
+            android:layout_marginLeft="5dp"
+            android:paddingStart="5dp"
+            android:paddingEnd="5dp"
+            android:inputType="text"
+            android:textSize="18sp"
+            android:visibility="gone"/>
+        <ImageView
+            android:id="@+id/search_previous"
+            android:layout_width="30dp"
+            android:layout_height="45dp"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@id/search_next"
+            android:src="@drawable/arrow_up"
+            android:visibility="gone"/>
+        <ImageView
+            android:id="@+id/search_next"
+            android:layout_width="30dp"
+            android:layout_height="45dp"
+            android:layout_alignParentTop="true"
+            android:layout_toLeftOf="@+id/end_search"
+            android:src="@drawable/arrow_up"
+            android:rotation="180.0"
+            android:visibility="gone"/>
+        <ImageView
+            android:id="@+id/end_search"
+            android:layout_width="35dp"
+            android:layout_height="45dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="5dp"
+            android:src="@drawable/x"
+            android:visibility="gone"/>
+    </RelativeLayout>
     <ScrollView
         android:id="@+id/scroll_view1"
         android:layout_width="match_parent"

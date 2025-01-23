@@ -80,10 +80,112 @@
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
             android:paddingTop="5dp"
-            android:paddingBottom="5dp"
             android:textSize="12sp"
             android:text="@string/switch_remove_spaces_and_linebreaks_extra_text"
             android:textColor="?android:attr/textColorPrimary"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_desktop_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/desktop_mode"
+            android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/desktop_mode_extra_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="5dp"
+            android:textSize="12sp"
+            android:text="@string/switch_desktop_mode_extra_text"
+            android:textColor="?android:attr/textColorPrimary"
+            android:autoLink="web"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_enable_custom_user_agent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/use_customized_user_agent"
+            android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/user_agent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="10dp"
+            android:textSize="16sp"
+            android:text=""
+            android:clickable="true"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/user_agent_extra_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="12sp"
+            android:text="@string/switch_custom_user_agent_extra_text"
+            android:textColor="?android:attr/textColorPrimary"
+            android:autoLink="web"
+            android:visibility="gone"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_enable_custom_language_setting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/manually_set_languages"
+            android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/language_tags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="10dp"
+            android:paddingBottom="5dp"
+            android:textSize="16sp"
+            android:text=""
+            android:clickable="true"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/button_add_language"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:padding="6dp"
+            android:text="@string/add_language"
+            android:textAllCaps="false"
+            android:visibility="gone"/>
+        <Button
+            android:id="@+id/button_clear_languages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="20dp"
+            android:layout_marginEnd="20dp"
+            android:layout_marginBottom="5dp"
+            android:padding="6dp"
+            android:text="@string/clear"
+            android:textAllCaps="false"
+            android:visibility="gone"/>
+        <TextView
+            android:id="@+id/language_tags_extra_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="5dp"
+            android:textSize="12sp"
+            android:text="@string/switch_manually_set_languages_extra_string"
+            android:textColor="?android:attr/textColorPrimary"
+            android:autoLink="web"
+            android:visibility="gone"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -169,6 +271,14 @@
             android:textSize="12sp"
             android:text="@string/switch_show_button_run_extra_text"
             android:textColor="?android:attr/textColorPrimary"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_clear_log_when_running_script"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/clear_log_when_running_script"
+            android:textSize="16sp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -242,6 +352,15 @@
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
             android:text="@string/see_doc"
+            android:textAllCaps="false"/>
+        <Button
+            android:id="@+id/button_view_privacy_policy"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:text="@string/view_privacy_policy"
             android:textAllCaps="false"/>
         <Button
             android:id="@+id/button_libraries"

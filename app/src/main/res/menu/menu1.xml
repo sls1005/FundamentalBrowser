@@ -6,13 +6,13 @@
         android:title="@string/menu1_item1"
         android:icon="@drawable/colondoubleslash"
         app:showAsAction="ifRoom"/>
-    <group android:id="@+id/group1">
+    <group android:id="@+id/group_url">
         <item
             android:id="@+id/action_edit_url"
             android:title="@string/menu1_item2"
             app:showAsAction="never"/>
     </group>
-    <group android:id="@+id/group2">
+    <group android:id="@+id/group_page">
         <item
             android:id="@+id/action_refresh"
             android:title="@string/menu1_item3"
@@ -39,13 +39,24 @@
         android:checkable="true"
         app:showAsAction="never"/>
     <item
+        android:id="@+id/action_enable_disable_desktop_mode"
+        android:title="@string/desktop_mode"
+        android:checkable="true"
+        app:showAsAction="never"/>
+    <group android:id="@+id/group_content_search">
+        <item
+            android:id="@+id/action_content_search"
+            android:title="@string/menu1_item9"
+            app:showAsAction="never"/>
+    </group>
+    <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
         app:showAsAction="never"/>
-    <group android:id="@+id/group3">
+    <group android:id="@+id/group_log">
         <item
             android:id="@+id/action_view_log"
-            android:title="@string/menu1_item9"
+            android:title="@string/menu1_item11"
             app:showAsAction="never"/>
     </group>
 </menu>

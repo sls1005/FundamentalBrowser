@@ -5,9 +5,12 @@ import android.content.ClipboardManager
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.View.OnClickListener
 import android.view.View.VISIBLE
 import android.view.View.GONE
 import android.view.ViewGroup.LayoutParams
@@ -16,11 +19,14 @@ import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
 import android.widget.EditText
 import android.widget.HorizontalScrollView
+import android.widget.ImageView
+import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -30,24 +36,199 @@ class MainActivity : ConfiguratedActivity() {
     private var previousTitle = ""
     private var currentURL = ""
     private var textToDisplayInUrlField = ""
+    private var languageTags = ""
+    private var allowsForegroundLogging = false
     private val logMsgs = ArrayDeque<String>()
+    public val clickListener = OnClickListener { view ->
+        when(view.id) {
+            R.id.button_go -> run {
+                val button = findViewById<Button>(R.id.button_go).apply {
+                    setClickable(false)
+                }
+                val url = findViewById<EditText>(R.id.url_field).text.toString().let {
+                    if (shouldRemoveLfAndSpacesFromUrl) {
+                        buildString(it.length / 2) {
+                            for (c in it) {
+                                if (c != ' ' && c != '\n') {
+                                    append(c)
+                                }
+                            }
+                        }
+                    } else {
+                        it
+                    }
+                }
+                currentURL = url
+                textToDisplayInUrlField = url
+                val v1 = findViewById<WebView>(R.id.view1)
+                val showingLog = isShowingLog()
+                val noPage = hasNotLoadedAnyPage()
+                if (url.startsWith("javascript:", ignoreCase=true) && (showingLog || noPage)) {
+                    // Console mode
+                    if (shouldClearLogWhenRunningScript) {
+                        synchronized(logMsgs) {
+                            logMsgs.clear()
+                        }
+                    }
+                    if (noPage && (!showingLog)) {
+                        showLog()
+                    }
+                    v1.loadUrl(url)
+                } else if (url.isEmpty()) {
+                    showMsg(getString(R.string.error3), button)
+                } else {
+                    hideUrlBar()
+                    hideLogIfShowing()
+                    v1.loadUrl(url)
+                }
+                button.setClickable(true)
+            }
+            R.id.button_close -> run {
+                hideUrlBarIfShowing()
+            }
+            R.id.button_decode -> run {
+                findViewById<EditText>(R.id.url_field).apply {
+                    text.apply {
+                        toString().also {
+                            if (it.isNotEmpty()) {
+                                clear()
+                                append(Uri.decode(it))
+                            }
+                        }
+                    }
+                }
+            }
+            R.id.button_clear -> run {
+                findViewById<EditText>(R.id.url_field).text.clear()
+            }
+            R.id.button_restore -> run {
+                if (currentURL.isNotEmpty()) {
+                    findViewById<EditText>(R.id.url_field).text.apply {
+                        clear()
+                        append(currentURL)
+                    }
+                }
+            }
+            R.id.button_search -> run {
+                val button = findViewById<Button>(R.id.button_search)
+                val rawInput = findViewById<EditText>(R.id.url_field).text.toString()
+                if (searchURL.isEmpty()) {
+                    showMsg(getString(R.string.error1), button)
+                } else if (rawInput.isEmpty()) {
+                    showMsg(getString(R.string.error2), button)
+                } else {
+                    button.setClickable(false)
+                    val url = searchURL + Uri.encode(
+                        rawInput.replace('\n', ' ')
+                    )
+                    hideUrlBar()
+                    hideLogIfShowing()
+                    currentURL = url
+                    textToDisplayInUrlField = url
+                    findViewById<WebView>(R.id.view1).loadUrl(url)
+                    button.setClickable(true)
+                }
+            }
+            R.id.button_copy -> run {
+                findViewById<EditText>(R.id.url_field).run {
+                    if (hasSelection()) {
+                        text.subSequence(selectionStart, selectionEnd)
+                    } else {
+                        text
+                    }
+                }.toString().also {
+                    if (it != "") {
+                        getSystemService(CLIPBOARD_SERVICE).apply {
+                            if (this is ClipboardManager) {
+                                setPrimaryClip(
+                                    ClipData.newPlainText("", it)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            R.id.button_paste -> {
+                val clip = getSystemService(CLIPBOARD_SERVICE).run {
+                    if (this is ClipboardManager) {
+                        getPrimaryClip() // ?: null
+                    } else {
+                        null
+                    }
+                }
+                if (clip != null) {
+                    findViewById<EditText>(R.id.url_field).apply {
+                        val start = selectionStart
+                        if (start != -1) {
+                            if (hasSelection()) {
+                                val end = selectionEnd
+                                text.delete(start, end)
+                            }
+                            for (i in (clip.itemCount - 1) downTo 0) {
+                                clip.getItemAt(i).coerceToText(this@MainActivity).also {
+                                    text.insert(start, it)
+                                }
+                            }
+                        } else {
+                            for (i in 0 ..< clip.itemCount) {
+                                clip.getItemAt(i).coerceToText(this@MainActivity).also {
+                                    text.append(it)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            R.id.button_run -> run {
+                val button = findViewById<Button>(R.id.button_run)
+                findViewById<EditText>(R.id.url_field).text.toString().also {
+                    if (it.isNotEmpty()) {
+                        val code = it
+                        button.setClickable(false)
+                        if (shouldClearLogWhenRunningScript) {
+                            synchronized(logMsgs) {
+                                logMsgs.clear()
+                            }
+                        }
+                        if (! isShowingLog()) {
+                            showLog()
+                        }
+                        findViewById<WebView>(R.id.view1).evaluateJavascript(code) {
+                            synchronized(logMsgs) {
+                                logMsgs.add(it)
+                                updateLogIfShowing()
+                            }
+                        }
+                        button.setClickable(true)
+                    }
+                }
+            }
+            R.id.search_previous -> run {
+                findViewById<WebView>(R.id.view1).findNext(false)
+            }
+            R.id.search_next -> run {
+                findViewById<WebView>(R.id.view1).findNext(true)
+            }
+            R.id.end_search -> run {
+                if (isShowingSearchBar()) {
+                    hideSearchBar()
+                }
+                findViewById<WebView>(R.id.view1).clearMatches()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         findViewById<WebView>(R.id.view1).apply {
             settings.apply {
-                javaScriptEnabled = shouldUseJavaScript
-                blockNetworkImage = !shouldLoadImages
-                blockNetworkLoads = !shouldLoadResources
+                setSupportMultipleWindows(false)
                 builtInZoomControls = true
                 displayZoomControls = false
             }
             webViewClient = object : WebViewClient() {
-                override fun shouldOverrideUrlLoading(
-                    v: WebView,
-                    req: WebResourceRequest
-                ): Boolean {
+                override fun shouldOverrideUrlLoading(v: WebView, req: WebResourceRequest): Boolean {
                     if (req.isRedirect) {
                         val url = req.url.toString()
                         val msg = buildString {
@@ -55,15 +236,17 @@ class MainActivity : ConfiguratedActivity() {
                             append(getString(R.string.space_redirected_space))
                             append(url)
                         }
-                        synchronized(logMsgs) {
-                            logMsgs.apply {
-                                if (size >= maxLogMsgs) {
-                                    removeFirst()
+                        if (maxLogMsgs > 0) {
+                            synchronized(logMsgs) {
+                                logMsgs.apply {
+                                    if (size >= maxLogMsgs) {
+                                        removeFirst()
+                                    }
+                                    add(msg)
                                 }
-                                add(msg)
                             }
                         }
-                        if (foregroundLoggingEnabled) {
+                        if (allowsForegroundLogging) {
                             showMsg(msg, v)
                         }
                     }
@@ -72,18 +255,35 @@ class MainActivity : ConfiguratedActivity() {
                 override fun shouldInterceptRequest(v: WebView, req: WebResourceRequest): WebResourceResponse? {
                     val url = req.url.toString()
                     val msg = "${req.method} $url"
-                    synchronized(logMsgs) {
-                        logMsgs.apply {
-                            if (size >= maxLogMsgs) {
-                                removeFirst()
+                    if (synchronized(manuallySetLanguageTags){
+                        manuallySetLanguageTags
+                    }) {
+                        req.requestHeaders.also {
+                            val languageHeader = "Accept-Language"
+                            val languages = synchronized(languageTags) { languageTags }
+                            if (languages.isEmpty()) {
+                                if (it.containsKey(languageHeader)) {
+                                    it.remove(languageHeader)
+                                }
+                            } else {
+                                it[languageHeader] = languages
                             }
-                            add(msg)
                         }
                     }
-                    if (synchronized(
-                            foregroundLoggingEnabled
-                        ) { foregroundLoggingEnabled }
-                    ) {
+                    val maxMsgNum = synchronized(maxLogMsgs) { maxLogMsgs }
+                    if (maxMsgNum > 0) {
+                        synchronized(logMsgs) {
+                            logMsgs.apply {
+                                if (size >= maxMsgNum) {
+                                    removeFirst()
+                                }
+                                add(msg)
+                            }
+                        }
+                    }
+                    if (synchronized(allowsForegroundLogging) {
+                            allowsForegroundLogging
+                    }) {
                         synchronized(v) {
                             showMsg(msg, v)
                         }
@@ -134,152 +334,34 @@ class MainActivity : ConfiguratedActivity() {
                     }
                 }
             }
-        }.also {
-            CookieManager.getInstance().setAcceptThirdPartyCookies(it, shouldAccept3rdPartyCookies)
         }
-        findViewById<Button>(R.id.button_go).setOnClickListener {
-            val self = findViewById<Button>(R.id.button_go).apply {
-                setClickable(false)
-            }
-            val url = findViewById<EditText>(R.id.url_field).text.toString().let {
-                if (shouldRemoveLfAndSpacesFromUrl) {
-                    buildString(it.length / 2) {
-                        for (c in it) {
-                            if (c != ' ' && c != '\n') {
-                                append(c)
-                            }
-                        }
-                    }
-                } else {
-                    it
-                }
-            }
-            currentURL = url
-            textToDisplayInUrlField = url
-            val v1 = findViewById<WebView>(R.id.view1)
-            val showingLog = isShowingLog()
-            val noPage = hasNotLoadedAnyPage()
-            if (url.startsWith("javascript:", ignoreCase=true) && (showingLog || noPage)) {
-                // Console mode
-                logMsgs.clear()
-                if (noPage && (!showingLog)) {
-                    showLog()
-                }
-                v1.loadUrl(url)
-            } else if (url.isEmpty()) {
-                showMsg(getString(R.string.error3), self)
-            } else {
-                hideUrlBar()
-                hideLogIfShowing()
-                v1.loadUrl(url)
-            }
-            self.setClickable(true)
+        listOf(
+            R.id.button_close,
+            R.id.button_decode,
+            R.id.button_clear,
+            R.id.button_restore,
+            R.id.button_search,
+            R.id.button_copy,
+            R.id.button_paste,
+            R.id.button_go,
+            R.id.button_run
+        ).forEach { id ->
+            findViewById<Button>(id).setOnClickListener(clickListener)
         }
-        findViewById<Button>(R.id.button_decode).setOnClickListener {
-            findViewById<EditText>(R.id.url_field).apply {
-                text.apply {
-                    toString().also {
-                        if (it.isNotEmpty()) {
-                            clear()
-                            append(Uri.decode(it))
-                        }
-                    }
-                }
-            }
+        listOf(
+            R.id.search_previous,
+            R.id.search_next,
+            R.id.end_search
+        ).forEach { id ->
+            findViewById<ImageView>(id).setOnClickListener(clickListener)
         }
-        findViewById<Button>(R.id.button_clear).setOnClickListener {
-            findViewById<EditText>(R.id.url_field).text.clear()
-        }
-        findViewById<Button>(R.id.button_restore).setOnClickListener {
-            if (currentURL.isNotEmpty()) {
-                findViewById<EditText>(R.id.url_field).text.apply {
-                    clear()
-                    append(currentURL)
-                }
+        findViewById<EditText>(R.id.content_search_field).addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, i: Int, n: Int, n1: Int) { }
+            override fun onTextChanged(s: CharSequence, i: Int, n0: Int, n: Int) { }
+            override fun afterTextChanged(e: Editable) {
+                findViewById<WebView>(R.id.view1).findAllAsync(e.toString())
             }
-        }
-        findViewById<Button>(R.id.button_search).setOnClickListener {
-            val self = findViewById<Button>(R.id.button_search)
-            val rawInput = findViewById<EditText>(R.id.url_field).text.toString()
-            if (searchURL.isEmpty()) {
-                showMsg(getString(R.string.error1), self)
-            } else if (rawInput.isEmpty()) {
-                showMsg(getString(R.string.error2), self)
-            } else {
-                self.setClickable(false)
-                val url = searchURL + Uri.encode(
-                    rawInput.replace('\n', ' ')
-                )
-                hideUrlBar()
-                hideLogIfShowing()
-                currentURL = url
-                textToDisplayInUrlField = url
-                findViewById<WebView>(R.id.view1).loadUrl(url)
-                self.setClickable(true)
-            }
-        }
-        findViewById<Button>(R.id.button_copy).setOnClickListener {
-            findViewById<EditText>(R.id.url_field).run {
-                if (hasSelection()) {
-                    text.subSequence(selectionStart, selectionEnd)
-                } else {
-                    text
-                }
-            }.toString().also {
-                if (it != "") {
-                    getSystemService(CLIPBOARD_SERVICE).apply {
-                        if (this is ClipboardManager) {
-                            setPrimaryClip(
-                                ClipData.newPlainText("", it)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        findViewById<Button>(R.id.button_paste).setOnClickListener {
-            val clip = getSystemService(CLIPBOARD_SERVICE).run {
-                if (this is ClipboardManager) {
-                    getPrimaryClip() // ?: null
-                } else {
-                    null
-                }
-            }
-            if (clip != null) {
-                findViewById<EditText>(R.id.url_field).apply {
-                    val start = selectionStart
-                    if (start != -1) {
-                        if (hasSelection()) {
-                            val end = selectionEnd
-                            text.delete(start, end)
-                        }
-                        for (i in (clip.itemCount - 1) downTo 0) {
-                            clip.getItemAt(i).coerceToText(this@MainActivity).also {
-                                text.insert(start, it)
-                            }
-                        }
-                    } else {
-                        for (i in 0 ..< clip.itemCount) {
-                            clip.getItemAt(i).coerceToText(this@MainActivity).also {
-                                text.append(it)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        findViewById<Button>(R.id.button_run).setOnClickListener {
-            val self = findViewById<Button>(R.id.button_run).apply {
-                setClickable(false)
-            }
-            val code = findViewById<EditText>(R.id.url_field).text.toString()
-            logMsgs.clear()
-            if (! isShowingLog()) {
-                showLog()
-            }
-            findViewById<WebView>(R.id.view1).loadUrl("javascript:" + code)
-            self.setClickable(true)
-        }
+        })
         findViewById<HorizontalScrollView>(R.id.button_area).postDelayed({
             val self = findViewById<HorizontalScrollView>(R.id.button_area)
             self.fullScroll(View.FOCUS_RIGHT)
@@ -287,7 +369,9 @@ class MainActivity : ConfiguratedActivity() {
         onBackPressedDispatcher.addCallback(this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    if (findViewById<TextView>(R.id.log).visibility == VISIBLE) {
+                    if (isShowingSearchBar()) {
+                        hideSearchBar()
+                    } else if (isShowingLog()) {
                         hideLog()
                     } else {
                         findViewById<WebView>(R.id.view1).apply {
@@ -313,9 +397,13 @@ class MainActivity : ConfiguratedActivity() {
             }
         }.also {
             CookieManager.getInstance().setAcceptThirdPartyCookies(it, shouldAccept3rdPartyCookies)
+            updateWindowSizeAndSetCorrectUserAgent()
         }
+        if (manuallySetLanguageTags) {
+            languageTags = getStoredLanguageTags()  ?: ""
+        }
+        allowsForegroundLogging = foregroundLoggingEnabled
         showRunButtonIfApplicable()
-        //logMsgs.add("$shouldAccept3rdPartyCookies $shouldRemoveLfAndSpacesFromUrl $maxLogMsgs $searchURL")
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -344,6 +432,10 @@ class MainActivity : ConfiguratedActivity() {
             Pair(
                 R.id.action_enable_disable_foreground_logging,
                 foregroundLoggingEnabled
+            ),
+            Pair(
+                R.id.action_enable_disable_desktop_mode,
+                desktopMode
             )
         ).forEach { it ->
             val (id, state) = it
@@ -351,16 +443,20 @@ class MainActivity : ConfiguratedActivity() {
         }
         listOf(
             Pair(
-                R.id.group1,
+                R.id.group_url,
                 (!isShowingUrlBar()) && currentURL.isNotEmpty()
             ),
             Pair(
-                R.id.group2,
+                R.id.group_page,
                 !hasNotLoadedAnyPage()
             ),
             Pair(
-                R.id.group3,
+                R.id.group_log,
                 logMsgs.isNotEmpty()
+            ),
+            Pair(
+                R.id.group_content_search,
+                (!hasNotLoadedAnyPage()) && (!isShowingSearchBar())
             )
         ).forEach { it ->
             val (id, state) = it
@@ -416,7 +512,23 @@ class MainActivity : ConfiguratedActivity() {
             }
             R.id.action_enable_disable_foreground_logging -> run {
                 foregroundLoggingEnabled = !item.isChecked()
+                if (!isShowingSearchBar()) {
+                    allowsForegroundLogging = foregroundLoggingEnabled
+                }
                 item.setChecked(foregroundLoggingEnabled)
+                (true)
+            }
+            R.id.action_enable_disable_desktop_mode -> run {
+                desktopMode = !item.isChecked()
+                item.setChecked(desktopMode)
+                updateWindowSizeAndSetCorrectUserAgent()
+                (true)
+            }
+            R.id.action_content_search -> run {
+                if (!isShowingSearchBar()) {
+                    hideLogIfShowing()
+                    showSearchBar()
+                }
                 (true)
             }
             R.id.action_settings -> run {
@@ -437,6 +549,56 @@ class MainActivity : ConfiguratedActivity() {
         }
     }
 
+    private fun updateWindowSizeAndSetCorrectUserAgent() {
+        findViewById<WebView>(R.id.view1).settings.also {
+            it.useWideViewPort = desktopMode
+            it.loadWithOverviewMode = desktopMode
+            it.userAgentString = if (useCustomUserAgent) {
+                getStoredUserAgent().let { stored ->
+                    if (stored == "") {
+                        null
+                    } else {
+                        stored // ?: null
+                    }
+                }
+            } else if (desktopMode) {
+                val defaultAgent = WebSettings.getDefaultUserAgent(this)
+                if ("Linux" in defaultAgent) {
+                    buildString(defaultAgent.length) {
+                        val i1 = defaultAgent.indexOf("Linux")
+                        var i2 = i1 + 5
+                        if (i1 > 0) {
+                            append(defaultAgent.substring(0, i1))
+                        }
+                        if ("X11" !in defaultAgent) {
+                            append("X11; ")
+                        }
+                        append(defaultAgent.substring(i1, i2))
+                        if ("x86_64" !in defaultAgent) {
+                            append(" x86_64")
+                        }
+                        if ("Android" in defaultAgent) {
+                            val i3 = defaultAgent.indexOf("Android")
+                            val i4 = defaultAgent.indexOf('(')
+                            val i5 = defaultAgent.indexOf(')')
+                            if (i4 < i1 && i2 < i3 && i3 < i5) {
+                                i2 = i5
+                            }
+                        }
+                        if (i2 < defaultAgent.length) {
+                            append(defaultAgent.substring(i2, defaultAgent.length))
+                        }
+                    }
+                    // This will result in a user agent without irrelevant information, rather than a user agent that is identical to that of desktop browsers. The latter is not intended and will not happen.
+                } else {
+                    null
+                }
+            } else {
+                null
+            }
+        }
+    }
+
     private fun showUrlBar() {
         findViewById<EditText>(R.id.url_field).apply {
             visibility = VISIBLE
@@ -451,6 +613,7 @@ class MainActivity : ConfiguratedActivity() {
         }
         findViewById<HorizontalScrollView>(R.id.button_area).visibility = VISIBLE
         listOf(
+            R.id.button_close,
             R.id.button_decode,
             R.id.button_clear,
             R.id.button_restore,
@@ -478,6 +641,7 @@ class MainActivity : ConfiguratedActivity() {
 
     private fun hideUrlBar() {
         listOf(
+            R.id.button_close,
             R.id.button_decode,
             R.id.button_clear,
             R.id.button_restore,
@@ -550,6 +714,52 @@ class MainActivity : ConfiguratedActivity() {
         }
     }
 
+    private inline fun isShowingSearchBar(): Boolean {
+        return findViewById<RelativeLayout>(R.id.search_area).visibility == VISIBLE
+    }
+
+    private fun showSearchBar() {
+        allowsForegroundLogging = false
+        hideUrlBarIfShowing()
+        this.supportActionBar?.hide()
+        findViewById<RelativeLayout>(R.id.search_area).visibility = VISIBLE
+        findViewById<EditText>(R.id.content_search_field).apply {
+            visibility = VISIBLE
+            setEnabled(true)
+        }
+        listOf(
+            R.id.search_previous,
+            R.id.search_next,
+            R.id.end_search
+        ).forEach { id ->
+            findViewById<ImageView>(id).apply {
+                visibility = VISIBLE
+                setEnabled(true)
+            }
+        }
+    }
+
+    private fun hideSearchBar() {
+        findViewById<EditText>(R.id.content_search_field).apply {
+            setEnabled(false)
+            text.clear()
+            visibility = GONE
+        }
+        listOf(
+            R.id.search_previous,
+            R.id.search_next,
+            R.id.end_search
+        ).forEach { id ->
+            findViewById<ImageView>(id).apply {
+                setEnabled(false)
+                visibility = GONE
+            }
+        }
+        findViewById<RelativeLayout>(R.id.search_area).visibility = GONE
+        this.supportActionBar?.show()
+        allowsForegroundLogging = foregroundLoggingEnabled
+    }
+
     private inline fun isShowingUrlBar(): Boolean {
         return (findViewById<EditText>(R.id.url_field).visibility == VISIBLE)
     }
@@ -557,6 +767,12 @@ class MainActivity : ConfiguratedActivity() {
     private inline fun showUrlBarIfHidden() {
         if (! isShowingUrlBar()) {
             showUrlBar()
+        }
+    }
+
+    private fun hideUrlBarIfShowing() {
+        if (isShowingUrlBar()) {
+            hideUrlBar()
         }
     }
 
