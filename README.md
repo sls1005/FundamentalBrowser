@@ -44,9 +44,7 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 - [ ] Ad-blocking
 
-- [ ] Anti-trace
-
-    It is supposed that, in each application store, you can always find at least one browser that not only blocks ads but also is untrackable on the net, so the priority is to offer something that they are unlikely to offer.
+- [ ] Anti-tracking
 
 ### Other features
 
