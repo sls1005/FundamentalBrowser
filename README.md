@@ -70,7 +70,7 @@ Using a commend prefixed with `javascript:` in any other situation will cause it
 
 * Since this app allows multiline editing, the 'Go' and 'Search' buttons (but not the 'Run' button) will by default replace newline characters in the URL field with spaces, or encode them as `%20` (meaning space). So be careful about your *code* that uses them, if any.
 
-* To keep things simple, new windows are implemented in this app as new tasks/activities. Because of this reason, the use of multiple windows may consume a lot of system resources. Hence, new windows are not created automatically in most cases.
+* To keep things simple, new windows are implemented in this app as new tasks/activities. The use of multiple windows may consume a lot of system resources due to this reason. Hence, new windows are not created automatically in most cases.
 
 * Remember to (or not to) update your 'System WebView.' It may affect the behavior of this application.
 
