@@ -3,24 +3,24 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/action_display_or_hide_url_bar"
-        android:title="@string/menu1_item1"
+        android:title="@string/menu1_action_show_or_hide_url_bar"
         android:icon="@drawable/colondoubleslash"
         app:showAsAction="ifRoom"/>
     <group android:id="@+id/group_url">
         <item
             android:id="@+id/action_edit_url"
-            android:title="@string/menu1_item2"
+            android:title="@string/menu1_action_edit_url"
             app:showAsAction="never"/>
     </group>
     <group android:id="@+id/group_page">
         <item
             android:id="@+id/action_refresh"
-            android:title="@string/menu1_item3"
+            android:title="@string/menu1_action_refresh"
             app:showAsAction="never"/>
     </group>
     <item
         android:id="@+id/action_enable_disable_js"
-        android:title="@string/menu1_item4"
+        android:title="@string/menu1_js"
         android:checkable="true"
         app:showAsAction="never"/>
     <item
@@ -46,9 +46,13 @@
     <group android:id="@+id/group_content_search">
         <item
             android:id="@+id/action_content_search"
-            android:title="@string/menu1_item9"
+            android:title="@string/menu1_action_search_content"
             app:showAsAction="never"/>
     </group>
+    <item
+        android:id="@+id/action_new_window"
+        android:title="@string/menu1_action_new_window"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
@@ -56,7 +60,7 @@
     <group android:id="@+id/group_log">
         <item
             android:id="@+id/action_view_log"
-            android:title="@string/menu1_item11"
+            android:title="@string/menu1_action_view_log"
             app:showAsAction="never"/>
     </group>
 </menu>

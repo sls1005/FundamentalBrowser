@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/linearlayout1"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,7 +15,7 @@
         android:paddingEnd="5dp"
         android:layout_marginStart="5dp"
         android:layout_marginEnd="5dp"
-        android:inputType="textMultiLine|textUri"
+        android:inputType="text|textMultiLine"
         android:textSize="20sp"
         android:fontFamily="monospace"
         android:hint="@string/main_url_field_hint"
@@ -152,7 +153,7 @@
             android:visibility="gone"/>
     </RelativeLayout>
     <ScrollView
-        android:id="@+id/scroll_view1"
+        android:id="@+id/log_scroll"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone">

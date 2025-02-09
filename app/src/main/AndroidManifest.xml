@@ -14,12 +14,26 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:configChanges="orientation"
             android:theme="@style/Theme.FundamentalBrowser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="http"/>
+                <data android:scheme="https"/>
             </intent-filter>
         </activity>
+        <activity
+            android:name=".NewWindowActivity"
+            android:taskAffinity="test.sls1005.projects.fundamentalbrowser.newwindowactivity"
+            android:exported="false"
+            android:configChanges="orientation"
+            android:theme="@style/Theme.FundamentalBrowser"/>
         <activity
             android:name=".SettingsActivity"
             android:exported="false"

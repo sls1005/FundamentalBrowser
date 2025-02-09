@@ -88,9 +88,10 @@ class SettingsActivity : ConfiguratedActivity() {
     public val checkedChangeListener = OnCheckedChangeListener { button, checked ->
         when (button.id) {
             R.id.switch_accept_cookies -> run {
+                shouldAcceptCookies = checked
                 CookieManager.getInstance().setAcceptCookie(checked)
                 (this@SettingsActivity).findViewById<SwitchMaterial>(R.id.switch_accept_3rd_party_cookies).apply {
-                    setEnabled(checked)
+                    visibility = if (checked) { VISIBLE } else { GONE }
                     if (!checked) {
                         shouldAccept3rdPartyCookies = false
                         setChecked(false)
@@ -102,6 +103,16 @@ class SettingsActivity : ConfiguratedActivity() {
             }
             R.id.switch_allow_js -> run {
                 shouldUseJavaScript = checked
+                (this@SettingsActivity).findViewById<SwitchMaterial>(R.id.switch_allow_js_for_urls_from_other_apps).apply {
+                    visibility = if (checked) { VISIBLE } else { GONE }
+                    if (!checked) {
+                        shouldAllowJSForUrlsFromOtherApps = false
+                        setChecked(false)
+                    }
+                }
+            }
+            R.id.switch_allow_js_for_urls_from_other_apps -> run {
+                shouldAllowJSForUrlsFromOtherApps = checked
             }
             R.id.switch_load_images -> run {
                 shouldLoadImages = checked
@@ -111,6 +122,9 @@ class SettingsActivity : ConfiguratedActivity() {
             }
             R.id.switch_foreground_logging -> run {
                 foregroundLoggingEnabled = checked
+            }
+            R.id.switch_ask_before_loading_url_from_another_app -> run {
+                shouldAskBeforeLoadingUrlThatIsFromAnotherApp = checked
             }
             R.id.switch_remove_lf_and_space_from_url -> run {
                 shouldRemoveLfAndSpacesFromUrl = checked
@@ -135,6 +149,9 @@ class SettingsActivity : ConfiguratedActivity() {
             R.id.switch_clear_log_when_running_script -> run {
                 shouldClearLogWhenRunningScript = checked
             }
+            R.id.switch_autoscroll_log_msgs -> run {
+                autoscrollLogMsgs = checked
+            }
         }
     }
 
@@ -145,15 +162,18 @@ class SettingsActivity : ConfiguratedActivity() {
             R.id.switch_accept_cookies,
             R.id.switch_accept_3rd_party_cookies,
             R.id.switch_allow_js,
+            R.id.switch_allow_js_for_urls_from_other_apps,
             R.id.switch_load_images,
             R.id.switch_load_resources,
             R.id.switch_foreground_logging,
+            R.id.switch_ask_before_loading_url_from_another_app,
             R.id.switch_remove_lf_and_space_from_url,
             R.id.switch_desktop_mode,
             R.id.switch_enable_custom_user_agent,
             R.id.switch_enable_custom_language_setting,
             R.id.switch_show_button_run,
-            R.id.switch_clear_log_when_running_script
+            R.id.switch_clear_log_when_running_script,
+            R.id.switch_autoscroll_log_msgs
         ).forEach { id ->
             findViewById<SwitchMaterial>(id).setOnCheckedChangeListener(checkedChangeListener)
         }
@@ -181,34 +201,39 @@ class SettingsActivity : ConfiguratedActivity() {
 
     override fun onResume() {
         super.onResume()
-        findViewById<SwitchMaterial>(R.id.switch_accept_cookies).apply {
-            CookieManager.getInstance().acceptCookie().also { checked ->
-                setChecked(checked)
-                (this@SettingsActivity).findViewById<SwitchMaterial>(R.id.switch_accept_3rd_party_cookies).apply {
-                    setEnabled(checked)
-                    if (!checked) {
-                        shouldAccept3rdPartyCookies = false
-                        setChecked(false)
-                    } else {
-                        setChecked(shouldAccept3rdPartyCookies)
-                    }
-                }
-            }
-        }
         listOf(
             Pair(R.id.switch_allow_js, shouldUseJavaScript),
             Pair(R.id.switch_load_images, shouldLoadImages),
             Pair(R.id.switch_load_resources, shouldLoadResources),
+            Pair(R.id.switch_accept_cookies, shouldAcceptCookies),
+            Pair(R.id.switch_ask_before_loading_url_from_another_app, shouldAskBeforeLoadingUrlThatIsFromAnotherApp),
             Pair(R.id.switch_foreground_logging, foregroundLoggingEnabled),
             Pair(R.id.switch_remove_lf_and_space_from_url, shouldRemoveLfAndSpacesFromUrl),
             Pair(R.id.switch_desktop_mode, desktopMode),
             Pair(R.id.switch_enable_custom_user_agent, useCustomUserAgent),
             Pair(R.id.switch_enable_custom_language_setting, manuallySetLanguageTags),
             Pair(R.id.switch_show_button_run, shouldDisplayRunButton),
-            Pair(R.id.switch_clear_log_when_running_script, shouldClearLogWhenRunningScript)
+            Pair(R.id.switch_clear_log_when_running_script, shouldClearLogWhenRunningScript),
+            Pair(R.id.switch_autoscroll_log_msgs, autoscrollLogMsgs)
         ).forEach { it ->
             val (id, flag) = it
             findViewById<SwitchMaterial>(id).setChecked(flag)
+        }
+        findViewById<SwitchMaterial>(R.id.switch_allow_js_for_urls_from_other_apps).apply {
+            visibility = if (shouldUseJavaScript) { VISIBLE } else { GONE }
+            if (shouldUseJavaScript) {
+                setChecked(shouldAllowJSForUrlsFromOtherApps)
+            } else {
+                shouldAllowJSForUrlsFromOtherApps = false
+            }
+        }
+        findViewById<SwitchMaterial>(R.id.switch_accept_3rd_party_cookies).apply {
+            visibility = if (shouldAcceptCookies) { VISIBLE } else { GONE }
+            if (shouldAcceptCookies) {
+                setChecked(shouldAccept3rdPartyCookies)
+            } else {
+                shouldAccept3rdPartyCookies = false
+            }
         }
         findViewById<TextView>(R.id.desktop_mode_extra_text).apply {
             visibility = if (desktopMode) { VISIBLE } else { GONE }

@@ -27,6 +27,14 @@
             android:text="@string/allow_javascript"
             android:textSize="16sp"/>
         <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_allow_js_for_urls_from_other_apps"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/allow_js_when_loading_url_that_is_from_another_app"
+            android:textSize="16sp"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_load_images"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -65,6 +73,14 @@
             android:layout_marginStart="15dp"
             android:layout_marginEnd="10dp"
             android:text="@string/accept_3rd_party_cookies"
+            android:textSize="16sp"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_ask_before_loading_url_from_another_app"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/ask_before_loading_url_that_is_from_another_app"
             android:textSize="16sp"/>
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_remove_lf_and_space_from_url"
@@ -278,6 +294,14 @@
             android:layout_marginStart="15dp"
             android:layout_marginEnd="10dp"
             android:text="@string/clear_log_when_running_script"
+            android:textSize="16sp"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_autoscroll_log_msgs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/autoscroll_log_msgs"
             android:textSize="16sp"/>
         <TextView
             android:layout_width="wrap_content"

@@ -26,19 +26,22 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
+import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 
-class MainActivity : ConfiguratedActivity() {
+open class MainActivity : ConfiguratedActivity() {
     private var previousTitle = ""
-    private var currentURL = ""
-    private var textToDisplayInUrlField = ""
     private var languageTags = ""
     private var allowsForegroundLogging = false
     private val logMsgs = ArrayDeque<String>()
+    protected var urlToLoad = ""
+    protected var currentURL = ""
+    protected var textToDisplayInUrlField = ""
     public val clickListener = OnClickListener { view ->
         when(view.id) {
             R.id.button_go -> run {
@@ -58,9 +61,6 @@ class MainActivity : ConfiguratedActivity() {
                         it
                     }
                 }
-                currentURL = url
-                textToDisplayInUrlField = url
-                val v1 = findViewById<WebView>(R.id.view1)
                 val showingLog = isShowingLog()
                 val noPage = hasNotLoadedAnyPage()
                 if (url.startsWith("javascript:", ignoreCase=true) && (showingLog || noPage)) {
@@ -73,13 +73,14 @@ class MainActivity : ConfiguratedActivity() {
                     if (noPage && (!showingLog)) {
                         showLog()
                     }
-                    v1.loadUrl(url)
+                    textToDisplayInUrlField = url
+                    load(url, updateCurrentUrl = false)
                 } else if (url.isEmpty()) {
                     showMsg(getString(R.string.error3), button)
                 } else {
                     hideUrlBar()
                     hideLogIfShowing()
-                    v1.loadUrl(url)
+                    load(url)
                 }
                 button.setClickable(true)
             }
@@ -123,9 +124,7 @@ class MainActivity : ConfiguratedActivity() {
                     )
                     hideUrlBar()
                     hideLogIfShowing()
-                    currentURL = url
-                    textToDisplayInUrlField = url
-                    findViewById<WebView>(R.id.view1).loadUrl(url)
+                    load(url)
                     button.setClickable(true)
                 }
             }
@@ -256,8 +255,8 @@ class MainActivity : ConfiguratedActivity() {
                     val url = req.url.toString()
                     val msg = "${req.method} $url"
                     if (synchronized(manuallySetLanguageTags){
-                        manuallySetLanguageTags
-                    }) {
+                            manuallySetLanguageTags
+                        }) {
                         req.requestHeaders.also {
                             val languageHeader = "Accept-Language"
                             val languages = synchronized(languageTags) { languageTags }
@@ -283,7 +282,7 @@ class MainActivity : ConfiguratedActivity() {
                     }
                     if (synchronized(allowsForegroundLogging) {
                             allowsForegroundLogging
-                    }) {
+                        }) {
                         synchronized(v) {
                             showMsg(msg, v)
                         }
@@ -385,6 +384,15 @@ class MainActivity : ConfiguratedActivity() {
                 }
             }
         )
+        urlToLoad = intent.data?.let { uri ->
+            uri.scheme?.let { scheme ->
+                if (scheme == "http" || scheme == "https") {
+                    uri.toString()
+                } else {
+                    ""
+                }
+            }
+        } ?: ""
     }
 
     override fun onResume() {
@@ -395,15 +403,19 @@ class MainActivity : ConfiguratedActivity() {
                 blockNetworkImage = !shouldLoadImages
                 blockNetworkLoads = !shouldLoadResources
             }
-        }.also {
-            CookieManager.getInstance().setAcceptThirdPartyCookies(it, shouldAccept3rdPartyCookies)
-            updateWindowSizeAndSetCorrectUserAgent()
+        }.also { v ->
+            CookieManager.getInstance().also { cm ->
+                cm.setAcceptCookie(shouldAcceptCookies)
+                cm.setAcceptThirdPartyCookies(v, shouldAccept3rdPartyCookies)
+            }
         }
+        updateWindowSizeAndSetCorrectUserAgent()
         if (manuallySetLanguageTags) {
             languageTags = getStoredLanguageTags()  ?: ""
         }
         allowsForegroundLogging = foregroundLoggingEnabled
         showRunButtonIfApplicable()
+        afterInitialization()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -481,7 +493,7 @@ class MainActivity : ConfiguratedActivity() {
             }
             R.id.action_refresh -> run {
                 if (! hasNotLoadedAnyPage()) {
-                    findViewById<WebView>(R.id.view1).loadUrl(currentURL)
+                    load(currentURL)
                 }
                 updateLogIfShowing()
                 (true)
@@ -529,6 +541,15 @@ class MainActivity : ConfiguratedActivity() {
                     hideLogIfShowing()
                     showSearchBar()
                 }
+                (true)
+            }
+            R.id.action_new_window -> run {
+                saveCurrentConfiguration()
+                startActivity(
+                    Intent(this, NewWindowActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                    }
+                )
                 (true)
             }
             R.id.action_settings -> run {
@@ -679,7 +700,7 @@ class MainActivity : ConfiguratedActivity() {
 
     private fun showLog() {
         findViewById<WebView>(R.id.view1).visibility = GONE
-        findViewById<ScrollView>(R.id.scroll_view1).apply {
+        findViewById<ScrollView>(R.id.log_scroll).apply {
             visibility = VISIBLE
             layoutParams!!.height = LayoutParams.MATCH_PARENT
         }
@@ -697,9 +718,7 @@ class MainActivity : ConfiguratedActivity() {
     }
 
     private fun hideLog() {
-        findViewById<ScrollView>(R.id.scroll_view1).apply {
-            visibility = GONE
-        }
+        findViewById<ScrollView>(R.id.log_scroll).visibility = GONE
         findViewById<TextView>(R.id.log).apply {
             text = ""
             visibility = GONE
@@ -784,6 +803,14 @@ class MainActivity : ConfiguratedActivity() {
         findViewById<TextView>(R.id.log).apply {
             if (visibility == VISIBLE) {
                 text = logMsgs.joinToString("\n")
+                postDelayed({
+                    (this@MainActivity).apply {
+                        if (autoscrollLogMsgs) {
+                            val bottom = findViewById<TextView>(R.id.log).bottom
+                            findViewById<ScrollView>(R.id.log_scroll).scrollTo(0, bottom)
+                        }
+                    }
+                }, 10)
             }
         }
     }
@@ -821,9 +848,50 @@ class MainActivity : ConfiguratedActivity() {
 
     private inline fun showMsg(msg: String, v: View) {
         Snackbar.make(v, msg, 5000).apply {
-            setBackgroundTint(getColor(R.color.snackbar_background))
-            setTextColor(getColor(R.color.white))
+            setBackgroundTint(
+                (this@MainActivity).getColor(R.color.snackbar_background)
+            )
+            setTextColor(
+                (this@MainActivity).getColor(R.color.white)
+            )
             show()
         }
+    }
+
+    private inline fun disableJavaScriptAsRequested() {
+        if (!shouldAllowJSForUrlsFromOtherApps) {
+            shouldUseJavaScript = false
+            findViewById<WebView>(R.id.view1).apply {
+                settings.javaScriptEnabled = false
+            }
+        }
+    }
+
+    protected open fun afterInitialization() {
+        if (urlToLoad.isNotEmpty()) {
+            val url = urlToLoad
+            urlToLoad = ""
+            if (shouldAskBeforeLoadingUrlThatIsFromAnotherApp) {
+                (AlertDialog.Builder(this).apply {
+                    setMessage("Do you want to load the page of '$url'?")
+                    setPositiveButton(getString(R.string.ok)) {_, _ ->
+                        disableJavaScriptAsRequested()
+                        load(url)
+                    }
+                    setNegativeButton(R.string.cancel) {_, _ -> }
+                }).create().show()
+            } else {
+                disableJavaScriptAsRequested()
+                load(url)
+            }
+        }
+    }
+
+    protected final inline fun load(url: String, updateCurrentUrl: Boolean = true) {
+        if (updateCurrentUrl) {
+            currentURL = url
+            textToDisplayInUrlField = url
+        }
+        findViewById<WebView>(R.id.view1).loadUrl(url)
     }
 }

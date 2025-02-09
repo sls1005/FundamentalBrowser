@@ -8,20 +8,24 @@ private const val FINAL_INDEX_OF_MAX_LOGS = 4
 private const val START_INDEX_OF_SEARCH_URL = 5
 
 open class ConfiguratedActivity : AppCompatActivity() {
-    // Default:                                          // Stored file format:
-    protected var shouldUseJavaScript = true             // Line 1, Byte 1, Bit 1 (LSB), true if set, false if not set
-    protected var shouldLoadImages = true                //         Bit 2
-    protected var shouldLoadResources = true             //         Bit 3
-    protected var foregroundLoggingEnabled = true        //         Bit 4
-    protected var shouldAccept3rdPartyCookies = false    //         Bit 5
-    protected var shouldRemoveLfAndSpacesFromUrl = true  //         Bit 6
-    protected var desktopMode = false                    //         Bit 7
-    protected var maxLogMsgs = 20                        // Byte 2-5, L.E.
-    protected var searchURL = ""                         // Starting from byte 6, and then LF
-    protected var shouldDisplayRunButton = false         // Line 2, Byte 1, Bit 1; experimental
-    protected var shouldClearLogWhenRunningScript = true //                 Bit 2
-    protected var useCustomUserAgent = false             //                 Bit 3
-    protected var manuallySetLanguageTags = false        //                 Bit 4
+    // Default:                                                         // Stored file format:
+    protected var shouldUseJavaScript = true                            // Line 1, Byte 1, Bit 1 (LSB), true if set, false if not set
+    protected var shouldLoadImages = true                               //         Bit 2
+    protected var shouldLoadResources = true                            //         Bit 3
+    protected var foregroundLoggingEnabled = true                       //         Bit 4
+    protected var shouldAccept3rdPartyCookies = false                   //         Bit 5
+    protected var shouldRemoveLfAndSpacesFromUrl = true                 //         Bit 6
+    protected var desktopMode = false                                   //         Bit 7
+    protected var shouldAcceptCookies = false                           //         Bit 8
+    protected var maxLogMsgs = 20                                       // Byte 2-5, L.E.
+    protected var searchURL = ""                                        // Starting from byte 6, and then LF
+    protected var shouldDisplayRunButton = false                        // Line 2, Byte 1, Bit 1; experimental
+    protected var shouldClearLogWhenRunningScript = true                //                 Bit 2
+    protected var useCustomUserAgent = false                            //                 Bit 3
+    protected var manuallySetLanguageTags = false                       //                 Bit 4
+    protected var shouldAllowJSForUrlsFromOtherApps = false             //                 Bit 5
+    protected var shouldAskBeforeLoadingUrlThatIsFromAnotherApp = false //                 Bit 6
+    protected var autoscrollLogMsgs = false                             //                 Bit 7
 
     override fun onResume() {
         super.onResume()
@@ -39,6 +43,7 @@ open class ConfiguratedActivity : AppCompatActivity() {
                 shouldAccept3rdPartyCookies = a1[4]
                 shouldRemoveLfAndSpacesFromUrl = a1[5]
                 desktopMode = a1[6]
+                shouldAcceptCookies = a1[7]
 
                 maxLogMsgs = run {
                     var k = 0
@@ -72,6 +77,9 @@ open class ConfiguratedActivity : AppCompatActivity() {
                         shouldClearLogWhenRunningScript = a2[1]
                         useCustomUserAgent = a2[2]
                         manuallySetLanguageTags = a2[3]
+                        shouldAllowJSForUrlsFromOtherApps = a2[4]
+                        shouldAskBeforeLoadingUrlThatIsFromAnotherApp = a2[5]
+                        autoscrollLogMsgs = a2[6]
                     }
                 } else {
                     searchURL = "" // if it has been assigned another string.
@@ -81,7 +89,16 @@ open class ConfiguratedActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        saveCurrentConfiguration()
         super.onPause()
+    }
+
+    override fun onStop() {
+        saveCurrentConfiguration()
+        super.onStop()
+    }
+
+    protected fun saveCurrentConfiguration() {
         val file = File(filesDir, "config.bin")
         if (file.exists()) {
             file.delete()
@@ -94,7 +111,8 @@ open class ConfiguratedActivity : AppCompatActivity() {
                 foregroundLoggingEnabled,
                 shouldAccept3rdPartyCookies,
                 shouldRemoveLfAndSpacesFromUrl,
-                desktopMode
+                desktopMode,
+                shouldAcceptCookies
             ).toBooleanArray()
         )
         val a = ByteArray(FINAL_INDEX_OF_MAX_LOGS + 1)
@@ -113,7 +131,10 @@ open class ConfiguratedActivity : AppCompatActivity() {
                         shouldDisplayRunButton,
                         shouldClearLogWhenRunningScript,
                         useCustomUserAgent,
-                        manuallySetLanguageTags
+                        manuallySetLanguageTags,
+                        shouldAllowJSForUrlsFromOtherApps,
+                        shouldAskBeforeLoadingUrlThatIsFromAnotherApp,
+                        autoscrollLogMsgs
                     ).toBooleanArray()
                 )
             ).toByteArray()
