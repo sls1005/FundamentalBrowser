@@ -74,7 +74,7 @@ Using a command prefixed with `javascript:` in any other situation will cause it
 
 * To keep things simple, new windows are implemented in this app as new tasks/activities. Using more than one window may consume a lot of system resources due to this reason. Hence, new windows are not created automatically in most cases.
 
-* For security concerns, JavaScript is automatically disabled by default when opening a URL from within another application. This can be changed in settings. In addition, this app will not load a URL from an intent unless its scheme is `http:` or `https:`. The latter rule is not enforced for URLs from a webpage or for URL/URIs loaded manually by the user.
+* For security concerns, JavaScript is automatically disabled by default when opening a URL from within another application. This can be changed in settings. In addition, this app will not load a URL from an intent unless its scheme is `http:` or `https:` (and currently, only the latter will be successfully loaded). The latter rule is not enforced for URLs from a webpage or for URL/URIs loaded manually by the user.
 
 * Remember to (or not to) update your 'System WebView.' It may affect the behavior of this application.
 
