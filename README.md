@@ -64,7 +64,7 @@ To enter the console mode, input some code with the `javascript:` prefix in the 
 
 ![](screenshots/screenshot4.jpg)
 
-Alternatively, you can use the (experimental) 'Run' button to run the code, in which case you don't have to (and must not) add the `javascript:` prefix.
+Alternatively, you can use the (optional) 'Run' button to run the code (enabled in settings), in which case you don't have to (and must not) add the `javascript:` prefix.
 
 ![](screenshots/screenshot5.jpg)
 
