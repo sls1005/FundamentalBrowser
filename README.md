@@ -54,7 +54,7 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 #### Separated buttons for searching and URL loading
 
-To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Go' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search it.
+To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Go' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search for it.
 
 #### Console mode
 
@@ -84,7 +84,7 @@ Using a command prefixed with `javascript:` in any other situation will cause it
 
 * JavaScript code, including user-input code, is executed via platform API (for which the underlying system could utilize something called V8, but I'm not sure), so this app can target the latest platform API level (35 as of Feb. 2025) while still enabling users to run code. (Whether it meets Play store's standard is another thing.)
 
-* `intent:` URIs are half-supported. That is to say, these URIs will usually be processed correctly, and the instantiated intent may be launched if approved by the user. However, this app usually doesn't check if it is an `intent:` URI, except when trying to protect itself from intent-based attacks. (See <https://www.mbsd.jp/Whitepaper/IntentScheme.pdf> for more information.) Instead, `intent:` URIs will be treated as if they were URIs of unrecognized schemes (such as `abc://`), for any of which this app will ask if it should launch an intent. Nonetheless, the app will not ask nor try to launch any intent if it detects that the intent would be sent back to the activity itself or to any other component of this application (in which case it might not create a log entry but can show an error message), so as to prevent the security issue mentioned in the link above.
+* `intent:` URIs are half-supported. That is to say, these URIs will usually be processed correctly, and the instantiated intent may be launched if approved by the user. However, this app usually doesn't check if it is an `intent:` URI, except when trying to protect itself from intent-based attacks. (See <https://www.mbsd.jp/Whitepaper/IntentScheme.pdf> for more information.) Instead, `intent:` URIs will be treated as if they were URIs of unrecognized schemes (such as `abc://`), for any of which this app will ask if it should launch an intent. Nonetheless, the app will not ask nor try to launch any intent if it detects that the intent would be sent back to the activity itself or to any other component of this application (in which case it might not create a log entry and can show an error message), so as to prevent the security issue mentioned in the link above.
 
 ### Projects that offer similar functionalities
 
