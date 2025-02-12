@@ -12,8 +12,8 @@ android {
         applicationId = "test.sls1005.projects.fundamentalbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 9
-        versionName = "0.6.0"
+        versionCode = 10
+        versionName = "0.7.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

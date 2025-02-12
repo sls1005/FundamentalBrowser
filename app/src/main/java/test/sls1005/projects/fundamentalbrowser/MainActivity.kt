@@ -1,12 +1,18 @@
 package test.sls1005.projects.fundamentalbrowser
 
+import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
+import android.text.SpannableString
+import android.text.Spanned
 import android.text.TextWatcher
+import android.text.style.URLSpan
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -33,12 +39,14 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
+import java.net.URISyntaxException
 
 open class MainActivity : ConfiguratedActivity() {
     private var previousTitle = ""
     private var languageTags = ""
     private var allowsForegroundLogging = false
     private val logMsgs = ArrayDeque<String>()
+    private var shouldLeaveOnBackGesture = false
     protected var urlToLoad = ""
     protected var currentURL = ""
     protected var textToDisplayInUrlField = ""
@@ -136,14 +144,8 @@ open class MainActivity : ConfiguratedActivity() {
                         text
                     }
                 }.toString().also {
-                    if (it != "") {
-                        getSystemService(CLIPBOARD_SERVICE).apply {
-                            if (this is ClipboardManager) {
-                                setPrimaryClip(
-                                    ClipData.newPlainText("", it)
-                                )
-                            }
-                        }
+                    if (it.isNotEmpty()) {
+                        copyTextToClipboard(it)
                     }
                 }
             }
@@ -228,14 +230,68 @@ open class MainActivity : ConfiguratedActivity() {
             }
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(v: WebView, req: WebResourceRequest): Boolean {
-                    if (req.isRedirect) {
-                        val url = req.url.toString()
-                        val msg = buildString {
-                            append(req.method)
-                            append(getString(R.string.space_redirected_space))
+                    val url = req.url.toString()
+                    val schemeIsSupported = req.url.scheme?.let { scheme ->
+                        isSupportedScheme(scheme)
+                    } ?: false
+                    if (!schemeIsSupported) {
+                        if (req.url.scheme.equals("intent", ignoreCase=true)) {
+                            if (url.contains((this@MainActivity).packageName, ignoreCase=true)) {
+                                return true
+                                // See: https://www.mbsd.jp/Whitepaper/IntentScheme.pdf
+                                // An intent URL is most dangerous when targeting the app itself.
+                            }
+                        }
+                    }
+                    if (req.isRedirect || (!schemeIsSupported)) {
+                        var shouldRecord = (maxLogMsgs > 0)
+                        var msg = buildString(url.length) {
+                            if (req.isRedirect) {
+                                append(req.method)
+                                append(getString(R.string.space_redirected_space))
+                            }
                             append(url)
                         }
-                        if (maxLogMsgs > 0) {
+                        if (!schemeIsSupported) {
+                            val x = try {
+                                Intent.parseUri(url, 0)
+                            } catch (_: URISyntaxException) {
+                                if (shouldRecord) {
+                                    val msg = getString(R.string.failed_to_parse) + url
+                                    synchronized(logMsgs) {
+                                        logMsgs.apply {
+                                            if (size >= maxLogMsgs) {
+                                                removeFirst()
+                                            }
+                                            add(msg)
+                                        }
+                                    }
+                                }
+                                return true
+                            }
+                            if (onlyICanHandle(x)) { // Prevent security issue. See comments above.
+                                showMsg(getString(R.string.error6), v)
+                                shouldRecord = false
+                                msg = ""
+                            } else {
+                                (AlertDialog.Builder(this@MainActivity).apply {
+                                    setView(
+                                        layoutInflater.inflate(R.layout.confirm_opening_unchecked_url_with_another_app, null).apply {
+                                            findViewById<TextView>(R.id.url).text = url
+                                        }
+                                    )
+                                    setPositiveButton(getString(R.string.yes)) {_, _ ->
+                                        try {
+                                            startActivity(x)
+                                        } catch(_: ActivityNotFoundException) {
+                                            showMsg(getString(R.string.error5))
+                                        }
+                                    }
+                                    setNegativeButton(R.string.no) {_, _ -> }
+                                }).create().show()
+                            }
+                        }
+                        if (shouldRecord) {
                             synchronized(logMsgs) {
                                 logMsgs.apply {
                                     if (size >= maxLogMsgs) {
@@ -245,11 +301,11 @@ open class MainActivity : ConfiguratedActivity() {
                                 }
                             }
                         }
-                        if (allowsForegroundLogging) {
+                        if (schemeIsSupported && allowsForegroundLogging) {
                             showMsg(msg, v)
                         }
                     }
-                    return false
+                    return !schemeIsSupported
                 }
                 override fun shouldInterceptRequest(v: WebView, req: WebResourceRequest): WebResourceResponse? {
                     val url = req.url.toString()
@@ -377,7 +433,20 @@ open class MainActivity : ConfiguratedActivity() {
                             if (canGoBack()) {
                                 goBack()
                             } else {
-                                (this@MainActivity).finish()
+                                with (this@MainActivity) {
+                                    if (shouldLeaveOnBackGesture || hasNotLoadedAnyPage()) {
+                                        finish()
+                                    } else {
+                                        shouldLeaveOnBackGesture = true
+                                        findViewById<LinearLayout>(R.id.linearlayout1).apply {
+                                            showMsg(getString(R.string.repeat_to_close), this)
+                                            postDelayed(
+                                                { shouldLeaveOnBackGesture = false },
+                                                5000
+                                            )
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -385,12 +454,10 @@ open class MainActivity : ConfiguratedActivity() {
             }
         )
         urlToLoad = intent.data?.let { uri ->
-            uri.scheme?.let { scheme ->
-                if (scheme == "http" || scheme == "https") {
-                    uri.toString()
-                } else {
-                    ""
-                }
+            if (isHttpOrHttpsUri(uri)) {
+                uri.toString()
+            } else {
+                ""
             }
         } ?: ""
     }
@@ -415,6 +482,13 @@ open class MainActivity : ConfiguratedActivity() {
         }
         allowsForegroundLogging = foregroundLoggingEnabled
         showRunButtonIfApplicable()
+        synchronized(logMsgs) {
+            logMsgs.apply {
+                while (size > maxLogMsgs && maxLogMsgs >= 0) {
+                    removeFirst()
+                }
+            }
+        }
         afterInitialization()
     }
 
@@ -428,6 +502,7 @@ open class MainActivity : ConfiguratedActivity() {
             return false
         }
         val v1 = findViewById<WebView>(R.id.view1)
+        val hasLoadedPage = !hasNotLoadedAnyPage()
         listOf(
             Pair(
                 R.id.action_enable_disable_js,
@@ -460,19 +535,32 @@ open class MainActivity : ConfiguratedActivity() {
             ),
             Pair(
                 R.id.group_page,
-                !hasNotLoadedAnyPage()
-            ),
-            Pair(
-                R.id.group_log,
-                logMsgs.isNotEmpty()
+                hasLoadedPage
             ),
             Pair(
                 R.id.group_content_search,
-                (!hasNotLoadedAnyPage()) && (!isShowingSearchBar())
+                hasLoadedPage && (!isShowingSearchBar())
             )
         ).forEach { it ->
             val (id, state) = it
             menu.setGroupVisible(id, state)
+        }
+        menu.findItem(R.id.submenu1).subMenu.also { sub ->
+            if (sub != null) {
+                listOf(
+                    Pair(
+                        R.id.menu1_sub1_group_page,
+                        hasLoadedPage
+                    ),
+                    Pair(
+                        R.id.menu1_sub1_group_log,
+                        logMsgs.isNotEmpty()
+                    )
+                ).forEach { it ->
+                    val (id, state) = it
+                    sub.setGroupVisible(id, state)
+                }
+            }
         }
         return true
     }
@@ -492,8 +580,10 @@ open class MainActivity : ConfiguratedActivity() {
                 (true)
             }
             R.id.action_refresh -> run {
-                if (! hasNotLoadedAnyPage()) {
-                    load(currentURL)
+                findViewById<WebView>(R.id.view1).apply {
+                    if (originalUrl != null) {
+                        reload()
+                    }
                 }
                 updateLogIfShowing()
                 (true)
@@ -543,15 +633,6 @@ open class MainActivity : ConfiguratedActivity() {
                 }
                 (true)
             }
-            R.id.action_new_window -> run {
-                saveCurrentConfiguration()
-                startActivity(
-                    Intent(this, NewWindowActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-                    }
-                )
-                (true)
-            }
             R.id.action_settings -> run {
                 startActivity(
                     Intent(this@MainActivity, SettingsActivity::class.java)
@@ -566,8 +647,89 @@ open class MainActivity : ConfiguratedActivity() {
                 }
                 (true)
             }
+            R.id.action_clear_log -> run {
+                synchronized(logMsgs) {
+                    logMsgs.clear()
+                }
+                if (isShowingLog()) {
+                    updateLogIfShowing()
+                }
+                (true)
+            }
+            R.id.action_new_window -> run {
+                saveCurrentConfiguration()
+                startActivity(
+                    Intent(this@MainActivity, NewWindowActivity::class.java).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                    }
+                )
+                (true)
+            }
+            R.id.action_open_in_new_window -> run {
+                Uri.parse(currentURL).also { uri ->
+                    if (isHttpOrHttpsUri(uri)) {
+                        saveCurrentConfiguration()
+                        startActivity(
+                            Intent(Intent.ACTION_VIEW, uri, (this@MainActivity).applicationContext, NewWindowActivity::class.java).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                            }
+                        )
+                    }
+                }
+                (true)
+            }
+            R.id.action_open_in_another_app -> run {
+                if (currentURL.isEmpty()) {
+                    showMsg(getString(R.string.error4))
+                } else {
+                    Uri.parse(currentURL).also { uri ->
+                        if (isHttpOrHttpsUri(uri)) {
+                            saveCurrentConfiguration()
+                            Intent(Intent.ACTION_VIEW, uri).also {
+                                if (onlyICanHandle(it)) {
+                                    showMsg(getString(R.string.error6))
+                                } else {
+                                    try {
+                                        startActivity(it)
+                                    } catch(_: ActivityNotFoundException) {
+                                        showMsg(getString(R.string.error5))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                (true)
+            }
+            R.id.action_copy_url -> run {
+                if (currentURL.isNotEmpty()) {
+                    copyTextToClipboard(currentURL)
+                }
+                (true)
+            }
+            R.id.action_copy_url_as_link -> run {
+                if (currentURL.isNotEmpty()) {
+                    copyTextToClipboard(
+                        SpannableString(currentURL).apply {
+                            setSpan(URLSpan(currentURL), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        }
+                    )
+                }
+                (true)
+            }
+            R.id.action_view_source -> run {
+                if (currentURL.isNotEmpty() && (!currentURL.startsWith("view-source:", ignoreCase=true))) {
+                    hideLogIfShowing()
+                    load("view-source:$currentURL", updateCurrentUrl=false)
+                }
+                (true)
+            }
             else -> false
         }
+    }
+
+    override fun onConfigurationChanged(config: Configuration) {
+        super.onConfigurationChanged(config)
     }
 
     private fun updateWindowSizeAndSetCorrectUserAgent() {
@@ -846,8 +1008,27 @@ open class MainActivity : ConfiguratedActivity() {
         return (findViewById<WebView>(R.id.view1).originalUrl == null)
     }
 
-    private inline fun showMsg(msg: String, v: View) {
-        Snackbar.make(v, msg, 5000).apply {
+    @SuppressLint("QueryPermissionsNeeded")
+    private inline fun onlyICanHandle(x: Intent): Boolean { // true if only this app will respond; false if any other or none
+        return (x.resolveActivity(packageManager)?.packageName == this.packageName)
+    }
+
+    private fun copyTextToClipboard(text: CharSequence) {
+        getSystemService(CLIPBOARD_SERVICE).apply {
+            if (this is ClipboardManager) {
+                setPrimaryClip(
+                    ClipData.newPlainText("", text)
+                )
+            }
+        }
+    }
+
+    private inline fun showMsg(msg: String, v: View? = null) {
+        Snackbar.make(
+            v ?: findViewById<LinearLayout>(R.id.linearlayout1),
+            msg,
+            5000
+        ).apply {
             setBackgroundTint(
                 (this@MainActivity).getColor(R.color.snackbar_background)
             )
@@ -873,7 +1054,7 @@ open class MainActivity : ConfiguratedActivity() {
             urlToLoad = ""
             if (shouldAskBeforeLoadingUrlThatIsFromAnotherApp) {
                 (AlertDialog.Builder(this).apply {
-                    setMessage("Do you want to load the page of '$url'?")
+                    setMessage(getString(R.string.confirm_loading_page, url))
                     setPositiveButton(getString(R.string.ok)) {_, _ ->
                         disableJavaScriptAsRequested()
                         load(url)
@@ -894,4 +1075,23 @@ open class MainActivity : ConfiguratedActivity() {
         }
         findViewById<WebView>(R.id.view1).loadUrl(url)
     }
+}
+
+private inline fun containedIgnoringCase(s: String, container: List<String>): Boolean {
+    for (e in container) {
+        if (s.equals(e, ignoreCase=true)) {
+            return true
+        }
+    }
+    return false
+}
+
+private inline fun isHttpOrHttpsUri(uri: Uri): Boolean {
+    return uri.scheme?.let { scheme ->
+        containedIgnoringCase(scheme, listOf("http", "https"))
+    } ?: false
+}
+
+private inline fun isSupportedScheme(scheme: String): Boolean {
+    return containedIgnoringCase(scheme, listOf("http", "https", "javascript"))
 }

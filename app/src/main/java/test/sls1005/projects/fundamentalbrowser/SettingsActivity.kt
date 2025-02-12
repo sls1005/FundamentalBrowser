@@ -145,8 +145,9 @@ class SettingsActivity : ConfiguratedActivity() {
             }
             R.id.switch_show_button_run -> run {
                 shouldDisplayRunButton = checked
+                findViewById<TextView>(R.id.switch_show_button_run_extra_text).visibility = if (checked) { VISIBLE } else { GONE }
             }
-            R.id.switch_clear_log_when_running_script -> run {
+            R.id.switch_clear_log_before_running_script -> run {
                 shouldClearLogWhenRunningScript = checked
             }
             R.id.switch_autoscroll_log_msgs -> run {
@@ -172,7 +173,7 @@ class SettingsActivity : ConfiguratedActivity() {
             R.id.switch_enable_custom_user_agent,
             R.id.switch_enable_custom_language_setting,
             R.id.switch_show_button_run,
-            R.id.switch_clear_log_when_running_script,
+            R.id.switch_clear_log_before_running_script,
             R.id.switch_autoscroll_log_msgs
         ).forEach { id ->
             findViewById<SwitchMaterial>(id).setOnCheckedChangeListener(checkedChangeListener)
@@ -213,7 +214,7 @@ class SettingsActivity : ConfiguratedActivity() {
             Pair(R.id.switch_enable_custom_user_agent, useCustomUserAgent),
             Pair(R.id.switch_enable_custom_language_setting, manuallySetLanguageTags),
             Pair(R.id.switch_show_button_run, shouldDisplayRunButton),
-            Pair(R.id.switch_clear_log_when_running_script, shouldClearLogWhenRunningScript),
+            Pair(R.id.switch_clear_log_before_running_script, shouldClearLogWhenRunningScript),
             Pair(R.id.switch_autoscroll_log_msgs, autoscrollLogMsgs)
         ).forEach { it ->
             val (id, flag) = it
