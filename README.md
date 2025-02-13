@@ -102,6 +102,8 @@ See <a href="#Details">details</a> for more information about this usage.
 
 * [MobiDevTools](https://sourceforge.net/projects/mobidevtools/)
 
+* [monocles browser](https://codeberg.org/monocles/monocles_browser)
+
 These are listed purely for comparison. They are not associated with this app nor its author.
 
 ### References
