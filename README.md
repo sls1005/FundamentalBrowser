@@ -70,6 +70,12 @@ Alternatively, you can use the (optional) 'Run' button to run the code (enabled 
 
 Using a command prefixed with `javascript:` in any other situation will cause it to be executed normally, as if loading a URL. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.
 
+#### Generalized intent sender and activity launcher
+
+![](screenshots/screenshot6.jpg)
+
+See <a href="#Details">details</a> for more information about this usage.
+
 ### Note
 
 * Since this app allows multiline editing, the 'Go' and 'Search' buttons (but not the 'Run' button) will by default replace newline characters in the URL field with spaces, or encode them as `%20` (meaning space). So be careful about your *code* that uses them, if any.
