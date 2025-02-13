@@ -2,7 +2,7 @@
 
 Fundamental Browser is a basic browser designed for running on Android. It is based on `WebView` and is intended to be developer-friendly.
 
-In addition to browser, it can also be used as a JavaScript interpreter, generalized (and programmable) intent sender and activity launcher. (Since version 0.7.0)
+Although not originally designed for, it can also be used as a JavaScript interpreter, generalized (and programmable) intent sender and activity launcher.
 
 ### Screenshots
 
