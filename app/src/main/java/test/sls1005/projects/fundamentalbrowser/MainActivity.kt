@@ -6,12 +6,15 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.res.Configuration
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
+import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextWatcher
+import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.view.Menu
 import android.view.MenuItem
@@ -69,17 +72,19 @@ open class MainActivity : ConfiguratedActivity() {
                         it
                     }
                 }
-                val showingLog = isShowingLog()
-                val noPage = hasNotLoadedAnyPage()
-                if (url.startsWith("javascript:", ignoreCase=true) && (showingLog || noPage)) {
-                    // Console mode
+                if (url.startsWith("javascript:", ignoreCase=true)) {
                     if (shouldClearLogWhenRunningScript) {
                         synchronized(logMsgs) {
                             logMsgs.clear()
                         }
                     }
-                    if (noPage && (!showingLog)) {
-                        showLog()
+                    if (hasNotLoadedAnyPage()) {
+                        if (!isShowingLog()) {
+                            showLog()
+                        }
+                    } else {
+                        hideUrlBar()
+                        hideLogIfShowing()
                     }
                     textToDisplayInUrlField = url
                     load(url, updateCurrentUrl = false)
@@ -196,7 +201,12 @@ open class MainActivity : ConfiguratedActivity() {
                         }
                         findViewById<WebView>(R.id.view1).evaluateJavascript(code) {
                             synchronized(logMsgs) {
-                                logMsgs.add(it)
+                                logMsgs.apply {
+                                    if (size >= maxLogMsgs) {
+                                        removeFirst()
+                                    }
+                                    add(it)
+                                }
                                 updateLogIfShowing()
                             }
                         }
@@ -376,7 +386,12 @@ open class MainActivity : ConfiguratedActivity() {
             webChromeClient = object : WebChromeClient() {
                 override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
                     synchronized(logMsgs) {
-                        logMsgs.add(consoleMessage.message())
+                        logMsgs.apply {
+                            if (size >= maxLogMsgs) {
+                                removeFirst()
+                            }
+                            add(consoleMessage.message())
+                        }
                         updateLogIfShowing()
                     }
                     return true
@@ -484,8 +499,10 @@ open class MainActivity : ConfiguratedActivity() {
         showRunButtonIfApplicable()
         synchronized(logMsgs) {
             logMsgs.apply {
-                while (size > maxLogMsgs && maxLogMsgs >= 0) {
-                    removeFirst()
+                if (maxLogMsgs >= 0) {
+                    while (size > maxLogMsgs) {
+                        removeFirst()
+                    }
                 }
             }
         }
@@ -968,8 +985,14 @@ open class MainActivity : ConfiguratedActivity() {
                 postDelayed({
                     (this@MainActivity).apply {
                         if (autoscrollLogMsgs) {
-                            val bottom = findViewById<TextView>(R.id.log).bottom
-                            findViewById<ScrollView>(R.id.log_scroll).scrollTo(0, bottom)
+                            val y = findViewById<TextView>(R.id.log).bottom.let {
+                                if (it > 1) {
+                                    it - 1
+                                } else {
+                                    it
+                                }
+                            }
+                            findViewById<ScrollView>(R.id.log_scroll).scrollTo(0, y)
                         }
                     }
                 }, 10)
@@ -1054,7 +1077,11 @@ open class MainActivity : ConfiguratedActivity() {
             urlToLoad = ""
             if (shouldAskBeforeLoadingUrlThatIsFromAnotherApp) {
                 (AlertDialog.Builder(this).apply {
-                    setMessage(getString(R.string.confirm_loading_page, url))
+                    setView(
+                        layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
+                            findViewById<TextView>(R.id.text1).text = getString(R.string.confirm_loading_page, url)
+                        }
+                    )
                     setPositiveButton(getString(R.string.ok)) {_, _ ->
                         disableJavaScriptAsRequested()
                         load(url)

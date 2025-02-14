@@ -210,5 +210,26 @@
             android:textSize="18sp"
             android:text="@string/doc_text2_6"
             android:textColor="?android:attr/textColorPrimary"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="15dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="5dp"
+            android:textSize="18sp"
+            android:text="@string/doc_title2_7"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textStyle="bold"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:paddingStart="20dp"
+            android:paddingEnd="10dp"
+            android:textSize="18sp"
+            android:text="@string/doc_text2_7"
+            android:textColor="?android:attr/textColorPrimary"
+            android:autoLink="web"/>
     </LinearLayout>
 </ScrollView>
