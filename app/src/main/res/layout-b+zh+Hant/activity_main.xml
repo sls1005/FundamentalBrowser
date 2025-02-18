@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Traditional Chinese characters are a little too information-intensive and thus need a specifically formed UI, while Simplified Chinese don't need it. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearlayout1"
@@ -40,6 +41,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/close"
+                android:textSize="17sp"
                 android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_decode"
@@ -48,6 +50,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/decode"
+                android:textSize="17sp"
                 android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_clear"
@@ -56,6 +59,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/clear"
+                android:textSize="17sp"
                 android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_restore"
@@ -64,6 +68,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/restore"
+                android:textSize="17sp"
                 android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_search"
@@ -72,6 +77,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/search"
+                android:textSize="17sp"
                 android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_copy"
@@ -80,6 +86,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/copy"
+                android:textSize="17sp"
                 android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_paste"
@@ -88,6 +95,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/paste"
+                android:textSize="17sp"
                 android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_go"
@@ -96,6 +104,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/main_button_go"
+                android:textSize="17sp"
                 android:textAllCaps="false"/>
             <Button
                 android:id="@+id/button_run"
@@ -104,6 +113,7 @@
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/main_button_run"
+                android:textSize="17sp"
                 android:textAllCaps="false"
                 android:visibility="gone"/>
         </LinearLayout>

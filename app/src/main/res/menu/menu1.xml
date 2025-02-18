@@ -35,7 +35,7 @@
         app:showAsAction="never"/>
     <item
         android:id="@+id/action_enable_disable_foreground_logging"
-        android:title="@string/foreground_logging"
+        android:title="@string/menu1_foreground_logging"
         android:checkable="true"
         app:showAsAction="never"/>
     <item

@@ -6,15 +6,12 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
-import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.TextWatcher
-import android.text.style.StyleSpan
 import android.text.style.URLSpan
 import android.view.Menu
 import android.view.MenuItem
@@ -46,10 +43,10 @@ import java.net.URISyntaxException
 
 open class MainActivity : ConfiguratedActivity() {
     private var previousTitle = ""
-    private var languageTags = ""
     private var allowsForegroundLogging = false
     private val logMsgs = ArrayDeque<String>()
     private var shouldLeaveOnBackGesture = false
+    protected var languageTags = ""
     protected var urlToLoad = ""
     protected var currentURL = ""
     protected var textToDisplayInUrlField = ""
@@ -244,7 +241,35 @@ open class MainActivity : ConfiguratedActivity() {
                     val schemeIsSupported = req.url.scheme?.let { scheme ->
                         isSupportedScheme(scheme)
                     } ?: false
-                    if (!schemeIsSupported) {
+                    if (schemeIsSupported) {
+                        if (isHttpOrHttpsUri(req.url) && url.endsWith(".pdf", ignoreCase = true)) {
+                            //Toast.makeText(this, "Test1", Toast.LENGTH_LONG).show()
+                            val x = Intent(Intent.ACTION_VIEW, req.url.buildUpon().build())
+                            if (!onlyICanHandle(x)) {
+                                (AlertDialog.Builder(this@MainActivity).apply {
+                                    setView(
+                                        layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
+                                            findViewById<TextView>(R.id.url).text = url
+                                            findViewById<TextView>(R.id.warning).text = getText(R.string.confirm_opening_url_with_another_app_warning2)
+                                        }
+                                    )
+                                    setPositiveButton(getString(R.string.yes)) {_, _ ->
+                                        saveCurrentConfiguration()
+                                        try {
+                                            startActivity(x)
+                                        } catch(_: ActivityNotFoundException) {
+                                            showMsg(getString(R.string.error5))
+                                        }
+                                    }
+                                    setNegativeButton(getString(R.string.open_here)) {_, _ ->
+                                        load(url)
+                                    }
+                                    setNeutralButton(getString(R.string.dont_load)) {_, _ -> }
+                                }).create().show()
+                                return true
+                            }
+                        }
+                    } else {
                         if (req.url.scheme.equals("intent", ignoreCase=true)) {
                             if (url.contains((this@MainActivity).packageName, ignoreCase=true)) {
                                 return true
@@ -286,11 +311,13 @@ open class MainActivity : ConfiguratedActivity() {
                             } else {
                                 (AlertDialog.Builder(this@MainActivity).apply {
                                     setView(
-                                        layoutInflater.inflate(R.layout.confirm_opening_unchecked_url_with_another_app, null).apply {
+                                        layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
                                             findViewById<TextView>(R.id.url).text = url
+                                            findViewById<TextView>(R.id.warning).text = getText(R.string.confirm_opening_url_with_another_app_warning1)
                                         }
                                     )
                                     setPositiveButton(getString(R.string.yes)) {_, _ ->
+                                        saveCurrentConfiguration()
                                         try {
                                             startActivity(x)
                                         } catch(_: ActivityNotFoundException) {
@@ -326,12 +353,12 @@ open class MainActivity : ConfiguratedActivity() {
                         req.requestHeaders.also {
                             val languageHeader = "Accept-Language"
                             val languages = synchronized(languageTags) { languageTags }
-                            if (languages.isEmpty()) {
-                                if (it.containsKey(languageHeader)) {
+                            if (it.containsKey(languageHeader)) {
+                                if (languages.isEmpty()) {
                                     it.remove(languageHeader)
+                                } else {
+                                    it[languageHeader] = languages
                                 }
-                            } else {
-                                it[languageHeader] = languages
                             }
                         }
                     }
@@ -468,13 +495,15 @@ open class MainActivity : ConfiguratedActivity() {
                 }
             }
         )
-        urlToLoad = intent.data?.let { uri ->
-            if (isHttpOrHttpsUri(uri)) {
-                uri.toString()
-            } else {
-                ""
-            }
-        } ?: ""
+        if (intent.action == Intent.ACTION_VIEW) {
+            urlToLoad = intent.data?.let { uri ->
+                if (isHttpOrHttpsUri(uri)) {
+                    uri.toString()
+                } else {
+                    ""
+                }
+            } ?: ""
+        }
     }
 
     override fun onResume() {
@@ -1080,6 +1109,12 @@ open class MainActivity : ConfiguratedActivity() {
                     setView(
                         layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
                             findViewById<TextView>(R.id.text1).text = getString(R.string.confirm_loading_page, url)
+                            if (url.endsWith(".pdf", ignoreCase = true)) {
+                                findViewById<TextView>(R.id.warning).apply {
+                                    visibility = VISIBLE
+                                    text = getText(R.string.confirm_opening_url_with_another_app_warning2)
+                                }
+                            }
                         }
                     )
                     setPositiveButton(getString(R.string.ok)) {_, _ ->
@@ -1100,7 +1135,13 @@ open class MainActivity : ConfiguratedActivity() {
             currentURL = url
             textToDisplayInUrlField = url
         }
-        findViewById<WebView>(R.id.view1).loadUrl(url)
+        findViewById<WebView>(R.id.view1).also {
+            if (manuallySetLanguageTags && languageTags.isNotEmpty()) {
+                it.loadUrl(url, mutableMapOf(Pair("Accept-Language", languageTags)))
+            } else {
+                it.loadUrl(url)
+            }
+        }
     }
 }
 
