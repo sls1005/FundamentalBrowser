@@ -12,6 +12,8 @@
     <string name="no">並沒有</string>
     <string name="none">無</string>
     <string name="main_url_field_hint">輸入文字或網址</string>
+    <string name="main_search_field_hint1">輸入文字以搜尋</string>
+    <string name="main_search_field_hint2">輸入文字以進行檢索</string>
     <string name="decode">解碼</string>
     <string name="clear">清除</string>
     <string name="restore">還原</string>
@@ -55,7 +57,7 @@
     <string name="switch_desktop_mode_extra_text">此項功能的實作牽涉到對這個瀏覽器的 user agent 進行變更，故可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。\n若此選項未產生其應有的效果，請考慮使用自訂 user agent。關於自訂 user agent 的方式與詳情，請見下方。</string>
     <string name="manually_set_languages">手動設定語言標籤</string>
     <string name="add_language">新增語言</string>
-    <string name="switch_manually_set_languages_extra_string">如未啟用，則將使用預設值。若啟用了卻未設定，則會防止發送任何語言標籤。\n網站可能忽略此資訊。\n\n<b>警告：</b>請注意，若使用高度客製化的語言標籤則可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
+    <string name="switch_manually_set_languages_extra_string">如未啟用，則將使用預設值。若啟用了卻未設定，則會防止發送任何語言標籤。\n若此選項未產生其應有的效果，請考慮變更此應用程式的語言。若您的裝置支援，則用於變更此應用程式語言的選項會出現在裝置的設定介面中。\n網站可能忽略此資訊。\n\n<b>警告：</b>請注意，若使用高度客製化的語言標籤則可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
     <string name="clear_log_before_running_script">執行指令碼前清空記錄檔</string>
     <string name="autoscroll_log_msgs">記錄檔自動滾動</string>
     <string name="allow_js_when_loading_url_that_is_from_another_app">載入來源為其他應用程式的網址時，允許使用JavaScript</string>
@@ -77,6 +79,7 @@
     <string name="menu1_js">JavaScript</string>
     <string name="menu1_foreground_logging">前景日誌訊息</string>
     <string name="menu1_action_search_content">內容搜尋</string>
+    <string name="menu1_action_search_in_log">檢索日誌紀錄</string>
     <string name="menu1_item_more">更多選項</string>
     <string name="menu1_action_new_window">開啟新視窗</string>
     <string name="menu1_action_open_in_another_app">在其他應用程式中開啟</string>

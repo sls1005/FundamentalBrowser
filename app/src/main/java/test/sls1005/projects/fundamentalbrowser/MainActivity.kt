@@ -46,6 +46,7 @@ open class MainActivity : ConfiguratedActivity() {
     private var allowsForegroundLogging = false
     private val logMsgs = ArrayDeque<String>()
     private var shouldLeaveOnBackGesture = false
+    private var isCurrentlyAllowingSearchingInLog = true
     protected var languageTags = ""
     protected var urlToLoad = ""
     protected var currentURL = ""
@@ -196,7 +197,7 @@ open class MainActivity : ConfiguratedActivity() {
                         if (! isShowingLog()) {
                             showLog()
                         }
-                        findViewById<WebView>(R.id.view1).evaluateJavascript(code) {
+                        findViewById<WebView>(R.id.window).evaluateJavascript(code) {
                             synchronized(logMsgs) {
                                 logMsgs.apply {
                                     if (size >= maxLogMsgs) {
@@ -212,16 +213,19 @@ open class MainActivity : ConfiguratedActivity() {
                 }
             }
             R.id.search_previous -> run {
-                findViewById<WebView>(R.id.view1).findNext(false)
+                findViewById<WebView>(R.id.window).findNext(false)
             }
             R.id.search_next -> run {
-                findViewById<WebView>(R.id.view1).findNext(true)
+                findViewById<WebView>(R.id.window).findNext(true)
             }
             R.id.end_search -> run {
+                val shouldClear = isShowingContentSearchBar()
                 if (isShowingSearchBar()) {
                     hideSearchBar()
                 }
-                findViewById<WebView>(R.id.view1).clearMatches()
+                if (shouldClear) {
+                    findViewById<WebView>(R.id.window).clearMatches()
+                }
             }
         }
     }
@@ -229,7 +233,7 @@ open class MainActivity : ConfiguratedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        findViewById<WebView>(R.id.view1).apply {
+        findViewById<WebView>(R.id.window).apply {
             settings.apply {
                 setSupportMultipleWindows(false)
                 builtInZoomControls = true
@@ -456,7 +460,28 @@ open class MainActivity : ConfiguratedActivity() {
             override fun beforeTextChanged(s: CharSequence, i: Int, n: Int, n1: Int) { }
             override fun onTextChanged(s: CharSequence, i: Int, n0: Int, n: Int) { }
             override fun afterTextChanged(e: Editable) {
-                findViewById<WebView>(R.id.view1).findAllAsync(e.toString())
+                val s = e.toString()
+                findViewById<WebView>(R.id.window).also {
+                    if (it.visibility == VISIBLE) {
+                        it.findAllAsync(s)
+                    } else if (isCurrentlyAllowingSearchingInLog) {
+                        isCurrentlyAllowingSearchingInLog = false
+                        val records = synchronized(logMsgs) { logMsgs.toList() }
+                        findViewById<TextView>(R.id.log).also {
+                            if (it.visibility == VISIBLE) {
+                                it.text = if (s.isEmpty()) {
+                                    records.joinToString("\n\n")
+                                } else {
+                                    records.filter({ it -> it.indexOf(s, ignoreCase=true) != -1 }).joinToString("\n\n")
+                                }
+                            }
+                            it.postDelayed(
+                                { isCurrentlyAllowingSearchingInLog = true },
+                                100
+                            )
+                        }
+                    }
+                }
             }
         })
         findViewById<HorizontalScrollView>(R.id.button_area).postDelayed({
@@ -468,10 +493,11 @@ open class MainActivity : ConfiguratedActivity() {
                 override fun handleOnBackPressed() {
                     if (isShowingSearchBar()) {
                         hideSearchBar()
+                        updateLogIfShowing()
                     } else if (isShowingLog()) {
                         hideLog()
                     } else {
-                        findViewById<WebView>(R.id.view1).apply {
+                        findViewById<WebView>(R.id.window).apply {
                             if (canGoBack()) {
                                 goBack()
                             } else {
@@ -508,7 +534,7 @@ open class MainActivity : ConfiguratedActivity() {
 
     override fun onResume() {
         super.onResume()
-        findViewById<WebView>(R.id.view1).apply {
+        findViewById<WebView>(R.id.window).apply {
             settings.apply {
                 javaScriptEnabled = shouldUseJavaScript
                 blockNetworkImage = !shouldLoadImages
@@ -547,20 +573,21 @@ open class MainActivity : ConfiguratedActivity() {
         if (! super.onPrepareOptionsMenu(menu)) {
             return false
         }
-        val v1 = findViewById<WebView>(R.id.view1)
+        val w = findViewById<WebView>(R.id.window)
         val hasLoadedPage = !hasNotLoadedAnyPage()
+        val showingLog = isShowingLog()
         listOf(
             Pair(
                 R.id.action_enable_disable_js,
-                v1.settings.javaScriptEnabled
+                w.settings.javaScriptEnabled
             ),
             Pair(
                 R.id.action_enable_disable_images,
-                !v1.settings.blockNetworkImage
+                !w.settings.blockNetworkImage
             ),
             Pair(
                 R.id.action_enable_disable_resources,
-                !v1.settings.blockNetworkLoads
+                !w.settings.blockNetworkLoads
             ),
             Pair(
                 R.id.action_enable_disable_foreground_logging,
@@ -585,7 +612,11 @@ open class MainActivity : ConfiguratedActivity() {
             ),
             Pair(
                 R.id.group_content_search,
-                hasLoadedPage && (!isShowingSearchBar())
+                hasLoadedPage && (!showingLog)
+            ),
+            Pair(
+                R.id.group_search_log,
+                showingLog && logMsgs.isNotEmpty()
             )
         ).forEach { it ->
             val (id, state) = it
@@ -626,7 +657,7 @@ open class MainActivity : ConfiguratedActivity() {
                 (true)
             }
             R.id.action_refresh -> run {
-                findViewById<WebView>(R.id.view1).apply {
+                findViewById<WebView>(R.id.window).apply {
                     if (originalUrl != null) {
                         reload()
                     }
@@ -636,26 +667,26 @@ open class MainActivity : ConfiguratedActivity() {
             }
             R.id.action_enable_disable_js -> run {
                 shouldUseJavaScript = !item.isChecked()
-                val v1 = findViewById<WebView>(R.id.view1).apply {
+                val w = findViewById<WebView>(R.id.window).apply {
                     settings.javaScriptEnabled = shouldUseJavaScript
                 }
-                item.setChecked(v1.settings.javaScriptEnabled)
+                item.setChecked(w.settings.javaScriptEnabled)
                 (true)
             }
             R.id.action_enable_disable_images -> run {
                 shouldLoadImages = !item.isChecked()
-                val v1 = findViewById<WebView>(R.id.view1).apply {
+                val w = findViewById<WebView>(R.id.window).apply {
                     settings.blockNetworkImage = !shouldLoadImages
                 }
-                item.setChecked(!v1.settings.blockNetworkImage)
+                item.setChecked(!w.settings.blockNetworkImage)
                 (true)
             }
             R.id.action_enable_disable_resources -> run {
                 shouldLoadResources = !item.isChecked()
-                val v1 = findViewById<WebView>(R.id.view1).apply {
+                val w = findViewById<WebView>(R.id.window).apply {
                     settings.blockNetworkLoads = !shouldLoadResources
                 }
-                item.setChecked(!v1.settings.blockNetworkLoads)
+                item.setChecked(!w.settings.blockNetworkLoads)
                 (true)
             }
             R.id.action_enable_disable_foreground_logging -> run {
@@ -675,7 +706,13 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.action_content_search -> run {
                 if (!isShowingSearchBar()) {
                     hideLogIfShowing()
-                    showSearchBar()
+                    showContentSearchBar()
+                }
+                (true)
+            }
+            R.id.action_search_in_log -> run {
+                if (!isShowingSearchBar()) {
+                    showSearchBarForLog()
                 }
                 (true)
             }
@@ -779,7 +816,7 @@ open class MainActivity : ConfiguratedActivity() {
     }
 
     private fun updateWindowSizeAndSetCorrectUserAgent() {
-        findViewById<WebView>(R.id.view1).settings.also {
+        findViewById<WebView>(R.id.window).settings.also {
             it.useWideViewPort = desktopMode
             it.loadWithOverviewMode = desktopMode
             it.userAgentString = if (useCustomUserAgent) {
@@ -858,7 +895,7 @@ open class MainActivity : ConfiguratedActivity() {
         }
         showRunButtonIfApplicable()
         for (v in listOf(
-            findViewById<WebView>(R.id.view1),
+            findViewById<WebView>(R.id.window),
             findViewById<TextView>(R.id.log)
         )) {
             if (v.visibility == VISIBLE) {
@@ -896,7 +933,7 @@ open class MainActivity : ConfiguratedActivity() {
         }
         findViewById<HorizontalScrollView>(R.id.button_area).visibility = GONE
         for (v in listOf(
-            findViewById<WebView>(R.id.view1),
+            findViewById<WebView>(R.id.window),
             findViewById<TextView>(R.id.log)
         )) {
             if (v.visibility == VISIBLE) {
@@ -907,7 +944,7 @@ open class MainActivity : ConfiguratedActivity() {
     }
 
     private fun showLog() {
-        findViewById<WebView>(R.id.view1).visibility = GONE
+        findViewById<WebView>(R.id.window).visibility = GONE
         findViewById<ScrollView>(R.id.log_scroll).apply {
             visibility = VISIBLE
             layoutParams!!.height = LayoutParams.MATCH_PARENT
@@ -916,7 +953,7 @@ open class MainActivity : ConfiguratedActivity() {
             visibility = VISIBLE
             layoutParams!!.height = LayoutParams.MATCH_PARENT
             text = synchronized(logMsgs) {
-                logMsgs.joinToString("\n")
+                logMsgs.joinToString("\n\n")
             }
         }
         (this@MainActivity).apply {
@@ -931,7 +968,7 @@ open class MainActivity : ConfiguratedActivity() {
             text = ""
             visibility = GONE
         }
-        findViewById<WebView>(R.id.view1).apply {
+        findViewById<WebView>(R.id.window).apply {
             visibility = VISIBLE
             layoutParams!!.height = LayoutParams.MATCH_PARENT
         }
@@ -945,13 +982,22 @@ open class MainActivity : ConfiguratedActivity() {
         return findViewById<RelativeLayout>(R.id.search_area).visibility == VISIBLE
     }
 
-    private fun showSearchBar() {
+    private inline fun isShowingContentSearchBar(): Boolean {
+        return (
+            findViewById<RelativeLayout>(R.id.search_area).visibility == VISIBLE
+        ) && (
+            findViewById<ImageView>(R.id.search_next).visibility == VISIBLE
+        )
+    }
+
+    private fun showContentSearchBar() {
         allowsForegroundLogging = false
         hideUrlBarIfShowing()
         this.supportActionBar?.hide()
         findViewById<RelativeLayout>(R.id.search_area).visibility = VISIBLE
         findViewById<EditText>(R.id.content_search_field).apply {
             visibility = VISIBLE
+            hint = getString(R.string.main_search_field_hint1)
             setEnabled(true)
         }
         listOf(
@@ -963,6 +1009,22 @@ open class MainActivity : ConfiguratedActivity() {
                 visibility = VISIBLE
                 setEnabled(true)
             }
+        }
+    }
+
+    private fun showSearchBarForLog() {
+        allowsForegroundLogging = false
+        hideUrlBarIfShowing()
+        this.supportActionBar?.hide()
+        findViewById<RelativeLayout>(R.id.search_area).visibility = VISIBLE
+        findViewById<EditText>(R.id.content_search_field).apply {
+            visibility = VISIBLE
+            hint = getString(R.string.main_search_field_hint2)
+            setEnabled(true)
+        }
+        findViewById<ImageView>(R.id.end_search).apply {
+            visibility = VISIBLE
+            setEnabled(true)
         }
     }
 
@@ -1010,7 +1072,7 @@ open class MainActivity : ConfiguratedActivity() {
     private fun updateLogIfShowing() {
         findViewById<TextView>(R.id.log).apply {
             if (visibility == VISIBLE) {
-                text = logMsgs.joinToString("\n")
+                text = synchronized(logMsgs) { logMsgs.joinToString("\n\n") }
                 postDelayed({
                     (this@MainActivity).apply {
                         if (autoscrollLogMsgs) {
@@ -1057,7 +1119,7 @@ open class MainActivity : ConfiguratedActivity() {
     }
 
     private inline fun hasNotLoadedAnyPage(): Boolean {
-        return (findViewById<WebView>(R.id.view1).originalUrl == null)
+        return (findViewById<WebView>(R.id.window).originalUrl == null)
     }
 
     @SuppressLint("QueryPermissionsNeeded")
@@ -1094,7 +1156,7 @@ open class MainActivity : ConfiguratedActivity() {
     private inline fun disableJavaScriptAsRequested() {
         if (!shouldAllowJSForUrlsFromOtherApps) {
             shouldUseJavaScript = false
-            findViewById<WebView>(R.id.view1).apply {
+            findViewById<WebView>(R.id.window).apply {
                 settings.javaScriptEnabled = false
             }
         }
@@ -1135,7 +1197,7 @@ open class MainActivity : ConfiguratedActivity() {
             currentURL = url
             textToDisplayInUrlField = url
         }
-        findViewById<WebView>(R.id.view1).also {
+        findViewById<WebView>(R.id.window).also {
             if (manuallySetLanguageTags && languageTags.isNotEmpty()) {
                 it.loadUrl(url, mutableMapOf(Pair("Accept-Language", languageTags)))
             } else {

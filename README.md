@@ -32,11 +32,13 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 - [x] Support desktop mode (on mobile).
 
-- [x] Selectable or customizable locales (for the content rather than UI)
+- [x] Selectable or customizable locales (for the content rather than UI; implemented and tested)
 
 - [x] Support searching in content.
 
 - [x] Log everything so that nothing is secretly down- or up-loaded.
+
+    * The log is searchable.
 
 - [ ] Display cookies.
 
@@ -51,6 +53,8 @@ A developer-friendly browser should: (A checked box means implemented or already
 - [ ] Anti-tracking
 
 - [ ] Bookmarks
+
+- [ ] History (Use the log instead.)
 
 - [ ] PDF viewer
 

@@ -125,6 +125,7 @@
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
             android:inputType="text"
+            android:hint=""
             android:textSize="18sp"
             android:visibility="gone"/>
         <ImageView
@@ -173,7 +174,7 @@
             android:visibility="gone"/>
     </ScrollView>
     <WebView
-        android:id="@+id/view1"
+        android:id="@+id/window"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 </LinearLayout>

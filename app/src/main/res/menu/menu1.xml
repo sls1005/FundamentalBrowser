@@ -49,6 +49,12 @@
             android:title="@string/menu1_action_search_content"
             app:showAsAction="never"/>
     </group>
+    <group android:id="@+id/group_search_log">
+        <item
+            android:id="@+id/action_search_in_log"
+            android:title="@string/menu1_action_search_in_log"
+            app:showAsAction="never"/>
+    </group>
     <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
