@@ -38,7 +38,7 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 - [x] Log everything so that nothing is secretly down- or up-loaded.
 
-    * The log is searchable.
+    - [x] The log is searchable.
 
 - [ ] Display cookies.
 
