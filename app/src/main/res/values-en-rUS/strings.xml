@@ -46,10 +46,10 @@
     <string name="doc_title1_2">ii. The main window</string>
     <string name="doc_text1_2">This is where the web page is displayed.\n</string>
     <string name="doc_title1_3">iii. The log</string>
-    <string name="doc_text1_3">The log is a record of the web requests this app has made, including the requests for images, scripts, data (JSON) and other kinds of resources. It also contains the output of each script that has been run.\n\nTo open the log, use the “view log” option from the option menu. The option is only available if there is anything in the log.\n\nEach request-related entry consists of:\n  (1) the method, e.g., GET.\n  (2) if it is a redirection, a string that indicates so.\n  (3) the URL associated with that request.\n\nUsing the back button of the device (or an equivalent gesture) will close the log.\n</string>
+    <string name="doc_text1_3">The log is a record of the web requests this app has made, including the requests for images, scripts, data (e.g., JSON) and other kinds of resources. It also contains the output of each script that has been run.\n\nTo open the log, use the “view log” option from the option menu. The option is only available if there is anything in the log.\n\nEach request-related entry consists of:\n  (1) the method, e.g., GET.\n  (2) if it is the result of a redirection, a string that indicates so.\n  (3) the URL associated with that request.\n\nTo search for a specific record in the log, use the “Search in log” option from the option menu. The option will be available when you open the menu while the log is opened.\n\nUsing the back button of the device (or an equivalent gesture) will close the log.\n</string>
     <string name="doc_title2">2. Usage</string>
     <string name="doc_title2_1">i. Load a URL</string>
-    <string name="doc_text2_1">To load a URL, paste it to the URL field and then tap “Go”\n.</string>
+    <string name="doc_text2_1">To load a URL, paste it to the URL field and then tap “Go”.\n</string>
     <string name="doc_title2_2">ii. Search the web</string>
     <string name="doc_text2_2">To do search, firstly set the search URL in settings and enter the keyword, and then tap “Search”.\n</string>
     <string name="doc_title2_3">iii. Search a web page</string>

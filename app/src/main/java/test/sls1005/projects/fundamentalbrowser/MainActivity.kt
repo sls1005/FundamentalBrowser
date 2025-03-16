@@ -21,6 +21,11 @@ import android.view.View.VISIBLE
 import android.view.View.GONE
 import android.view.ViewGroup.LayoutParams
 import android.webkit.ConsoleMessage
+import android.webkit.ConsoleMessage.MessageLevel.DEBUG
+import android.webkit.ConsoleMessage.MessageLevel.ERROR
+import android.webkit.ConsoleMessage.MessageLevel.LOG
+import android.webkit.ConsoleMessage.MessageLevel.TIP
+import android.webkit.ConsoleMessage.MessageLevel.WARNING
 import android.webkit.CookieManager
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -42,9 +47,9 @@ import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
 
 open class MainActivity : ConfiguratedActivity() {
+    private val logMsgs = ArrayDeque<String>()
     private var previousTitle = ""
     private var allowsForegroundLogging = false
-    private val logMsgs = ArrayDeque<String>()
     private var shouldLeaveOnBackGesture = false
     private var isCurrentlyAllowingSearchingInLog = true
     protected var languageTags = ""
@@ -197,13 +202,13 @@ open class MainActivity : ConfiguratedActivity() {
                         if (! isShowingLog()) {
                             showLog()
                         }
-                        findViewById<WebView>(R.id.window).evaluateJavascript(code) {
+                        findViewById<WebView>(R.id.window).evaluateJavascript(code) { result ->
                             synchronized(logMsgs) {
                                 logMsgs.apply {
                                     if (size >= maxLogMsgs) {
                                         removeFirst()
                                     }
-                                    add(it)
+                                    add("[REPL] $result")
                                 }
                                 updateLogIfShowing()
                             }
@@ -247,7 +252,6 @@ open class MainActivity : ConfiguratedActivity() {
                     } ?: false
                     if (schemeIsSupported) {
                         if (isHttpOrHttpsUri(req.url) && url.endsWith(".pdf", ignoreCase = true)) {
-                            //Toast.makeText(this, "Test1", Toast.LENGTH_LONG).show()
                             val x = Intent(Intent.ACTION_VIEW, req.url.buildUpon().build())
                             if (!onlyICanHandle(x)) {
                                 (AlertDialog.Builder(this@MainActivity).apply {
@@ -302,7 +306,7 @@ open class MainActivity : ConfiguratedActivity() {
                                             if (size >= maxLogMsgs) {
                                                 removeFirst()
                                             }
-                                            add(msg)
+                                            add("[Error] $msg\n")
                                         }
                                     }
                                 }
@@ -338,7 +342,7 @@ open class MainActivity : ConfiguratedActivity() {
                                     if (size >= maxLogMsgs) {
                                         removeFirst()
                                     }
-                                    add(msg)
+                                    add("[Log] $msg\n")
                                 }
                             }
                         }
@@ -373,7 +377,7 @@ open class MainActivity : ConfiguratedActivity() {
                                 if (size >= maxMsgNum) {
                                     removeFirst()
                                 }
-                                add(msg)
+                                add("[Log] $msg\n")
                             }
                         }
                     }
@@ -416,12 +420,29 @@ open class MainActivity : ConfiguratedActivity() {
             }
             webChromeClient = object : WebChromeClient() {
                 override fun onConsoleMessage(consoleMessage: ConsoleMessage): Boolean {
+                    val kind = when (consoleMessage.messageLevel()) {
+                        DEBUG -> "Debug"
+                        ERROR -> "Error"
+                        LOG -> "Log"
+                        TIP -> "Tip"
+                        WARNING -> "Warning"
+                    }
+                    val logMsg = buildString {
+                        append("[$kind (from console)")
+                        consoleMessage.sourceId().also { src ->
+                            if (src.isNotEmpty()) {
+                                append(" | from $src")
+                            }
+                        }
+                        append(" | line ${consoleMessage.lineNumber()}] ")
+                        append(consoleMessage.message()) // No '\n' here.
+                    }
                     synchronized(logMsgs) {
                         logMsgs.apply {
                             if (size >= maxLogMsgs) {
                                 removeFirst()
                             }
-                            add(consoleMessage.message())
+                            add(logMsg)
                         }
                         updateLogIfShowing()
                     }
@@ -436,7 +457,7 @@ open class MainActivity : ConfiguratedActivity() {
                 }
             }
         }
-        listOf(
+        intArrayOf(
             R.id.button_close,
             R.id.button_decode,
             R.id.button_clear,
@@ -449,7 +470,7 @@ open class MainActivity : ConfiguratedActivity() {
         ).forEach { id ->
             findViewById<Button>(id).setOnClickListener(clickListener)
         }
-        listOf(
+        intArrayOf(
             R.id.search_previous,
             R.id.search_next,
             R.id.end_search
@@ -470,9 +491,9 @@ open class MainActivity : ConfiguratedActivity() {
                         findViewById<TextView>(R.id.log).also {
                             if (it.visibility == VISIBLE) {
                                 it.text = if (s.isEmpty()) {
-                                    records.joinToString("\n\n")
+                                    records.joinToString("\n")
                                 } else {
-                                    records.filter({ it -> it.indexOf(s, ignoreCase=true) != -1 }).joinToString("\n\n")
+                                    records.filter({ it -> it.indexOf(s, ignoreCase=true) != -1 }).joinToString("\n")
                                 }
                             }
                             it.postDelayed(
@@ -576,7 +597,7 @@ open class MainActivity : ConfiguratedActivity() {
         val w = findViewById<WebView>(R.id.window)
         val hasLoadedPage = !hasNotLoadedAnyPage()
         val showingLog = isShowingLog()
-        listOf(
+        arrayOf(
             Pair(
                 R.id.action_enable_disable_js,
                 w.settings.javaScriptEnabled
@@ -601,7 +622,7 @@ open class MainActivity : ConfiguratedActivity() {
             val (id, state) = it
             menu.findItem(id).setChecked(state)
         }
-        listOf(
+        arrayOf(
             Pair(
                 R.id.group_url,
                 (!isShowingUrlBar()) && currentURL.isNotEmpty()
@@ -624,7 +645,7 @@ open class MainActivity : ConfiguratedActivity() {
         }
         menu.findItem(R.id.submenu1).subMenu.also { sub ->
             if (sub != null) {
-                listOf(
+                arrayOf(
                     Pair(
                         R.id.menu1_sub1_group_page,
                         hasLoadedPage
@@ -705,7 +726,6 @@ open class MainActivity : ConfiguratedActivity() {
             }
             R.id.action_content_search -> run {
                 if (!isShowingSearchBar()) {
-                    hideLogIfShowing()
                     showContentSearchBar()
                 }
                 (true)
@@ -878,7 +898,7 @@ open class MainActivity : ConfiguratedActivity() {
             setEnabled(true)
         }
         findViewById<HorizontalScrollView>(R.id.button_area).visibility = VISIBLE
-        listOf(
+        intArrayOf(
             R.id.button_close,
             R.id.button_decode,
             R.id.button_clear,
@@ -894,7 +914,7 @@ open class MainActivity : ConfiguratedActivity() {
             }
         }
         showRunButtonIfApplicable()
-        for (v in listOf(
+        for (v in arrayOf(
             findViewById<WebView>(R.id.window),
             findViewById<TextView>(R.id.log)
         )) {
@@ -906,7 +926,7 @@ open class MainActivity : ConfiguratedActivity() {
     }
 
     private fun hideUrlBar() {
-        listOf(
+        intArrayOf(
             R.id.button_close,
             R.id.button_decode,
             R.id.button_clear,
@@ -932,7 +952,7 @@ open class MainActivity : ConfiguratedActivity() {
             visibility = GONE
         }
         findViewById<HorizontalScrollView>(R.id.button_area).visibility = GONE
-        for (v in listOf(
+        for (v in arrayOf(
             findViewById<WebView>(R.id.window),
             findViewById<TextView>(R.id.log)
         )) {
@@ -953,7 +973,7 @@ open class MainActivity : ConfiguratedActivity() {
             visibility = VISIBLE
             layoutParams!!.height = LayoutParams.MATCH_PARENT
             text = synchronized(logMsgs) {
-                logMsgs.joinToString("\n\n")
+                logMsgs.joinToString("\n")
             }
         }
         (this@MainActivity).apply {
@@ -1000,7 +1020,7 @@ open class MainActivity : ConfiguratedActivity() {
             hint = getString(R.string.main_search_field_hint1)
             setEnabled(true)
         }
-        listOf(
+        intArrayOf(
             R.id.search_previous,
             R.id.search_next,
             R.id.end_search
@@ -1034,7 +1054,7 @@ open class MainActivity : ConfiguratedActivity() {
             text.clear()
             visibility = GONE
         }
-        listOf(
+        intArrayOf(
             R.id.search_previous,
             R.id.search_next,
             R.id.end_search
@@ -1072,7 +1092,7 @@ open class MainActivity : ConfiguratedActivity() {
     private fun updateLogIfShowing() {
         findViewById<TextView>(R.id.log).apply {
             if (visibility == VISIBLE) {
-                text = synchronized(logMsgs) { logMsgs.joinToString("\n\n") }
+                text = synchronized(logMsgs) { logMsgs.joinToString("\n") }
                 postDelayed({
                     (this@MainActivity).apply {
                         if (autoscrollLogMsgs) {
@@ -1207,7 +1227,7 @@ open class MainActivity : ConfiguratedActivity() {
     }
 }
 
-private inline fun containedIgnoringCase(s: String, container: List<String>): Boolean {
+private inline fun containedIgnoringCase(s: String, container: Collection<String>): Boolean {
     for (e in container) {
         if (s.equals(e, ignoreCase=true)) {
             return true
@@ -1218,10 +1238,11 @@ private inline fun containedIgnoringCase(s: String, container: List<String>): Bo
 
 private inline fun isHttpOrHttpsUri(uri: Uri): Boolean {
     return uri.scheme?.let { scheme ->
-        containedIgnoringCase(scheme, listOf("http", "https"))
+        containedIgnoringCase(scheme, setOf("http", "https"))
     } ?: false
 }
 
 private inline fun isSupportedScheme(scheme: String): Boolean {
-    return containedIgnoringCase(scheme, listOf("http", "https", "javascript"))
+    return containedIgnoringCase(scheme, setOf("http", "https", "blob", "javascript"))
+    //                                                               ^ unsure
 }

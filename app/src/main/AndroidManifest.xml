@@ -15,7 +15,7 @@
             android:name=".MainActivity"
             android:launchMode="standard"
             android:exported="true"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/Theme.FundamentalBrowser">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
@@ -33,7 +33,7 @@
             android:name=".NewWindowActivity"
             android:taskAffinity="test.sls1005.projects.fundamentalbrowser.newwindowactivity"
             android:exported="false"
-            android:configChanges="orientation"
+            android:configChanges="orientation|screenSize|screenLayout"
             android:theme="@style/Theme.FundamentalBrowser"/>
         <activity
             android:name=".SettingsActivity"

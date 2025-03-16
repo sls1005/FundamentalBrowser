@@ -2,7 +2,11 @@
 
 Fundamental Browser is a basic browser designed for running on Android. It is based on `WebView` and is intended to be developer-friendly.
 
-Although not originally designed for, it can also be used as a JavaScript interpreter, generalized (and programmable) intent sender and activity launcher.
+Although not originally designed for, it can also be used as a JavaScript interpreter (works offline), generalized (and programmable) intent sender and activity launcher.
+
+When used as a JavaScript interpreter, it can even work on platform API level 29 and above. (i.e. not subject to the W^X restriction, not at all, or at least not in technical aspects.)
+
+However, the functionality of this app will not exceed what it should have as a browser with built-in developer tools. (It is... was common for browsers to have a JavaScript console, wasn't it?)
 
 ### Screenshots
 
@@ -96,9 +100,9 @@ See <a href="#Details">details</a> for more information about this usage.
 
 ### Details
 
-* The whole app (except for icons, etc.) is written in Kotlin. No JavaScript used except in examples, tests and documentation (for the console).
+* The whole app (except for icons, etc.) is written in Kotlin. No JavaScript used except in examples, tests and documentation (for the console/REPL feature).
 
-* JavaScript code, including user-input code, is executed via platform API (for which the underlying system could utilize something called V8, but I'm not sure), so this app can target the latest platform API level (35 as of Feb. 2025) while still enabling users to run code. (Whether it meets Play store's standard is another thing.)
+* JavaScript code, including user-input code, is executed via platform API (for which the underlying system could utilize something called V8, but I'm not sure), so this app can target the latest platform API level (35 as of Feb. 2025) while still enabling users to run code. (Whether or not it meets Play store's standard is another thing. If you ask me, I would say that it should be allowed because JavaScript in browser is an explicitly stated exception to the rule.)
 
 * Intent scheme URIs are half-supported. That is to say, they will usually be processed correctly, and the instantiated intent may be launched if approved by the user; however, this app usually doesn't check if a URI is an `intent:` URI, except when trying to protect itself from intent-based attacks. (See <a href="#References">[1]</a>.) Instead, `intent:` URIs will be treated as if they were URIs of unrecognized schemes (such as `abc://`), for any of which this app will ask if it should launch an intent. Nonetheless, the app will not ask nor try to launch any intent if it detects that the intent would be sent back to the activity itself or to any other component of this application (for which case it might not create a log entry and can show an error message), so as to prevent the security issue mentioned in <a href="#References">[1]</a>. Despite being suggested in <a href="#References">[2]</a>, this app doesn't use `CATEGORY_BROWSABLE` to instantiate such intents, as it would still be insufficient according to <a href="#References">[1]</a> (and this app doesn't use the unsafe constant anyway). This application has its own security-related mechanism as mentioned above; basically, an `intent:` URI is forbidden if it would be sent back to this app; it is otherwise up to the user's explicit intention. If this mechanism is proved to still be insufficient, please open an issue to let me know.
 
@@ -119,6 +123,8 @@ These are listed purely for comparison. They are not associated with this app no
 1. <https://www.mbsd.jp/Whitepaper/IntentScheme.pdf>
 
 2. <https://developer.android.com/reference/kotlin/android/content/Intent#URI_ALLOW_UNSAFE:kotlin.Int>
+
+3. <https://developer.android.com/develop/ui/views/layout/webapps/debugging>
 
 ### Disclaimer
 

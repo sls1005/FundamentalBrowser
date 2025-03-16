@@ -12,8 +12,8 @@ android {
         applicationId = "test.sls1005.projects.fundamentalbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 13
-        versionName = "0.9.0"
+        versionCode = 14
+        versionName = "1.0.0"
         resourceConfigurations += arrayOf("en", "en-rGB", "en-rUS", "zh-rCN", "zh-rHK", "zh-rTW", "b+zh+Hant")
     }
     androidResources {

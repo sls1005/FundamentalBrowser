@@ -159,7 +159,7 @@ class SettingsActivity : ConfiguratedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_settings)
-        listOf(
+        intArrayOf(
             R.id.switch_accept_cookies,
             R.id.switch_accept_3rd_party_cookies,
             R.id.switch_allow_js,
@@ -178,7 +178,7 @@ class SettingsActivity : ConfiguratedActivity() {
         ).forEach { id ->
             findViewById<SwitchMaterial>(id).setOnCheckedChangeListener(checkedChangeListener)
         }
-        listOf(
+        intArrayOf(
             R.id.button_clear_cache,
             R.id.button_clear_usernames_and_passwords,
             R.id.button_clear_cookies,
@@ -190,7 +190,7 @@ class SettingsActivity : ConfiguratedActivity() {
         ).forEach { id ->
             findViewById<Button>(id).setOnClickListener(clickListener)
         }
-        listOf(
+        intArrayOf(
             R.id.max_log_msgs,
             R.id.search_url,
             R.id.user_agent,
@@ -202,7 +202,7 @@ class SettingsActivity : ConfiguratedActivity() {
 
     override fun onResume() {
         super.onResume()
-        listOf(
+        arrayOf(
             Pair(R.id.switch_allow_js, shouldUseJavaScript),
             Pair(R.id.switch_load_images, shouldLoadImages),
             Pair(R.id.switch_load_resources, shouldLoadResources),
@@ -266,7 +266,7 @@ class SettingsActivity : ConfiguratedActivity() {
             }
             findViewById<TextView>(R.id.user_agent_extra_text).visibility = VISIBLE
         } else {
-            listOf(
+            intArrayOf(
                 R.id.user_agent,
                 R.id.user_agent_extra_text
             ).forEach { id ->
@@ -288,7 +288,7 @@ class SettingsActivity : ConfiguratedActivity() {
                     }
                 }
             }
-            listOf(
+            intArrayOf(
                 R.id.button_add_language,
                 R.id.button_clear_languages
             ).forEach { id ->
@@ -299,13 +299,13 @@ class SettingsActivity : ConfiguratedActivity() {
             }
             findViewById<TextView>(R.id.language_tags_extra_text).visibility = VISIBLE
         } else {
-            listOf(
+            intArrayOf(
                 R.id.language_tags,
                 R.id.language_tags_extra_text
             ).forEach { id ->
                 findViewById<TextView>(id).visibility = GONE
             }
-            listOf(
+            intArrayOf(
                 R.id.button_add_language,
                 R.id.button_clear_languages
             ).forEach { id ->
