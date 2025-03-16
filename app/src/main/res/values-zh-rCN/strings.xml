@@ -120,12 +120,12 @@
     <string name="doc_text2_3">使用选单中的“内容搜寻”选项即可在页面中搜寻。（必须先载入任一页面。）\n</string>
     <string name="doc_title2_4">iv. 检视网页源代码</string>
     <string name="doc_text2_4">欲检视某个页面的源代码，将“view-source:”加在指向该页面的网址之前即可。示例：“<code>view-source:https://example.com/index.html</code>”。此用法通过框架而实现支持。\n\n作为替代，您也可以使用选单（轻触由三个圆点组成的符号来开启）的“更多”子选单中的“检视页面源代码”选项。若想在源代码中进行搜寻，可使用“内容搜寻”选项，仿佛它是通常的网页一般。\n</string>
-    <string name="doc_title2_5">v. 主控台模式</string>
-    <string name="doc_text2_5">若想进入主控台，可在日志展开的状态下在网址栏输入以“<b><code>javascript:</code></b>”开头的代码（示例：“<b><code>javascript:console.log(0);</code></b>”）并点击“载入”。执行结果会显示在屏幕上。您也可以使用“执行”键（在设置中启用）来执行代码。\n\n在其他任何情况下使用“<b><code>javascript:</code></b>”会让其如平时载入网页般正常执行。此类代码的执行，即使是在主控台模式下也不是由此应用程序处理，而是由框架或系统处理。本应用程序仅仅实现了用于显示日志消息的逻辑。\n</string>
+    <string name="doc_title2_5">v. 主控台与 REPL</string>
+    <string name="doc_text2_5">欲使用主控台及 REPL 等功能，可在网址栏输入一段代码（通常必须是JS指令码），并使用“执行”键（在设置中启用）来执行它。执行结果会显示在屏幕上。这类代码的执行，即使是在主控台模式下也不是由此应用程序处理，而是由框架或系统处理。本应用程序仅仅实现了用于显示日志消息的逻辑。\n</string>
     <string name="doc_title2_6">vi. 前景日志消息</string>
     <string name="doc_text2_6">“前景日志消息”这个功能将带给你一些关于您所阅读的页面的元信息。消息格式与日志中的消息格式相同。请参阅上文以瞭解更多详情。\n</string>
     <string name="doc_title2_7">vii. 使用此应用作为通用意图发送器及活动启动器</string>
-    <string name="doc_text2_7">若使用形如“<b><code>javascript:location.href=\"intent:#Intent;...;end\"</code></b>”的代码，则可能利用这个应用程序作为通用意图发送器及活动启动器（方法是以文字形式指明“action”、“component”等参数），但必须遵循以下限制：意图只能被送往其他应用程序，不可送回此应用程序。基于安全上的考量，若此应用程序在 URI 中或意图中检测到自身的包名（package name），则会拒绝发送该意图；在这种情况下，此应用程序可能不会将该事件记录在日志中，且可能会显示错误消息。\n\n本应用程序半正式地支持 intent scheme URI。亦即它们通常能被正常解析，但此应用程序通常不会确认其是否为“<b><code>intent:</code></b>”，而仅在试图避免自身受到基于意图的攻击（intent-based attack）时才进行确认。（请参阅 https://www.mbsd.jp/Whitepaper/IntentScheme.pdf 以瞭解更多详情。）\n\n相反地，`<b><code>intent:</code></b>` URI 会被视为类型未知的 URI（例如 <b><code>abc://</code></b>）并做一样处理：对于每一个未知类型的 URI，此应用程序都会询问用户是否要发送意图；只有先前提及的特定情况会是例外。</string>
+    <string name="doc_text2_7">若使用形如“<b><code>location.href=\"intent:#Intent;...;end\"</code></b>”的指令码，则可能利用这个应用程序作为通用意图发送器及活动启动器（方法是以文字形式指明“action”、“component”等参数），但必须遵循以下限制：意图只能被送往其他应用程序，不可送回此应用程序。基于安全上的考量，若此应用程序在 URI 中或意图中检测到自身的包名（package name），则会拒绝发送该意图；在这种情况下，此应用程序可能不会将该事件记录在日志中，且可能会显示错误消息。\n\n本应用程序半正式地支持 intent scheme URI。亦即它们通常能被正常解析，但此应用程序通常不会确认其是否为“<b><code>intent:</code></b>”，而仅在试图避免自身受到基于意图的攻击（intent-based attack）时才进行确认。（请参阅 https://www.mbsd.jp/Whitepaper/IntentScheme.pdf 以瞭解更多详情。）\n\n相反地，<b><code>intent:</code></b> URI 会被视为类型未知的 URI（例如 <b><code>abc://</code></b>）并做一样处理：对于每一个未知类型的 URI，此应用程序都会询问用户是否要发送意图；只有先前提及的特定情况会是例外。</string>
     <string name="settings_activity_label">设置</string>
     <string name="doc_activity_label">使用手册</string>
 </resources>

@@ -81,13 +81,13 @@ open class MainActivity : ConfiguratedActivity() {
                             logMsgs.clear()
                         }
                     }
+                    val notShowingLog = !isShowingLog()
                     if (hasNotLoadedAnyPage()) {
-                        if (!isShowingLog()) {
+                        if (notShowingLog) {
                             showLog()
                         }
-                    } else {
+                    } else if (notShowingLog) {
                         hideUrlBar()
-                        hideLogIfShowing()
                     }
                     textToDisplayInUrlField = url
                     load(url, updateCurrentUrl = false)

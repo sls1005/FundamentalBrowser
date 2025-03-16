@@ -48,7 +48,7 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 - [x] Support `view-source:`. (Supported through framework)
 
-- [x] Support `javascript:`. (Supported through framework; the output of `console.log` will be joined with the app's log.)
+- [x] <strike>Support `javascript:`.</strike> (Supported through framework, but considered deprecated now in this app.)
 
 **The following features are not planned and thus will not be implemented in near future:**
 
@@ -68,21 +68,21 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Go' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search for it.
 
-#### Console mode
+#### Console and REPL
 
-To enter the console mode, input some code with the `javascript:` prefix in the URL field and press the 'Go' button while the log window is opened, or load it before loading any page or search. You must prefix each command with `javascript:` to keep it in this mode. This can also be used as an interpreter. Remember not to use the 'Search' button, which will not execute any code in the URL field, but will search it.
+To use the console and REPL features, input some code (should normally be JS code) in the URL field and then use the 'Run' button (enabled in settings) to execute it.
 
 ![](screenshots/screenshot4.jpg)
 
-Alternatively, you can use the (optional) 'Run' button to run the code (enabled in settings), in which case you don't have to (and must not) add the `javascript:` prefix.
-
 ![](screenshots/screenshot5.jpg)
 
-Using a command prefixed with `javascript:` in any other situation will cause it to be executed normally, as if loading a URL. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.
+![](screenshots/screenshot6.jpg)
+
+The support for `javascript:` scheme in this app is considered deprecated since Mar. 2025, and now the recommended way to run code in this app is to use the 'Run' button. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.
 
 #### Generalized intent sender and activity launcher
 
-![](screenshots/screenshot6.jpg)
+![](screenshots/screenshot7.jpg)
 
 See <a href="#Details">details</a> for more information about this usage.
 
@@ -106,7 +106,7 @@ See <a href="#Details">details</a> for more information about this usage.
 
 * Intent scheme URIs are half-supported. That is to say, they will usually be processed correctly, and the instantiated intent may be launched if approved by the user; however, this app usually doesn't check if a URI is an `intent:` URI, except when trying to protect itself from intent-based attacks. (See <a href="#References">[1]</a>.) Instead, `intent:` URIs will be treated as if they were URIs of unrecognized schemes (such as `abc://`), for any of which this app will ask if it should launch an intent. Nonetheless, the app will not ask nor try to launch any intent if it detects that the intent would be sent back to the activity itself or to any other component of this application (for which case it might not create a log entry and can show an error message), so as to prevent the security issue mentioned in <a href="#References">[1]</a>. Despite being suggested in <a href="#References">[2]</a>, this app doesn't use `CATEGORY_BROWSABLE` to instantiate such intents, as it would still be insufficient according to <a href="#References">[1]</a> (and this app doesn't use the unsafe constant anyway). This application has its own security-related mechanism as mentioned above; basically, an `intent:` URI is forbidden if it would be sent back to this app; it is otherwise up to the user's explicit intention. If this mechanism is proved to still be insufficient, please open an issue to let me know.
 
-* By using some code that looks like `javascript:location.href="intent:#Intent;...;end"`, you can utilize this app as a generalized intent sender and activity launcher (by specifying `action`, `component`, etc. in the form of text; remember to use constant values rather than their names). Unlike in <a href="#References">[1]</a>, you don't have to add `SEL` (which should have no effect anyway), as the rules mentioned above still apply: you can't use it to access any activity of this app; for other apps, only exported activities. This usage is still under test.
+* By using some code that looks like `location.href="intent:#Intent;...;end"`, you can utilize this app as a generalized intent sender and activity launcher (by specifying `action`, `component`, etc. in the form of text; remember to use constant values rather than their names). Unlike in <a href="#References">[1]</a>, you don't have to add `SEL` (which should have no effect anyway), as the rules mentioned above still apply: you can't use it to access any activity of this app; for other apps, only exported activities. This usage is still under test.
 
 ### Projects that offer similar functionalities
 
