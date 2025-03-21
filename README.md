@@ -78,11 +78,13 @@ To use the console and REPL features, input some code (should normally be JS cod
 
 ![](screenshots/screenshot6.jpg)
 
+![](screenshots/screenshot7.jpg)
+
 The support for `javascript:` scheme in this app is considered deprecated since Mar. 2025, and now the recommended way to run code in this app is to use the 'Run' button. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.
 
 #### Generalized intent sender and activity launcher
 
-![](screenshots/screenshot7.jpg)
+![](screenshots/screenshot8.jpg)
 
 See <a href="#Details">details</a> for more information about this usage.
 
