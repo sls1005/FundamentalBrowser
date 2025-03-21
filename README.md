@@ -80,6 +80,8 @@ To use the console and REPL features, input some code (should normally be JS cod
 
 The support for `javascript:` scheme in this app is considered deprecated since Mar. 2025, and now the recommended way to run code in this app is to use the 'Run' button. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.
 
+If there is a loaded script, you can possibly access its API.
+
 ![](screenshots/screenshot7.jpg)
 
 #### Generalized intent sender and activity launcher
