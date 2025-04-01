@@ -85,6 +85,7 @@ class SettingsActivity : ConfiguratedActivity() {
             }
         }
     }
+
     public val checkedChangeListener = OnCheckedChangeListener { button, checked ->
         when (button.id) {
             R.id.switch_accept_cookies -> run {
@@ -145,13 +146,16 @@ class SettingsActivity : ConfiguratedActivity() {
             }
             R.id.switch_show_button_run -> run {
                 shouldDisplayRunButton = checked
-                findViewById<TextView>(R.id.switch_show_button_run_extra_text).visibility = if (checked) { VISIBLE } else { GONE }
+                findViewById<TextView>(R.id.switch_show_button_run_extra_text).visibility = if (shouldDisplayRunButton) { VISIBLE } else { GONE }
             }
             R.id.switch_clear_log_before_running_script -> run {
                 shouldClearLogWhenRunningScript = checked
             }
             R.id.switch_autoscroll_log_msgs -> run {
                 autoscrollLogMsgs = checked
+            }
+            R.id.switch_allow_http -> run {
+                shouldAllowHTTP = checked
             }
         }
     }
@@ -174,7 +178,8 @@ class SettingsActivity : ConfiguratedActivity() {
             R.id.switch_enable_custom_language_setting,
             R.id.switch_show_button_run,
             R.id.switch_clear_log_before_running_script,
-            R.id.switch_autoscroll_log_msgs
+            R.id.switch_autoscroll_log_msgs,
+            R.id.switch_allow_http
         ).forEach { id ->
             findViewById<SwitchMaterial>(id).setOnCheckedChangeListener(checkedChangeListener)
         }
@@ -215,7 +220,8 @@ class SettingsActivity : ConfiguratedActivity() {
             Pair(R.id.switch_enable_custom_language_setting, manuallySetLanguageTags),
             Pair(R.id.switch_show_button_run, shouldDisplayRunButton),
             Pair(R.id.switch_clear_log_before_running_script, shouldClearLogWhenRunningScript),
-            Pair(R.id.switch_autoscroll_log_msgs, autoscrollLogMsgs)
+            Pair(R.id.switch_autoscroll_log_msgs, autoscrollLogMsgs),
+            Pair(R.id.switch_allow_http, shouldAllowHTTP)
         ).forEach { it ->
             val (id, flag) = it
             findViewById<SwitchMaterial>(id).setChecked(flag)

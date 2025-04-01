@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Not all strings are listed; will use default for other strings. -->
-    <string name="settings_text2">This is the URL that will be used when the search button is pressed, and will be joined with the search keywords to form an actual URL. The search button can only be used when this is set.\nExample: <code>https://example.com/search?q=</code></string>
-    <string name="settings_text3">The source code of this app is available at https://github.com/sls1005/FundamentalBrowser, under the MIT Licence.</string>
-    <string name="settings_text4">Disclaimer: JavaScript is a trademark or registered trademark of Oracle Corporation.</string>
+    <string name="settings_search_url_extra_text">This is the URL that will be used when the search button is pressed, and will be joined with the search keywords to form an actual URL. The search button can only be used when this is set.\nExample: <code>https://example.com/search?q=</code></string>
+    <string name="settings_text1">The source code of this app is available at https://github.com/sls1005/FundamentalBrowser, under the MIT Licence.</string>
+    <string name="settings_text2">Disclaimer: JavaScript is a trademark or registered trademark of Oracle Corporation.</string>
     <string name="see_doc">See documentation</string>
     <string name="see_libs">See open source libraries used</string>
     <string name="remove_spaces_and_linebreaks_when_loading">Remove spaces and linebreaks when loading a URL</string>
@@ -30,6 +30,12 @@
     <string name="error4">Error: Empty URL</string>
     <string name="error5">Error: Couldn\'t find an application that can handle this uri.</string>
     <string name="error6">Error: Couldn\'t find an application other than this that can handle this uri.</string>
+    <string name="error7">Error: Manually loading a URL of ‘%1$s’ scheme is not allowed.</string>
+    <string name="failed_to_parse">Failed to parse ‘%1$s’</string>
+    <string name="warning_not_https">[Warning] ‘%1$s’ looks unsafe as its protocol seems to be HTTP rather than HTTPS.</string>
+    <string name="method_was">" The method was ‘%1$s’."</string>
+    <!-- British punctuation rule: dot outside quotation marks -->
+    <string name="blocked_but_can_change_in_settings">" Blocked. This behaviour can be changed in settings."</string>
     <string name="view_privacy_policy">View the privacy policy</string>
     <string name="privacy_policy_title1">Privacy Policy</string>
     <string name="privacy_policy_text">1. This is a notice, not a legal document.\n\n2. When using this app, some of the information you provide, possibly including, but not limited to, a customised so-called ‘user agent’ or user-selected language tags, may be stored in the device by this app. Such data may be stored unencrypted.\n\n3. When the user visits a website by using this app, some information provided by the user, notably a customised user agent or user-selected language tags, may be sent to the website. Depending on the protocol, such data may be sent unencrypted.\n\n4. This application will not intentionally collect your information beyond what it should as a browser. In addition, it will never intentionally help you to hide your identity on the net nor prevent you from hiding your identity on the net.\n\n5. For more details about how this application collects and uses information, please see the source code of this application.</string>
@@ -53,7 +59,7 @@
     <string name="doc_title2_3">iii. Search a web page</string>
     <string name="doc_text2_3">To do search in a web page, use the ‘search content’ option from the option menu (only available if any page is loaded).\n</string>
     <string name="doc_title2_4">iv. View the source code</string>
-    <string name="doc_text2_4">To see the source code of a web page, add ‘view-source:’ to the start of the URL that points to it. For example: ‘<code>view-source:https://example.com/index.html</code>’. This usage is supported through the framework.\n\nAlternatively, you can use the ‘view the source code of this page’ option hidden in the menu that is opened by tapping the three-dot icon and then tapping ‘more.’\n\nTo search in the source code, you may use the ‘search content’ option as if it were a normal web page.\n</string>
+    <string name="doc_text2_4">To see the source code of a web page, add ‘view-source:’ to the start of the URL that points to it. For example: ‘<code>view-source:https://example.com/index.html</code>’. This usage is supported through the framework.\n\nAlternatively, you can use the ‘view the source code of this page’ option hidden in the menu that is opened by tapping the three-dot icon and then tapping ‘more’.\n\nTo search in the source code, you may use the ‘search content’ option as if it were a normal web page.\n</string>
     <string name="doc_title2_5">v. Console and REPL</string>
     <string name="doc_text2_5">To use the console and REPL features, input some code (should normally be JS code) into the URL field and use the ‘Run’ button (enabled in settings) to execute it. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.\n</string>
     <string name="doc_title2_6">vi. Logging</string>

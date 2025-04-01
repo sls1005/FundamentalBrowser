@@ -81,6 +81,10 @@
                     android:title="@string/menu1_action_view_source"
                     app:showAsAction="never"/>
                 <item
+                    android:id="@+id/action_view_cert"
+                    android:title="@string/menu1_action_view_cert"
+                    app:showAsAction="never"/>
+                <item
                     android:id="@+id/action_copy_url"
                     android:title="@string/menu1_action_copy_url"
                     app:showAsAction="never"/>
