@@ -2,16 +2,17 @@
 <resources>
     <string name="app_name">Fundamental Browser</string>
     <string name="space_redirected_space">" (重定向) "</string>
-    <string name="failed_to_parse">"(无法解析) "</string>
     <string name="log">日志</string>
     <string name="settings">设置</string>
     <string name="ok">确定</string>
     <string name="cancel">取消</string>
     <string name="yes">是的</string>
     <string name="no">绝没有</string>
+    <string name="true_lowercase">是</string>
+    <string name="false_lowercase">否</string>
     <string name="none">无</string>
     <string name="main_url_field_hint">输入文字或网址</string>
-    <string name="main_search_field_hint1">输入文字以进行搜索</string>
+    <string name="main_search_field_hint1">输入文字以在内容中搜寻</string>
     <string name="main_search_field_hint2">输入文字以进行检索</string>
     <string name="decode">解码</string>
     <string name="clear">清除</string>
@@ -26,41 +27,45 @@
     <!-- This file uses “载入” to mean loading a page for the first time, and “加载” in other cases.
          “载入” is need here anyway as “加载” does not carry enough meaning about what this button does. -->
     <string name="main_button_run">执行</string>
-    <string name="settings_title1">选项</string>
+    <string name="settings_title_options">选项</string>
     <string name="allow_javascript">允许使用 JavaScript</string>
     <string name="load_images">加载图片</string>
     <string name="load_resources">加载资源</string>
     <string name="setting_foreground_logging">在前景显示日志消息</string>
     <string name="accept_cookies">接受 cookies</string>
     <string name="accept_3rd_party_cookies">接受第三方 cookies</string>
-    <string name="settings_title2">日志最大记录笔数</string>
+    <string name="settings_title_max_log_msg">日志最大记录笔数</string>
     <!-- Note that, unlike in other files, we use “记录” rather than “纪录” -->
-    <string name="settings_text1"></string> <!-- Keep empty -->
-    <string name="settings_title3">搜索用网址</string>
-    <string name="settings_text2">只有当这个网址已经设置时，才可能使用搜索键。在按下搜索键时，这个网址会被用来和要搜索的关键词组成实际的 URL。\n示例：<code>https://example.com/search?q=</code></string>
-    <string name="settings_title4">实验性选项</string>
-    <string name="settings_title5">清除数据</string>
+    <string name="settings_max_log_msg_extra_text"></string> <!-- Keep empty -->
+    <string name="settings_title_search_url">搜索用网址</string>
+    <string name="settings_search_url_extra_text">只有当这个网址已经设置时，才可能使用搜索键。在按下搜索键时，这个网址会被用来和要搜索的关键词组成实际的 URL。\n示例：<code>https://example.com/search?q=</code></string>
+    <string name="settings_title_experimental">实验性选项</string>
+    <string name="settings_title_clear_data">清除数据</string>
     <string name="clear_cache">清除缓存</string>
     <string name="clear_usernames_passwords">清除用户名称以及密码</string>
     <string name="clear_cookies">清除 cookies</string>
-    <string name="settings_title6">相关信息</string>
-    <string name="settings_text3">本应用程序的源代码可以在 https://github.com/sls1005/FundamentalBrowser 取得；以 MIT 许可证释出。</string>
-    <string name="settings_text4">JavaScript 是甲骨文公司（Oracle Corporation）的商标或注册商标。</string>
+    <string name="settings_title_about">相关信息</string>
+    <string name="settings_text1">本应用程序的源代码可以在 https://github.com/sls1005/FundamentalBrowser 取得；以 MIT 许可证释出。</string>
+    <string name="settings_text2">JavaScript 是甲骨文公司（Oracle Corporation）的商标或注册商标。</string>
     <string name="see_doc">阅读使用手册</string>
     <string name="see_libs">显示所使用的开源库</string>
     <string name="open_here">在此开启</string>
     <string name="dont_load">不要加载</string>
+    <string name="try_encryption">尝试加密</string>
     <string name="remove_spaces_and_linebreaks_when_loading">加载网址时移除空格及换行符</string>
     <string name="switch_remove_spaces_and_linebreaks_extra_text">建议让此选项保持开启。</string>
     <string name="show_button_run">显示用于将网址栏的输入视为代码执行的按键</string>
     <string name="switch_show_button_run_extra_text">该按键仅在 JavaScript 为启用状态时有效。</string>
-    <string name="use_customized_user_agent">使用自定义 user agent</string>
-    <string name="switch_custom_user_agent_extra_text">若未启用或未设置，则将使用默认值。\n\n<b>警告：</b>请注意，若使用高度自定义的 user agent 则可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
+    <string name="use_customized_user_agent">使用自定义用户代理</string>
+    <string name="switch_custom_user_agent_extra_text">若未启用或未设置，则将使用默认值。\n\n<b>警告：</b>请注意，若使用高度自定义的用户代理（user agent）则可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
     <string name="desktop_mode">桌面模式</string>
-    <string name="switch_desktop_mode_extra_text">此项功能的实现牵涉到对这个浏览器的 user agent 进行变更，因此可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。\n如果这个选项没有产生它应有的效果，请考虑使用自定义的 user agent 。关于自定义 user agent 的方式及详情，请见下方。</string>
+    <string name="switch_desktop_mode_extra_text">此项功能的实现牵涉到对这个浏览器的用户代理（user agent）进行变更，因此可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。\n如果这个选项没有产生它应有的效果，请考虑使用自定义的用户代理。关于自定义用户代理的方式及详情，请见下方。</string>
+    <string name="settings_title_advanced_sertings">高级选项</string>
+    <string name="allow_http">允许使用 HTTP</string>
+    <string name="switch_allow_http_extra_text"><b>警告：</b>不同于 HTTPS，HTTP 是个不安全的通信协议。除非您正在内网测试自有服务器，否则不建议启用此选项。</string>
     <string name="manually_set_languages">手动设置偏好的语言</string>
     <string name="add_language">添加语言</string>
-    <string name="switch_manually_set_languages_extra_string">若未启用，则将使用默认值。若启用了却未设置，则会防止发送任何语言标签。\n若此选项未产生其应有的效果，请考虑变更此应用程序的语言。若您的设备支持，则用来变更此应用程序语言的选项会出现在设备的设置界面中。\n网站可能忽略此信息。\n\n<b>警告：</b>请注意，若使用高度自定义的 user agent 则可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
+    <string name="switch_manually_set_languages_extra_string">若未启用，则将使用默认值。若启用了却未设置，则会防止发送任何语言标签。\n若此选项未产生其应有的效果，请考虑变更此应用程序的语言。若您的设备支持，则用来变更此应用程序语言的选项会出现在设备的设置界面中。\n网站可能忽略此信息。\n\n<b>警告：</b>请注意，若使用高度自定义的语言标签则可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
     <string name="clear_log_before_running_script">执行代码前清空日志</string>
     <string name="autoscroll_log_msgs">日志自动滚屏</string>
     <string name="allow_js_when_loading_url_that_is_from_another_app">加载来自其他应用的网址时，允许使用JavaScript</string>
@@ -89,19 +94,31 @@
     <string name="menu1_action_view_source">检视页面源代码</string>
     <string name="menu1_action_copy_url">复制当前网址为纯文字</string>
     <string name="menu1_action_copy_url_as_link">复制当前网址为链接</string>
+    <string name="menu1_action_view_cert">检视此网站的证书</string>
     <string name="error1">错误：搜索专用网址未设置，请在设置中设置它。</string>
     <string name="error2">请输入关键词。</string>
     <string name="error3">请输入网址。</string>
     <string name="error4">错误：网址为空</string>
     <string name="error5">错误：找不到能处理此 URI 的应用程序。</string>
     <string name="error6">错误：找不到本应用以外的应用程序来处理此 URI。</string>
+    <string name="error7">错误：禁止手动载入以“%1$s”开头的网址。</string>
+    <string name="error_no_cert">未提供任何证书。</string>
+    <string name="js_not_enabled">必须启用 JavaScript，否则无法执行代码。</string>
+    <!-- Usually "运行程序" and "执行代码", but other constructions are also seen. -->
+    <string name="failed_to_parse">无法解析 “%1$s”</string>
+    <string name="warning"><b>警告：</b></string>
+    <string name="warnings"><b>警告：</b></string>
+    <string name="cannot_display_pdf">本应用程序无法显示PDF文件。</string>
+    <string name="protocol_is_insecure">此通信协议不安全。</string>
+    <string name="warning_not_https">[Warning] “%1$s” 乍看之下并不安全。其通信协议为 HTTP 而非 HTTPS。</string>
+    <string name="method_was">原方法为 “%1$s”。</string>
+    <string name="blocked_but_can_change_in_settings">已封锁。此行为可在设置中更改。</string>
     <string name="view_privacy_policy">查看隐私政策</string>
     <string name="privacy_policy_title1">隐私政策</string>
     <string name="privacy_policy_text">1. 这是一份通知书，而不是法律文件。\n\n2. 在使用本应用程序时，您所提供的一部分信息，或许包括，但不限於用户自定义的所谓“用户代理”（“user agent”）或用户选择的语言标签（language tags），可能会被储存在设备中。上述的数据可能会以未加密的方式被储存。\n\n3. 当用户使用本应用访问网站的时候，用户提供的一些信息（其中较重要的有自定义的用户代理以及用户所选择的语言标签）可能会被送至该网站。依据所使用的协定，这些信息可能会以未加密的形式被传送。\n\n4. 本应用程序不会有意地在超出其作为浏览器所应当收集的范围外收集您的信息。另外，它永不会有意地协助隐藏您在网络上的身份，亦不会有意地阻止您在网络上隐藏身份。\n\n5. 关于本应用程序如何收集以及使用信息的更多详情，请参阅其源代码。</string>
     <string name="confirm_manually_setting_language_tags">您想要手动设置语言标签吗？</string>
     <string name="confirm_opening_url_with_another_app1">您想要在其他应用程式中开启这个网址吗？</string>
     <string name="confirm_opening_url_with_another_app_warning1"><b>警告：</b>您必须为此行为的任何后果承担完全责任，因此请仔细检视这个 URL/URI，尤其是当它以“<b><code>intent:</code></b>”开头的时候。</string>
-    <string name="confirm_opening_url_with_another_app_warning2"><b>警告：</b>本应用程序无法显示PDF文件。</string>
     <string name="confirm_loading_page">您想要载入“%1$s”这个页面吗？</string>
     <string name="doc_title1">1. UI</string>
     <string name="doc_title1_1">i. 网址列</string>
@@ -128,4 +145,14 @@
     <string name="doc_text2_7">若使用形如“<b><code>location.href=\"intent:#Intent;...;end\"</code></b>”的指令码，则可能利用这个应用程序作为通用意图发送器及活动启动器（方法是以文字形式指明“action”、“component”等参数），但必须遵循以下限制：意图只能被送往其他应用程序，不可送回此应用程序。基于安全上的考量，若此应用程序在 URI 中或意图中检测到自身的包名（package name），则会拒绝发送该意图；在这种情况下，此应用程序可能不会将该事件记录在日志中，且可能会显示错误消息。\n\n本应用程序半正式地支持 intent scheme URI。亦即它们通常能被正常解析，但此应用程序通常不会确认其是否为“<b><code>intent:</code></b>”，而仅在试图避免自身受到基于意图的攻击（intent-based attack）时才进行确认。（请参阅 https://www.mbsd.jp/Whitepaper/IntentScheme.pdf 以瞭解更多详情。）\n\n相反地，<b><code>intent:</code></b> URI 会被视为类型未知的 URI（例如 <b><code>abc://</code></b>）并做一样处理：对于每一个未知类型的 URI，此应用程序都会询问用户是否要发送意图；只有先前提及的特定情况会是例外。</string>
     <string name="settings_activity_label">设置</string>
     <string name="doc_activity_label">使用手册</string>
+    <string name="certificate">证书</string>
+    <string name="cert_part1">"版本：%1$d\n\n序列号：%2$s\n\n签名算法：%3$s\n\n"</string>
+    <string name="cert_part2">"签发者：%1$s\n\n效期：\n    不早于：%2$s\n    不晚于：%3$s\n\n持有者：%4$s\n"</string>
+    <string name="cert_part3">"\n持有者之公钥：\n    算法： %1$s\n"</string>
+    <string name="cert_parameters_s">"    参数：%1$s\n"</string>
+    <string name="cert_parameters_lf">"    参数：\n"</string>
+    <string name="cert_x_is_odd">"    x 为奇数：%1$s\n"</string>
+    <string name="cert_modulus_exponent">"     模数（Modulus）：%1$s\n    指数（Exponent）：%2$d\n"</string>
+    <!-- See the TW version for explanation. -->
+    <string name="cert_final_part">"\n签名算法：%1$s\n\n签名：%2$s\n"</string>
 </resources>

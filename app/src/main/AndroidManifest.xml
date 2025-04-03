@@ -10,6 +10,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/Theme.FundamentalBrowser"
+        android:networkSecurityConfig="@xml/config"
         tools:targetApi="35">
         <activity
             android:name=".MainActivity"
@@ -39,13 +40,13 @@
             android:name=".SettingsActivity"
             android:exported="false"
             android:theme="@style/Theme.FundamentalBrowser"
-            android:label="Settings">
+            android:label="@string/settings_activity_label">
         </activity>
         <activity
             android:name=".DocumentationActivity"
             android:exported="false"
             android:theme="@style/Theme.FundamentalBrowser"
-            android:label="Documentation">
+            android:label="@string/doc_activity_label">
         </activity>
         <activity
             android:name="com.mikepenz.aboutlibraries.ui.LibsActivity"

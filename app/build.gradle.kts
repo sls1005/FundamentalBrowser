@@ -12,9 +12,9 @@ android {
         applicationId = "test.sls1005.projects.fundamentalbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 15
-        versionName = "1.1.0"
-        resourceConfigurations += arrayOf("en", "en-rGB", "en-rUS", "zh-rCN", "zh-rHK", "zh-rTW", "b+zh+Hant")
+        versionCode = 17
+        versionName = "1.2.0"
+        resourceConfigurations += arrayOf("en", "en-rGB", "en-rUS", "zh-rCN", "zh-rHK", "zh-rTW", "b+zh+Hans", "b+zh+Hant")
     }
     androidResources {
         generateLocaleConfig = true

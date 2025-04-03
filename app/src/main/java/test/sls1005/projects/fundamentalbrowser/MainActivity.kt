@@ -7,9 +7,11 @@ import android.content.ClipboardManager
 import android.content.Intent
 import android.content.res.Configuration
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextWatcher
 import android.text.style.URLSpan
@@ -45,6 +47,14 @@ import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
 import com.google.android.material.snackbar.Snackbar
 import java.net.URISyntaxException
+import java.security.interfaces.DSAPublicKey
+import java.security.interfaces.ECPublicKey
+import java.security.interfaces.EdECPublicKey
+import java.security.interfaces.RSAPublicKey
+import java.security.interfaces.XECPublicKey
+import java.security.spec.ECFieldF2m
+import java.security.spec.ECFieldFp
+import javax.crypto.interfaces.DHPublicKey
 
 open class MainActivity : ConfiguratedActivity() {
     private val logMsgs = ArrayDeque<String>()
@@ -63,19 +73,26 @@ open class MainActivity : ConfiguratedActivity() {
                     setClickable(false)
                 }
                 val url = findViewById<EditText>(R.id.url_field).text.toString().let {
-                    if (shouldRemoveLfAndSpacesFromUrl) {
-                        buildString(it.length / 2) {
+                    val textLooksLikeDomainWithoutScheme = (it.indexOf('.') != -1 && it.indexOf(':') == -1)
+                    val k = if (shouldRemoveLfAndSpacesFromUrl) { 2 } else { 1 }
+                    val n = if (textLooksLikeDomainWithoutScheme) { 8 } else { 0 }
+                    buildString(n + (it.length) / k) {
+                        if (textLooksLikeDomainWithoutScheme) {
+                            append("https://")
+                        }
+                        if (shouldRemoveLfAndSpacesFromUrl) {
                             for (c in it) {
                                 if (c != ' ' && c != '\n') {
                                     append(c)
                                 }
                             }
+                        } else {
+                            append(it)
                         }
-                    } else {
-                        it
                     }
                 }
-                if (url.startsWith("javascript:", ignoreCase=true)) {
+                val scheme = Uri.parse(url).scheme ?: ""
+                if (scheme.equals("javascript", ignoreCase=true)) {
                     if (shouldClearLogWhenRunningScript) {
                         synchronized(logMsgs) {
                             logMsgs.clear()
@@ -93,10 +110,28 @@ open class MainActivity : ConfiguratedActivity() {
                     load(url, updateCurrentUrl = false)
                 } else if (url.isEmpty()) {
                     showMsg(getString(R.string.error3), button)
-                } else {
+                } else if (scheme.isEmpty()) {
+                    val msg = getString(R.string.error, getString(R.string.failed_to_parse, url))
+                    showMsg(msg, button)
+                } else if (scheme.equals("intent", ignoreCase=true)) {
+                    val code = showDialogForOpeningURLWithAnotherApp(url)
+                    if (code == 1) {
+                        showMsg(getString(R.string.error6), button)
+                    } else if (code == -2) {
+                        val msg = getString(R.string.error, getString(R.string.failed_to_parse, url))
+                        showMsg(msg, button) 
+                    }
+                } else if (shouldNotBlockUserLoading(url)) {
                     hideUrlBar()
                     hideLogIfShowing()
-                    load(url)
+                    load(url).also { urlLoaded ->
+                        if (!urlLoaded && hasNotLoadedAnyPage() && !isShowingLog() && maxLogMsgs > 0) {
+                            showLog()
+                            showUrlBarIfHidden()
+                        }
+                    }
+                } else {
+                    showMsg(getString(R.string.error7, scheme), button)
                 }
                 button.setClickable(true)
             }
@@ -135,12 +170,9 @@ open class MainActivity : ConfiguratedActivity() {
                     showMsg(getString(R.string.error2), button)
                 } else {
                     button.setClickable(false)
-                    val url = searchURL + Uri.encode(
-                        rawInput.replace('\n', ' ')
-                    )
                     hideUrlBar()
                     hideLogIfShowing()
-                    load(url)
+                    load(searchURL + Uri.encode(rawInput.replace('\n', ' ')))
                     button.setClickable(true)
                 }
             }
@@ -189,31 +221,45 @@ open class MainActivity : ConfiguratedActivity() {
                 }
             }
             R.id.button_run -> run {
-                val button = findViewById<Button>(R.id.button_run)
-                findViewById<EditText>(R.id.url_field).text.toString().also {
-                    if (it.isNotEmpty()) {
-                        val code = it
-                        button.setClickable(false)
-                        if (shouldClearLogWhenRunningScript) {
-                            synchronized(logMsgs) {
-                                logMsgs.clear()
+                if (shouldDisplayRunButton) { // check if the button is really displayed
+                    val button = findViewById<Button>(R.id.button_run)
+                    findViewById<EditText>(R.id.url_field).text.toString().also {
+                        if (it.isNotEmpty()) {
+                            val code = it
+                            button.setClickable(false)
+                            if (shouldClearLogWhenRunningScript) {
+                                synchronized(logMsgs) {
+                                    logMsgs.clear()
+                                }
                             }
-                        }
-                        if (! isShowingLog()) {
-                            showLog()
-                        }
-                        findViewById<WebView>(R.id.window).evaluateJavascript(code) { result ->
-                            synchronized(logMsgs) {
+                            if (! isShowingLog()) {
+                                showLog()
+                            }
+                            if (shouldUseJavaScript) { // i.e. JS is allowed, enabled. Otherwise it's impossible to execute.
+                                findViewById<WebView>(R.id.window).evaluateJavascript(code) { result ->
+                                    synchronized(logMsgs) {
+                                        logMsgs.apply {
+                                            if (size >= maxLogMsgs) {
+                                                removeFirst()
+                                            }
+                                            add("[REPL] $result")
+                                        }
+                                        updateLogIfShowing()
+                                    }
+                                }
+                            } else {
+                                val errMsg = getString(R.string.js_not_enabled)
+                                showMsg(getString(R.string.error, errMsg), button)
                                 logMsgs.apply {
                                     if (size >= maxLogMsgs) {
                                         removeFirst()
                                     }
-                                    add("[REPL] $result")
+                                    add("[Error] $errMsg\n")
                                 }
                                 updateLogIfShowing()
                             }
+                            button.setClickable(true)
                         }
-                        button.setClickable(true)
                     }
                 }
             }
@@ -246,19 +292,30 @@ open class MainActivity : ConfiguratedActivity() {
             }
             webViewClient = object : WebViewClient() {
                 override fun shouldOverrideUrlLoading(v: WebView, req: WebResourceRequest): Boolean {
+                    val schemeIsSupported = isOfSupportedScheme(req.url)
+                    val schemeIsHttp = isHttpUri(req.url)
+                    val schemeIsKnown = (schemeIsSupported || isOfKnownScheme(req.url) || schemeIsHttp)
                     val url = req.url.toString()
-                    val schemeIsSupported = req.url.scheme?.let { scheme ->
-                        isSupportedScheme(scheme)
-                    } ?: false
                     if (schemeIsSupported) {
-                        if (isHttpOrHttpsUri(req.url) && url.endsWith(".pdf", ignoreCase = true)) {
+                        if (url.endsWith(".pdf", ignoreCase = true) && isHttpOrHttpsUri(req.url)) {
                             val x = Intent(Intent.ACTION_VIEW, req.url.buildUpon().build())
                             if (!onlyICanHandle(x)) {
                                 (AlertDialog.Builder(this@MainActivity).apply {
                                     setView(
                                         layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
                                             findViewById<TextView>(R.id.url).text = url
-                                            findViewById<TextView>(R.id.warning).text = getText(R.string.confirm_opening_url_with_another_app_warning2)
+                                            findViewById<TextView>(R.id.warning).text = SpannableStringBuilder(
+                                                if (schemeIsHttp) {
+                                                    getText(R.string.warnings)
+                                                } else {
+                                                    getText(R.string.warning)
+                                                }
+                                            ).apply {
+                                                append(getString(R.string.cannot_display_pdf))
+                                                if (schemeIsHttp) {
+                                                    append(getString(R.string.protocol_is_insecure))
+                                                }
+                                            }
                                         }
                                     )
                                     setPositiveButton(getString(R.string.yes)) {_, _ ->
@@ -270,25 +327,87 @@ open class MainActivity : ConfiguratedActivity() {
                                         }
                                     }
                                     setNegativeButton(getString(R.string.open_here)) {_, _ ->
-                                        load(url)
+                                        load(url).also { urlLoaded ->
+                                            if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
+                                                showLog()
+                                            }
+                                        }
                                     }
                                     setNeutralButton(getString(R.string.dont_load)) {_, _ -> }
                                 }).create().show()
                                 return true
                             }
                         }
-                    } else {
-                        if (req.url.scheme.equals("intent", ignoreCase=true)) {
-                            if (url.contains((this@MainActivity).packageName, ignoreCase=true)) {
+                        if (schemeIsHttp) {
+                            if (shouldAllowHTTP) {
+                                (AlertDialog.Builder(this@MainActivity).apply {
+                                    setView(
+                                        layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
+                                            findViewById<TextView>(R.id.text1).text = SpannableStringBuilder().apply {
+                                                append(getString(R.string.confirm_loading_page, url))
+                                                append("\n\n")
+                                                append(getText(R.string.warning))
+                                                append(getString(R.string.protocol_is_insecure))
+                                            }
+                                        }
+                                    )
+                                    setPositiveButton(getString(R.string.yes)) {_, _ ->
+                                        load(url).also { urlLoaded ->
+                                            if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
+                                                showLog()
+                                            }
+                                        }
+                                    }
+                                    setNegativeButton(R.string.no) {_, _ -> }
+                                    setNeutralButton(R.string.try_encryption) {_, _ -> 
+                                        load(
+                                            (Uri.parse(url).buildUpon().apply { scheme("https") }).build().toString()
+                                        ).also { urlLoaded ->
+                                            if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
+                                                showLog()
+                                            }
+                                        }
+                                    }
+                                }).create().show()
                                 return true
-                                // See: https://www.mbsd.jp/Whitepaper/IntentScheme.pdf
-                                // An intent URL is most dangerous when targeting the app itself.
+                            } else {
+                                val msg = buildString {
+                                    append(getString(R.string.warning_not_https, url))
+                                    append(getString(R.string.method_was, req.method))
+                                    append(getString(R.string.blocked_but_can_change_in_settings))
+                                }
+                                synchronized(logMsgs) {
+                                    logMsgs.apply {
+                                        if (size >= maxLogMsgs) {
+                                            removeFirst()
+                                        }
+                                        add(msg)
+                                    }
+                                }
+                                showMsg(msg)
+                                return true
                             }
                         }
+                    } else if (checkUriScheme(req.url, "intent")) {
+                        if (url.contains((this@MainActivity).packageName, ignoreCase=true)) {
+                            return true
+                            // See: https://www.mbsd.jp/Whitepaper/IntentScheme.pdf
+                            // An intent URL is most dangerous when targeting the app itself.
+                        }
+                    } else if (schemeIsKnown || url.isEmpty() || (req.url.scheme?.isEmpty() ?: true)) { // known but not supported or should be blocked
+                        synchronized(logMsgs) {
+                            logMsgs.apply {
+                                if (size >= maxLogMsgs) {
+                                    removeFirst()
+                                }
+                                add("[Log] (ignored) ${req.method} $url\n")
+                            }
+                        }
+                        return true
                     }
                     if (req.isRedirect || (!schemeIsSupported)) {
                         var shouldRecord = (maxLogMsgs > 0)
-                        var msg = buildString(url.length) {
+                        var msg = buildString(url.length) { // could be needed even if shouldRecord is false
                             if (req.isRedirect) {
                                 append(req.method)
                                 append(getString(R.string.space_redirected_space))
@@ -296,45 +415,25 @@ open class MainActivity : ConfiguratedActivity() {
                             append(url)
                         }
                         if (!schemeIsSupported) {
-                            val x = try {
-                                Intent.parseUri(url, 0)
-                            } catch (_: URISyntaxException) {
+                            val code = showDialogForOpeningURLWithAnotherApp(url)
+                            if (code == 1) {
+                                showMsg(getString(R.string.error6), v)
+                            } else if (code == -2) {
                                 if (shouldRecord) {
-                                    val msg = getString(R.string.failed_to_parse) + url
+                                    val errMsg = getString(R.string.failed_to_parse, url)
                                     synchronized(logMsgs) {
                                         logMsgs.apply {
                                             if (size >= maxLogMsgs) {
                                                 removeFirst()
                                             }
-                                            add("[Error] $msg\n")
+                                            add("[Error] $errMsg\n")
                                         }
                                     }
                                 }
+                            }
+                            if (code != 0) {
                                 return true
-                            }
-                            if (onlyICanHandle(x)) { // Prevent security issue. See comments above.
-                                showMsg(getString(R.string.error6), v)
-                                shouldRecord = false
-                                msg = ""
-                            } else {
-                                (AlertDialog.Builder(this@MainActivity).apply {
-                                    setView(
-                                        layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
-                                            findViewById<TextView>(R.id.url).text = url
-                                            findViewById<TextView>(R.id.warning).text = getText(R.string.confirm_opening_url_with_another_app_warning1)
-                                        }
-                                    )
-                                    setPositiveButton(getString(R.string.yes)) {_, _ ->
-                                        saveCurrentConfiguration()
-                                        try {
-                                            startActivity(x)
-                                        } catch(_: ActivityNotFoundException) {
-                                            showMsg(getString(R.string.error5))
-                                        }
-                                    }
-                                    setNegativeButton(R.string.no) {_, _ -> }
-                                }).create().show()
-                            }
+                            } // else: log
                         }
                         if (shouldRecord) {
                             synchronized(logMsgs) {
@@ -353,6 +452,11 @@ open class MainActivity : ConfiguratedActivity() {
                     return !schemeIsSupported
                 }
                 override fun shouldInterceptRequest(v: WebView, req: WebResourceRequest): WebResourceResponse? {
+                    if (req.url.scheme?.equals("http", ignoreCase=true) ?: false) {
+                        if (synchronized(shouldAllowHTTP) { (!shouldAllowHTTP) }) {
+                            return WebResourceResponse(null, null, 426, "Upgrade Required", null, null)
+                        }
+                    }
                     val url = req.url.toString()
                     val msg = "${req.method} $url"
                     if (synchronized(manuallySetLanguageTags){
@@ -431,10 +535,10 @@ open class MainActivity : ConfiguratedActivity() {
                         append("[$kind (from console)")
                         consoleMessage.sourceId().also { src ->
                             if (src.isNotEmpty()) {
-                                append(" | from $src")
+                                append(" | Source: $src")
                             }
                         }
-                        append(" | line ${consoleMessage.lineNumber()}] ")
+                        append(" | Line ${consoleMessage.lineNumber()}] ")
                         append(consoleMessage.message()) // No '\n' here.
                     }
                     synchronized(logMsgs) {
@@ -462,9 +566,9 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.button_decode,
             R.id.button_clear,
             R.id.button_restore,
-            R.id.button_search,
             R.id.button_copy,
             R.id.button_paste,
+            R.id.button_search,
             R.id.button_go,
             R.id.button_run
         ).forEach { id ->
@@ -827,6 +931,10 @@ open class MainActivity : ConfiguratedActivity() {
                 }
                 (true)
             }
+            R.id.action_view_cert -> run {
+                showCurrentSiteCert()
+                (true)
+            }
             else -> false
         }
     }
@@ -903,9 +1011,9 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.button_decode,
             R.id.button_clear,
             R.id.button_restore,
-            R.id.button_search,
             R.id.button_copy,
             R.id.button_paste,
+            R.id.button_search,
             R.id.button_go
         ).forEach { id ->
             findViewById<Button>(id).apply {
@@ -931,9 +1039,9 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.button_decode,
             R.id.button_clear,
             R.id.button_restore,
-            R.id.button_search,
             R.id.button_copy,
             R.id.button_paste,
+            R.id.button_search,
             R.id.button_go
         ).forEach { id ->
             findViewById<Button>(id).apply {
@@ -1142,7 +1250,7 @@ open class MainActivity : ConfiguratedActivity() {
         return (findViewById<WebView>(R.id.window).originalUrl == null)
     }
 
-    @SuppressLint("QueryPermissionsNeeded")
+    @SuppressLint("QueryPermissionsNeeded") // Don't need. Because the purpose is never to see other apps.
     private inline fun onlyICanHandle(x: Intent): Boolean { // true if only this app will respond; false if any other or none
         return (x.resolveActivity(packageManager)?.packageName == this.packageName)
     }
@@ -1173,6 +1281,184 @@ open class MainActivity : ConfiguratedActivity() {
         }
     }
 
+    private fun showDialogForOpeningURLWithAnotherApp(url: String): Int { // This function does extra checks to prevent security issues.
+        /* Error codes:
+             0: the dialog is shown
+             1: the intent would be sent back to this app, so it is blocked; the dialog is not shown
+             -1: invalid argument
+             -2: failed to parse
+             -3: potential security issue; blocked; the dialog is not shown
+        */
+        if (url.isEmpty() || Uri.parse(url).scheme == null) {
+            return -1
+        }
+        if (checkUriScheme(Uri.parse(url), "intent")) {
+            if (url.contains((this@MainActivity).packageName, ignoreCase=true)) {
+                return -3
+            }
+        }
+        val x = try {
+            Intent.parseUri(url, 0)
+        } catch (_: URISyntaxException) {
+            return -2
+        }
+        if (onlyICanHandle(x)) {
+            return 1
+        } else {
+            (AlertDialog.Builder(this).apply {
+                setView(
+                    layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
+                        findViewById<TextView>(R.id.url).text = url
+                        findViewById<TextView>(R.id.warning).text = getText(R.string.confirm_opening_url_with_another_app_warning1)
+                    }
+                )
+                setPositiveButton(getString(R.string.yes)) { _, _ ->
+                    saveCurrentConfiguration()
+                    try {
+                        startActivity(x)
+                    } catch(_: ActivityNotFoundException) {
+                        showMsg(getString(R.string.error5))
+                    }
+                }
+                setNegativeButton(R.string.no) {_, _ -> }
+            }).create().show()
+        }
+        return 0
+    }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    private inline fun showCurrentSiteCert() { // Reference: IUT-T (10/2019), "X.509"
+        val window = findViewById<WebView>(R.id.window)
+        val sslCert = window.certificate
+        if (sslCert == null) {
+            showMsg(getString(R.string.error_no_cert), window)
+        } else {
+            val content = StringBuilder()
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val x509Cert = sslCert.x509Certificate
+                if (x509Cert != null) {
+                    val version = x509Cert.version
+                    val serialNumber = x509Cert.serialNumber.toString(16)
+                    val signatureAlgorithm = x509Cert.sigAlgName
+                    val issuer = x509Cert.issuerX500Principal.name
+                    val notBefore = x509Cert.notBefore.toString()
+                    val notAfter = x509Cert.notAfter.toString()
+                    val subject = x509Cert.subjectX500Principal.name
+                    val publicKey = x509Cert.publicKey
+                    val keyAlgorithm = publicKey.algorithm
+                    val signature = x509Cert.signature.toHexString()
+                    content.apply {
+                        append(
+                            getString(
+                                R.string.cert_part1,
+                                version,
+                                serialNumber,
+                                signatureAlgorithm
+                            )
+                        )
+                        append(getString(R.string.cert_part2, issuer, notBefore, notAfter, subject))
+                        append(getString(R.string.cert_part3, keyAlgorithm))
+                    }
+                    if (publicKey is DHPublicKey) {
+                        val parameters = publicKey.params
+                        val p = parameters.p.toString(16)
+                        val g = parameters.g.toString(16)
+                        val y = publicKey.y.toString(16)
+                        content.apply {
+                            append(getString(R.string.cert_parameters_lf))
+                            append(getString(R.string.cert_parameter_p_s, p))
+                            append(getString(R.string.cert_parameter_g_s, g))
+                            append(getString(R.string.cert_value_y_s, y))
+                        }
+                    } else if (publicKey is DSAPublicKey) {
+                        val parameters = publicKey.params
+                        val p = parameters.p.toString(16)
+                        val q = parameters.q.toString(16)
+                        val g = parameters.g.toString(16)
+                        val y = publicKey.y.toString(16)
+                        content.apply {
+                            append(getString(R.string.cert_parameters_lf))
+                            append(getString(R.string.cert_parameter_p_s, p))
+                            append(getString(R.string.cert_parameter_q_s, q))
+                            append(getString(R.string.cert_parameter_g_s, g))
+                            append(getString(R.string.cert_value_y_s, y))
+                        }
+                    } else if (publicKey is RSAPublicKey) {
+                        val modulus = publicKey.modulus.toString(16)
+                        val exponent = publicKey.publicExponent
+                        content.append(getString(R.string.cert_modulus_exponent, modulus, exponent))
+                    } else if (publicKey is ECPublicKey) {
+                        val parameters = publicKey.params
+                        val a = parameters.curve.a.toString(16)
+                        val b = parameters.curve.b.toString(16)
+                        content.apply {
+                            append(getString(R.string.cert_parameters_lf))
+                            append(getString(R.string.cert_parameter_a_s, a))
+                            append(getString(R.string.cert_parameter_b_s, b))
+                        }
+                        val field = parameters.curve.field
+                        if (field is ECFieldFp) {
+                            val p = field.p.toString(16)
+                            content.append(getString(R.string.cert_parameter_p_s, p))
+                        } else if (field is ECFieldF2m) {
+                            val m = field.m
+                            content.append(getString(R.string.cert_parameter_m_d, m))
+                        }
+                        val g = parameters.generator
+                        val xg = g.affineX.toString(16)
+                        val yg = g.affineY.toString(16)
+                        val n = parameters.order.toString(16)
+                        val h = parameters.cofactor
+                        val w = publicKey.w
+                        val xw = w.affineX.toString(16)
+                        val yw = w.affineY.toString(16)
+                        content.apply {
+                            append(getString(R.string.cert_parameter_point_g, xg, yg))
+                            append(getString(R.string.cert_parameter_n_s, n))
+                            append(getString(R.string.cert_parameter_h_d, h))
+                            append(getString(R.string.cert_point_w, xw, yw))
+                        }
+                    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        if (publicKey is EdECPublicKey) {
+                            val parameters = publicKey.params.name
+                            val point = publicKey.point
+                            val y = point.y.toString(16)
+                            content.apply {
+                                append(getString(R.string.cert_parameters_s, parameters))
+                                append(getString(R.string.cert_x_is_odd,
+                                    if (point.isXOdd()) {
+                                        getString(R.string.true_lowercase)
+                                    } else {
+                                        getString(R.string.false_lowercase)
+                                    }
+                                ))
+                                append(getString(R.string.cert_value_y_s, y))
+                            }
+                        } else if (publicKey is XECPublicKey) {
+                            val u = publicKey.u.toString(16)
+                            content.append(getString(R.string.cert_value_u_s, u))
+                        }
+                    }
+                    content.append(getString(R.string.cert_final_part, signatureAlgorithm, signature))
+                }
+            }
+            if (content.isEmpty()) {
+                val issuer = sslCert.issuedBy.dName
+                val notBefore = sslCert.validNotBeforeDate.toString()
+                val notAfter = sslCert.validNotAfterDate.toString()
+                val subject = sslCert.issuedTo.dName
+                content.append(getString(R.string.cert_part2, issuer, notBefore, notAfter, subject))
+            }
+            (AlertDialog.Builder(this@MainActivity).apply {
+                setView(
+                    layoutInflater.inflate(R.layout.cert, null).apply {
+                        findViewById<TextView>(R.id.content).text = content
+                    }
+                )
+            }).create().show()
+        }
+    }
+
     private inline fun disableJavaScriptAsRequested() {
         if (!shouldAllowJSForUrlsFromOtherApps) {
             shouldUseJavaScript = false
@@ -1186,48 +1472,87 @@ open class MainActivity : ConfiguratedActivity() {
         if (urlToLoad.isNotEmpty()) {
             val url = urlToLoad
             urlToLoad = ""
+            val schemeIsHttp = isHttpUri(Uri.parse(url))
+            val isPDF = url.endsWith(".pdf", ignoreCase = true)
             if (shouldAskBeforeLoadingUrlThatIsFromAnotherApp) {
                 (AlertDialog.Builder(this).apply {
                     setView(
                         layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
-                            findViewById<TextView>(R.id.text1).text = getString(R.string.confirm_loading_page, url)
-                            if (url.endsWith(".pdf", ignoreCase = true)) {
-                                findViewById<TextView>(R.id.warning).apply {
-                                    visibility = VISIBLE
-                                    text = getText(R.string.confirm_opening_url_with_another_app_warning2)
+                            findViewById<TextView>(R.id.text1).text = SpannableStringBuilder().apply {
+                                append(getString(R.string.confirm_loading_page, url))
+                                if (isPDF || schemeIsHttp) {
+                                    append("\n\n")
+                                    append(getText(R.string.warning))
+                                }
+                                if (isPDF) {
+                                    append(getString(R.string.cannot_display_pdf))
+                                }
+                                if (schemeIsHttp) {
+                                    append(getString(R.string.protocol_is_insecure))
                                 }
                             }
                         }
                     )
                     setPositiveButton(getString(R.string.ok)) {_, _ ->
                         disableJavaScriptAsRequested()
-                        load(url)
+                        load(url).also { urlLoaded ->
+                            if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
+                                showLog()
+                            }
+                        }
                     }
                     setNegativeButton(R.string.cancel) {_, _ -> }
                 }).create().show()
             } else {
                 disableJavaScriptAsRequested()
-                load(url)
+                load(url).also { urlLoaded ->
+                    if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
+                        showLog()
+                    }
+                }
             }
         }
     }
 
-    protected final inline fun load(url: String, updateCurrentUrl: Boolean = true) {
-        if (updateCurrentUrl) {
-            currentURL = url
-            textToDisplayInUrlField = url
-        }
-        findViewById<WebView>(R.id.window).also {
-            if (manuallySetLanguageTags && languageTags.isNotEmpty()) {
-                it.loadUrl(url, mutableMapOf(Pair("Accept-Language", languageTags)))
-            } else {
-                it.loadUrl(url)
+    protected final fun load(url: String, updateCurrentUrl: Boolean = true): Boolean {
+        val schemeIsOrSeemsLikeHttp = isOrSeemsLikeHttpUrl(url)
+        val w = findViewById<WebView>(R.id.window)
+        if (schemeIsOrSeemsLikeHttp) {
+            val msg = buildString {
+                append(getString(R.string.warning_not_https, url))
+                if (!shouldAllowHTTP) {
+                    append(getString(R.string.blocked_but_can_change_in_settings))
+                }
             }
+            synchronized(logMsgs) {
+                logMsgs.apply {
+                    if (size >= maxLogMsgs) {
+                        removeFirst()
+                    }
+                    add(msg)
+                }
+            }
+            showMsg(msg, w) // even if allowsForegroundLogging is false
         }
+        if (schemeIsOrSeemsLikeHttp && (!shouldAllowHTTP)) {
+            return false
+        } else {
+            if (updateCurrentUrl) {
+                currentURL = url
+                textToDisplayInUrlField = url
+            }
+            if (manuallySetLanguageTags && languageTags.isNotEmpty()) {
+                w.loadUrl(url, mutableMapOf(Pair("Accept-Language", languageTags)))
+            } else {
+                w.loadUrl(url)
+            }
+            return true
+        }
+        return false
     }
 }
 
-private inline fun containedIgnoringCase(s: String, container: Collection<String>): Boolean {
+private inline fun containedIgnoringCase(s: String, container: Array<String>): Boolean { // Array<String> seems to be the most efficient type here
     for (e in container) {
         if (s.equals(e, ignoreCase=true)) {
             return true
@@ -1236,13 +1561,65 @@ private inline fun containedIgnoringCase(s: String, container: Collection<String
     return false
 }
 
-private inline fun isHttpOrHttpsUri(uri: Uri): Boolean {
-    return uri.scheme?.let { scheme ->
-        containedIgnoringCase(scheme, setOf("http", "https"))
+private inline fun checkUriScheme(uri: Uri, scheme: String): Boolean {
+    return uri.scheme?.let { uriScheme ->
+        uriScheme.equals(scheme, ignoreCase=true)
     } ?: false
 }
 
-private inline fun isSupportedScheme(scheme: String): Boolean {
-    return containedIgnoringCase(scheme, setOf("http", "https", "blob", "javascript"))
-    //                                                               ^ unsure
+private inline fun checkUriScheme(uri: Uri, schemes: Array<String>): Boolean {
+    return uri.scheme?.let { uriScheme ->
+        containedIgnoringCase(uriScheme, schemes)
+    } ?: false
+}
+
+private inline fun isHttpOrHttpsUri(uri: Uri): Boolean {
+    return checkUriScheme(uri, arrayOf("http", "https"))
+}
+
+private inline fun isHttpUri(uri: Uri): Boolean { // Not HTTPS
+    return checkUriScheme(uri, "http")
+}
+
+private fun isOrSeemsLikeHttpUrl(url: String): Boolean {
+    val scheme1 = Uri.parse(url).scheme
+    if (scheme1 == null) {
+        return false
+    } else if (scheme1.equals("http", ignoreCase=true) || (scheme1.equals("view-source", ignoreCase=true) && url.contains("http://", ignoreCase=true))) {
+        return true
+    }
+    val url2 = Uri.decode(url).let { decoded ->
+        buildString(decoded.length) {
+            for (c in decoded) {
+                if (c !in charArrayOf('\n', '\r', '\t', ' ', '\u0000', '\u000b')) {
+                    append(c)
+                }
+            }
+        }
+    }
+    val scheme2 = Uri.parse(url2).scheme
+    if (scheme2 == null) {
+        return false
+    } else if (scheme2.equals("http", ignoreCase=true) || (scheme2.equals("view-source", ignoreCase=true) && url.contains("http://", ignoreCase=true))) {
+        return true
+    }
+    return false
+}
+
+private inline fun isOfSupportedScheme(uri: Uri): Boolean {
+    return checkUriScheme(uri, arrayOf("http", "https", "blob"))
+    // Excluded: "javascript", "data", but manual loading is still possible and is not forbidden. Neither is there a reason to forbid explicit manual loading
+}
+
+private inline fun isOfKnownScheme(uri: Uri): Boolean { // schemes that should be handled by the browser, if at all
+    return checkUriScheme(uri, arrayOf("http", "https", "javascript", "data", "blob", "view-source", "android.resource"))
+    // Excluded: "file", "content", "intent"
+}
+
+private inline fun shouldNotBlockUserLoading(url: String): Boolean {
+    return checkUriScheme(
+        Uri.parse(url),
+        arrayOf("http", "https", "javascript", "view-source", "data", "intent")
+    )
+    // Excluded: "file", "content", "blob"
 }

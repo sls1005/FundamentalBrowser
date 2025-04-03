@@ -40,6 +40,8 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 - [x] Support searching in content.
 
+    - [x] Support searching in the source code of a webpage.
+
 - [x] Log everything so that nothing is secretly down- or up-loaded.
 
     - [x] The log is searchable.
@@ -48,7 +50,7 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 - [x] Support `view-source:`. (Supported through framework)
 
-- [x] <strike>Support `javascript:`.</strike> (Supported through framework, but considered deprecated now in this app.)
+- [x] <strike>Support `javascript:`</strike>. (Supported through framework, but considered deprecated now in this app.)
 
 **The following features are not planned and thus will not be implemented in near future:**
 
@@ -66,7 +68,7 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 #### Separated buttons for searching and URL loading
 
-To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Go' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search for it.
+To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Go' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search for it. Such strict distinguishment between tasks is supposed to be helpful to prevent unintended URL loading and to allow the user to search for a domain-name-like or URL-like string.
 
 #### Console and REPL
 
@@ -78,7 +80,7 @@ To use the console and REPL features, input some code (should normally be JS cod
 
 ![](screenshots/screenshot6.jpg)
 
-The support for `javascript:` scheme in this app is considered deprecated since Mar. 2025, and now the recommended way to run code in this app is to use the 'Run' button. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.
+The support for `javascript:` scheme in this app is considered deprecated since Mar. 2025, and now the recommended way to run code in this app is to use the 'Run' button.
 
 #### Generalized intent sender and activity launcher
 
@@ -88,13 +90,15 @@ See <a href="#Details">details</a> for more information about this usage.
 
 ### Note
 
-* Since this app allows multiline editing, the 'Go' and 'Search' buttons (but not the 'Run' button) will by default replace newline characters in the URL field with spaces, or encode them as `%20` (meaning space). So be careful about your *code* that uses them, if any.
+* Since this app allows multiline editing, the 'Go' and 'Search' buttons (but not the 'Run' button) will by default replace newline characters in the URL field with spaces, or encode them as `%20` (meaning space).
 
 * To keep things simple, new windows are implemented in this app as new tasks/activities. Using more than one window may consume a lot of system resources due to this reason. Hence, new windows are not created automatically in most cases.
 
 * For security concerns, JavaScript is automatically disabled by default when opening a URL from within another application. This can be changed in settings. In addition, this app will not load a URL from an intent unless its scheme is `http:` or `https:` (and currently, only the latter will be successfully loaded). The latter rule is not enforced for URLs from a webpage or for URL/URIs loaded manually by the user.
 
-* This app currently cannot be used to open PDF URLs. (It can load them, but will show nothing.) Such support is not planned and is unlikely to be implemented in the future, because PDF files are, as far as I know, not commonly used in web development nor in webcrawling.
+* This browser supports HTTP (the non-secure protocol that is similar to but different from HTTPS), but it is disabled by default, meaning this app will block (non-HTTPS) HTTP requests unless you enable HTTP in settings. HTTPS is used normally and is not subject to this rule. The reason for this application to support (non-secure) HTTP is to allow debugging custom servers in LAN. It's not for general use. Don't enable it unless you really need it.
+
+* This app currently cannot be used to open PDF URLs. Such support is not planned and is unlikely to be implemented in the future, because PDF files are, as far as I know, not commonly used in web development nor in webcrawling.
 
 * Remember to (or not to) update your 'System WebView.' It may affect the behavior of this application.
 
@@ -102,7 +106,7 @@ See <a href="#Details">details</a> for more information about this usage.
 
 * The whole app (except for icons, etc.) is written in Kotlin. No JavaScript used except in examples, tests and documentation (for the console/REPL feature).
 
-* JavaScript code, including user-input code, is executed via platform API (for which the underlying system could utilize something called V8, but I'm not sure), so this app can target the latest platform API level (35 as of Feb. 2025) while still enabling users to run code. (Whether or not it meets Play store's standard is another thing. If you ask me, I would say that it should be allowed because JavaScript in browser is an explicitly stated exception to the rule.)
+* JavaScript code, including user-input code, is executed via platform API (for which the underlying system could utilize something called V8, but I'm not sure), so this app can target the latest stable platform API level (35 as of Mar. 2025) while still enabling users to run code. (Whether or not it meets Play store's standard is another thing. If you ask me, I would say that it should be allowed because JavaScript in browser is an explicitly stated exception to the rule.)
 
 * Intent scheme URIs are half-supported. That is to say, they will usually be processed correctly, and the instantiated intent may be launched if approved by the user; however, this app usually doesn't check if a URI is an `intent:` URI, except when trying to protect itself from intent-based attacks. (See <a href="#References">[1]</a>.) Instead, `intent:` URIs will be treated as if they were URIs of unrecognized schemes (such as `abc://`), for any of which this app will ask if it should launch an intent. Nonetheless, the app will not ask nor try to launch any intent if it detects that the intent would be sent back to the activity itself or to any other component of this application (for which case it might not create a log entry and can show an error message), so as to prevent the security issue mentioned in <a href="#References">[1]</a>. Despite being suggested in <a href="#References">[2]</a>, this app doesn't use `CATEGORY_BROWSABLE` to instantiate such intents, as it would still be insufficient according to <a href="#References">[1]</a> (and this app doesn't use the unsafe constant anyway). This application has its own security-related mechanism as mentioned above; basically, an `intent:` URI is forbidden if it would be sent back to this app; it is otherwise up to the user's explicit intention. If this mechanism is proved to still be insufficient, please open an issue to let me know.
 

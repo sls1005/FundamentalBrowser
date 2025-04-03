@@ -3,16 +3,17 @@
     <string name="app_name">Fundamental Browser</string>
     <string name="space_redirected_space">" (重定向) "</string>
     <!-- Halfwidth parentheses here for being consistent with ASCII characters in a URL. This is special case. Use fullwidth otherwise. -->
-    <string name="failed_to_parse">"(無法解析) "</string>
     <string name="log">記錄檔</string>
     <string name="settings">設定</string>
     <string name="ok">確定</string>
     <string name="cancel">取消</string>
     <string name="yes">是的</string>
     <string name="no">並沒有</string>
+    <string name="true_lowercase">是</string>
+    <string name="false_lowercase">否</string>
     <string name="none">無</string>
     <string name="main_url_field_hint">輸入文字或網址</string>
-    <string name="main_search_field_hint1">輸入文字以搜尋</string>
+    <string name="main_search_field_hint1">輸入文字以在內容中搜尋</string>
     <string name="main_search_field_hint2">輸入文字以進行檢索</string>
     <string name="decode">解碼</string>
     <string name="clear">清除</string>
@@ -25,36 +26,39 @@
     <string name="tap_to_set">輕觸以設定</string>
     <string name="main_button_go">載入</string>
     <string name="main_button_run">執行</string>
-    <string name="settings_title1">選項</string>
+    <string name="settings_title_options">選項</string>
     <string name="allow_javascript">允許使用 JavaScript</string>
     <string name="load_images">載入圖片</string>
     <string name="load_resources">載入資源</string>
     <string name="setting_foreground_logging">在前景顯示日誌訊息</string>
     <string name="accept_cookies">接受 cookies</string>
     <string name="accept_3rd_party_cookies">接受第三方 cookies</string>
-    <string name="settings_title2">日誌最大紀錄筆數</string>
+    <string name="settings_title_max_log_msg">日誌最大紀錄筆數</string>
     <!-- 紀 is correct here. -->
-    <string name="settings_text1"></string> <!-- Keep empty -->
-    <string name="settings_title3">搜尋專用網址</string>
-    <string name="settings_text2">唯有當這個網址已經設置時，才可能使用搜尋鍵。在按下搜尋鍵時，這個網址會被用來和要搜尋的關鍵字組成實際的 URL。\n範例：<code>https://example.com/search?q=</code></string>
-    <string name="settings_title4">實驗性選項</string>
-    <string name="settings_title5">清除資料</string>
+    <string name="settings_max_log_msg_extra_text"></string> <!-- Keep empty -->
+    <string name="settings_title_search_url">搜尋專用網址</string>
+    <string name="settings_search_url_extra_text">唯有當這個網址已經設置時，才可能使用搜尋鍵。在按下搜尋鍵時，這個網址會被用來和要搜尋的關鍵字組成實際的 URL。\n範例：<code>https://example.com/search?q=</code></string>
+    <string name="settings_title_experimental">實驗性選項</string>
+    <string name="settings_title_clear_data">清除資料</string>
     <string name="clear_cache">清除快取</string>
     <string name="clear_usernames_passwords">清除使用者名稱及密碼</string>
     <string name="clear_cookies">清除 cookies</string>
-    <string name="settings_title6">相關資訊</string>
-    <string name="settings_text3">此應用程式的原始碼可在 https://github.com/sls1005/FundamentalBrowser 取得；以 MIT 授權釋出。</string>
-    <string name="settings_text4"> JavaScript 是甲骨文公司（Oracle Corporation）的商標或註冊商標。</string>
+    <string name="settings_title_about">相關資訊</string>
+    <string name="settings_text1">此應用程式的原始碼可在 https://github.com/sls1005/FundamentalBrowser 取得；以 MIT 授權釋出。</string>
+    <string name="settings_text2"> JavaScript 是甲骨文公司（Oracle Corporation）的商標或註冊商標。</string>
     <string name="see_doc">閱讀使用手冊</string>
     <string name="see_libs">顯示所使用的開放原始碼程式庫</string>
     <string name="remove_spaces_and_linebreaks_when_loading">載入網址時移除空格及換行符號</string>
     <string name="switch_remove_spaces_and_linebreaks_extra_text">建議讓此選項保持開啟。</string>
     <string name="show_button_run">顯示用於將網址欄的輸入視為程式執行的按鍵</string>
     <string name="switch_show_button_run_extra_text">該按鍵僅在 JavaScript 為啟用狀態時有效。</string>
-    <string name="use_customized_user_agent">使用自訂 user agent</string>
-    <string name="switch_custom_user_agent_extra_text">如未啟用或未設定，則將使用預設值。\n\n<b>警告：</b>請注意，若使用高度客製化的 user agent 則可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
+    <string name="use_customized_user_agent">使用自訂使用者代理</string>
+    <string name="switch_custom_user_agent_extra_text">如未啟用或未設定，則將使用預設值。\n\n<b>警告：</b>請注意，若使用高度客製化的使用者代理（user agent）則可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
     <string name="desktop_mode">桌面模式</string>
-    <string name="switch_desktop_mode_extra_text">此項功能的實作牽涉到對這個瀏覽器的 user agent 進行變更，故可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。\n若此選項未產生其應有的效果，請考慮使用自訂 user agent。關於自訂 user agent 的方式與詳情，請見下方。</string>
+    <string name="switch_desktop_mode_extra_text">此項功能的實作牽涉到對這個瀏覽器的使用者代理（user agent）進行變更，故可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。\n若此選項未產生其應有的效果，請考慮使用自訂使用者代理。關於自訂使用者代理的方式與詳情，請見下方。</string>
+    <string name="settings_title_advanced_sertings">進階選項</string>
+    <string name="allow_http">允許使用 HTTP</string>
+    <string name="switch_allow_http_extra_text"><b>警告：</b>不同於 HTTPS， HTTP 是個不安全的通訊協定。除非您正於內網測試自有伺服器，否則不建議啟用此選項。</string>
     <string name="manually_set_languages">手動設定語言標籤</string>
     <string name="add_language">新增語言</string>
     <string name="switch_manually_set_languages_extra_string">如未啟用，則將使用預設值。若啟用了卻未設定，則會防止發送任何語言標籤。\n若此選項未產生其應有的效果，請考慮變更此應用程式的語言。若您的裝置支援，則用於變更此應用程式語言的選項會出現在裝置的設定介面中。\n網站可能忽略此資訊。\n\n<b>警告：</b>請注意，若使用高度客製化的語言標籤則可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
@@ -71,6 +75,7 @@
     <string name="language_selection_extra_text">較高的權重代表較高優先級。具有較高優先級的語言會被認為是使用者偏好的語言。「預設」意為最優先。</string>
     <string name="open_here">在此開啟</string>
     <string name="dont_load">不要載入</string>
+    <string name="try_encryption">嘗試加密</string>
     <string name="repeat_to_close">重複該手勢以關閉視窗</string>
     <string name="menu1_action_show_or_hide_url_bar">顯示/隱藏網址列</string>
     <!-- “網址列” for the URL bar, “網址欄” for the URL field. -->
@@ -89,19 +94,31 @@
     <string name="menu1_action_view_source">檢視頁面原始碼</string>
     <string name="menu1_action_copy_url">以純文字形式複製當前網址</string>
     <string name="menu1_action_copy_url_as_link">以連結形式複製當前網址</string>
+    <string name="menu1_action_view_cert">檢視此網站的憑證</string>
     <string name="error1">錯誤：搜尋專用網址未設置。請於設定中設置之。</string>
     <string name="error2">請輸入關鍵字。</string>
     <string name="error3">請輸入網址。</string>
     <string name="error4">錯誤：網址為空</string>
     <string name="error5">錯誤：找不到能處理此 URI 的應用程式。</string>
     <string name="error6">錯誤：找不到本應用以外的應用程式來處理此 URI。</string>
+    <string name="error7">錯誤：禁止手動載入以「%1$s」開頭的網址。</string>
+    <!-- "Scheme" is a word with no common Chinese translation. -->
+    <string name="error_no_cert">未提供任何憑證。</string>
+    <string name="js_not_enabled">必須啟用 JavaScript，否則無法執行指令碼。</string>
+    <string name="failed_to_parse">無法解析「%1$s」</string>
+    <string name="warning"><b>警告：</b></string> 
+    <string name="warnings"><b>警告：</b></string>
+    <string name="cannot_display_pdf">本應用程式無法顯示PDF檔案。</string>
+    <string name="protocol_is_insecure">此通訊協定不安全。</string>
+    <string name="warning_not_https">[Warning] 「%1$s」乍看之下並不安全。其通訊協定為 HTTP 而非 HTTPS。</string>
+    <string name="method_was">原方法為「%1$s」。</string>
+    <string name="blocked_but_can_change_in_settings">已封鎖。此行為可於設定中更改。</string>
     <string name="view_privacy_policy">檢視隱私權政策</string>
     <string name="privacy_policy_title1">隱私權政策</string>
     <string name="privacy_policy_text">1. 這是一份通知書，而非法律文件。\n\n2. 在使用本應用程式時，您所提供的部份資訊，或許包括，但不限於用戶自訂的所謂「使用者代理」（“user agent”）或使用者選擇的語言標籤（language tags），可能會被儲存在裝置中。上述這些資料可能會以未加密的方式被儲存。\n\n3. 當使用者透過此應用程式造訪網站的時候，使用者提供的一些資訊（其中較重要的有自訂的使用者代理以及使用者選擇的語言標籤）可能會被送至該網站。依據所使用的協定，這些資料可能會以未加密的形式被傳送。\n\n4. 本應用程式不會有意地在超出其作為瀏覽器所應當收集的範圍外收集您的資訊。另外，它永不會有意地協助隱藏您在網路上的身份，亦不會有意地阻止您在網路上隱藏身份。\n\n5. 關於本應用程式如何收集以及使用資訊的更多詳情，請參閱其原始碼。</string>
     <string name="confirm_manually_setting_language_tags">您想要手動設置語言標籤嗎？</string>
     <string name="confirm_opening_url_with_another_app1">您想要在其他應用程式中開啟這個網址嗎？</string>
     <string name="confirm_opening_url_with_another_app_warning1"><b>警告：</b>您必須為此行為的任何後果承擔完全責任，因此請仔細檢視此 URL/URI ，尤其是當它以「<b><code>intent:</code></b>」開頭的時候。</string>
-    <string name="confirm_opening_url_with_another_app_warning2"><b>警告：</b>本應用程式無法顯示PDF檔案。</string>
     <string name="confirm_loading_page">您想要載入「%1$s」這個頁面嗎？</string>
     <string name="doc_title1">1. UI</string>
     <string name="doc_title1_1">i. 網址列</string>
@@ -128,4 +145,17 @@
     <string name="doc_text2_7">若使用形如「<b><code>location.href=\"intent:#Intent;...;end\"</code></b>」的指令碼，則可能利用這個應用程式作為通用意圖發送器及活動啟動器（方法是以文字形式指明「action」、「component」等參數），但必須遵循以下限制：意圖只能被送往其他應用程式，不可送回此應用程式。基於安全上的考量，若此應用程式在 URI 中或意圖中檢測到自身的包名（package name），則會拒絕發送該意圖；在這種情況下，此應用程式可能不會將該事件記錄在日誌中，且可能會顯示錯誤訊息。\n\n本應用程式半正式地支援 intent scheme URI 。亦即它們通常能被正常解析，但此應用程式通常不會確認其是否為「<b><code>intent:</code></b>」URI，而僅在試圖避免自身受到基於意圖的攻擊（intent-based attack）時才進行確認。（請參閱 https://www.mbsd.jp/Whitepaper/IntentScheme.pdf 以瞭解更多詳情。）\n\n相反地，<b><code>intent:</code></b> URI 會被視為類型未知的 URI（例如 <b><code>abc://</code></b>）並做一樣處理：對於每一個未知類型的 URI ，此應用程式都會詢問使用者是否要發送意圖；只有先前提及的特定情況會是例外。</string>
     <string name="settings_activity_label">設定</string>
     <string name="doc_activity_label">使用手冊</string>
+    <string name="certificate">憑證</string>
+    <string name="cert_part1">"版本：%1$d\n\n序列號：%2$s\n\n簽章演算法：%3$s\n\n"</string>
+    <string name="cert_part2">"簽發者：%1$s\n\n效期：\n    不早於：%2$s\n    不晚於：%3$s\n\n持有者：%4$s\n"</string>
+    <string name="cert_part3">"\n持有者之公鑰：\n    演算法：%1$s\n"</string>
+    <string name="cert_parameters_s">"    參數：%1$s\n"</string>
+    <string name="cert_parameters_lf">"    參數：\n"</string>
+    <string name="cert_x_is_odd">"    x 為奇數：%1$s\n"</string>
+    <string name="cert_modulus_exponent">"    模數（Modulus）：%1$s\n    指數（Exponent）：%2$d\n"</string>
+    <!-- See: https://pedia.cloud.edu.tw/Entry/Detail?title=%E6%A8%A1%E6%95%B8
+        "模數" can mean modulus, the divisor, or the operator, but (formally) not the remainer nor similar things.
+        In the context of RSA, the alternative translation of "modulus" would be "除數" ("divisor").
+    -->
+    <string name="cert_final_part">"\n簽章演算法：%1$s\n\n簽章：%2$s\n"</string>
 </resources>

@@ -15,7 +15,7 @@
             android:paddingStart="15dp"
             android:paddingBottom="5dp"
             android:textSize="16sp"
-            android:text="@string/settings_title1"
+            android:text="@string/settings_title_options"
             android:textColor="?android:attr/colorPrimary"
             android:textStyle="bold"/>
         <com.google.android.material.switchmaterial.SwitchMaterial
@@ -96,6 +96,7 @@
             android:paddingStart="20dp"
             android:paddingEnd="20dp"
             android:paddingTop="5dp"
+            android:paddingBottom="5dp"
             android:textSize="12sp"
             android:text="@string/switch_remove_spaces_and_linebreaks_extra_text"
             android:textColor="?android:attr/textColorPrimary"/>
@@ -118,6 +119,70 @@
             android:text="@string/switch_desktop_mode_extra_text"
             android:textColor="?android:attr/textColorPrimary"
             android:autoLink="web"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="15dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="16sp"
+            android:text="@string/settings_title_advanced_sertings"
+            android:textColor="?android:attr/colorPrimary"
+            android:textStyle="bold"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_allow_http"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/allow_http"
+            android:textSize="16sp"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="12sp"
+            android:text="@string/switch_allow_http_extra_text"
+            android:textColor="?android:attr/textColorPrimary"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_show_button_run"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/show_button_run"
+            android:textSize="16sp"/>
+        <TextView
+            android:id="@+id/switch_show_button_run_extra_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp"
+            android:textSize="12sp"
+            android:text="@string/switch_show_button_run_extra_text"
+            android:textColor="?android:attr/textColorPrimary"
+            android:visibility="gone"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_clear_log_before_running_script"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/clear_log_before_running_script"
+            android:textSize="16sp"/>
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/switch_autoscroll_log_msgs"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="10dp"
+            android:text="@string/autoscroll_log_msgs"
+            android:textSize="16sp"/>
         <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_enable_custom_user_agent"
             android:layout_width="match_parent"
@@ -202,49 +267,13 @@
             android:textColor="?android:attr/textColorPrimary"
             android:autoLink="web"
             android:visibility="gone"/>
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_show_button_run"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="10dp"
-            android:text="@string/show_button_run"
-            android:textSize="16sp"/>
-        <TextView
-            android:id="@+id/switch_show_button_run_extra_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:paddingStart="20dp"
-            android:paddingEnd="20dp"
-            android:paddingTop="0dp"
-            android:paddingBottom="5dp"
-            android:textSize="12sp"
-            android:text="@string/switch_show_button_run_extra_text"
-            android:textColor="?android:attr/textColorPrimary"
-            android:visibility="gone"/>
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_clear_log_before_running_script"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="10dp"
-            android:text="@string/clear_log_before_running_script"
-            android:textSize="16sp"/>
-        <com.google.android.material.switchmaterial.SwitchMaterial
-            android:id="@+id/switch_autoscroll_log_msgs"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="15dp"
-            android:layout_marginEnd="10dp"
-            android:text="@string/autoscroll_log_msgs"
-            android:textSize="16sp"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="15dp"
             android:paddingBottom="5dp"
             android:textSize="16sp"
-            android:text="@string/settings_title2"
+            android:text="@string/settings_title_max_log_msg"
             android:textColor="?android:attr/colorPrimary"
             android:textStyle="bold"/>
         <TextView
@@ -264,7 +293,7 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:textSize="12sp"
-            android:text="@string/settings_text1"
+            android:text="@string/settings_max_log_msg_extra_text"
             android:textColor="?android:attr/textColorPrimary"/>
         <TextView
             android:layout_width="wrap_content"
@@ -272,7 +301,7 @@
             android:paddingStart="15dp"
             android:paddingBottom="5dp"
             android:textSize="16sp"
-            android:text="@string/settings_title3"
+            android:text="@string/settings_title_search_url"
             android:textColor="?android:attr/colorPrimary"
             android:textStyle="bold"/>
         <TextView
@@ -292,7 +321,7 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:textSize="12sp"
-            android:text="@string/settings_text2"
+            android:text="@string/settings_search_url_extra_text"
             android:textColor="?android:attr/textColorPrimary"
             android:autoLink="none"/>
         <TextView
@@ -302,7 +331,7 @@
             android:paddingTop="5dp"
             android:paddingBottom="5dp"
             android:textSize="16sp"
-            android:text="@string/settings_title5"
+            android:text="@string/settings_title_clear_data"
             android:textColor="?android:attr/colorPrimary"
             android:textStyle="bold"/>
         <Button
@@ -338,7 +367,7 @@
             android:paddingStart="15dp"
             android:paddingBottom="5dp"
             android:textSize="16sp"
-            android:text="@string/settings_title6"
+            android:text="@string/settings_title_about"
             android:textColor="?android:attr/colorPrimary"
             android:textStyle="bold"/>
         <TextView
@@ -348,7 +377,7 @@
             android:paddingEnd="20dp"
             android:paddingBottom="5dp"
             android:textSize="14sp"
-            android:text="@string/settings_text3"
+            android:text="@string/settings_text1"
             android:textColor="?android:attr/textColorPrimary"
             android:autoLink="web"/>
         <TextView
@@ -358,7 +387,7 @@
             android:paddingEnd="20dp"
             android:paddingBottom="5dp"
             android:textSize="14sp"
-            android:text="@string/settings_text4"
+            android:text="@string/settings_text2"
             android:textColor="?android:attr/textColorPrimary" />
         <Button
             android:id="@+id/button_doc"

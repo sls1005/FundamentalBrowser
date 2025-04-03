@@ -19,13 +19,14 @@ open class ConfiguratedActivity : AppCompatActivity() {
     protected var shouldAcceptCookies = false                           //         Bit 8
     protected var maxLogMsgs = 20                                       // Byte 2-5, L.E.
     protected var searchURL = ""                                        // Starting from byte 6, and then LF
-    protected var shouldDisplayRunButton = false                        // Line 2, Byte 1, Bit 1; experimental
+    protected var shouldDisplayRunButton = false                        // Line 2, Byte 1, Bit 1
     protected var shouldClearLogWhenRunningScript = true                //                 Bit 2
     protected var useCustomUserAgent = false                            //                 Bit 3
     protected var manuallySetLanguageTags = false                       //                 Bit 4
     protected var shouldAllowJSForUrlsFromOtherApps = false             //                 Bit 5
     protected var shouldAskBeforeLoadingUrlThatIsFromAnotherApp = false //                 Bit 6
     protected var autoscrollLogMsgs = false                             //                 Bit 7
+    protected var shouldAllowHTTP = false                               //                 Bit 8
 
     override fun onResume() {
         super.onResume()
@@ -80,6 +81,7 @@ open class ConfiguratedActivity : AppCompatActivity() {
                         shouldAllowJSForUrlsFromOtherApps = a2[4]
                         shouldAskBeforeLoadingUrlThatIsFromAnotherApp = a2[5]
                         autoscrollLogMsgs = a2[6]
+                        shouldAllowHTTP = a2[7]
                     }
                 } else {
                     searchURL = "" // if it has been assigned another string.
@@ -134,7 +136,8 @@ open class ConfiguratedActivity : AppCompatActivity() {
                         manuallySetLanguageTags,
                         shouldAllowJSForUrlsFromOtherApps,
                         shouldAskBeforeLoadingUrlThatIsFromAnotherApp,
-                        autoscrollLogMsgs
+                        autoscrollLogMsgs,
+                        shouldAllowHTTP
                     ).toBooleanArray()
                 )
             ).toByteArray()
