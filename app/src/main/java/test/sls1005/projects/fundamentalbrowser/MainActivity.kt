@@ -627,7 +627,7 @@ open class MainActivity : ConfiguratedActivity() {
                                 goBack()
                             } else {
                                 with (this@MainActivity) {
-                                    if (shouldLeaveOnBackGesture || hasNotLoadedAnyPage()) {
+                                    if (shouldLeaveOnBackGesture || (hasNotLoadedAnyPage() && findViewById<EditText>(R.id.url_field).text.isEmpty() && logMsgs.isEmpty())) {
                                         finish()
                                     } else {
                                         shouldLeaveOnBackGesture = true

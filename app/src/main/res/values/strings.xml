@@ -57,8 +57,8 @@
     <string name="desktop_mode">Desktop mode</string>
     <string name="switch_desktop_mode_extra_text">This is implemented by changing the user agent of this browser and thus can result in privacy-related issues as described in https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 .\nIf this doesn\'t work, please consider using a custom user agent. See below for more information about customized user agents.</string>
     <string name="settings_title_advanced_sertings">Advanced settings</string>
-    <string name="allow_http">Allow using HTTP</string>
-    <string name="switch_allow_http_extra_text"><b>Warning:</b> HTTP is an insecure protocol and is different from HTTPS. It is recommended to keep this off unless you are testing your own server in LAN.</string>
+    <string name="allow_http">HTTP-compatible mode</string>
+    <string name="switch_allow_http_extra_text">Allow using HTTP (not HTTPS) as the communication protocol.\n\n<b>Warning:</b> HTTP is an insecure protocol and is different from HTTPS. It is recommended to keep this off unless you are testing your own server in LAN.</string>
     <string name="manually_set_languages">Manually set preferred languages</string>
     <string name="add_language">Add a language</string>
     <string name="switch_manually_set_languages_extra_string">When disabled, the default will be used. If enabled but not set, no language tag will be sent.\nIf this doesn\'t work, please consider changing the language of this app. If your device supports doing so, the option for changing the language of this application will appear in the device settings.\nA website may ignore this.\n\n<b>Warning:</b> Please note that the use of highly customized language tags may result in privacy-related issues as described in https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 .</string>

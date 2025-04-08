@@ -61,8 +61,8 @@
     <string name="desktop_mode">桌面模式</string>
     <string name="switch_desktop_mode_extra_text">此项功能的实现牵涉到对这个浏览器的用户代理（user agent）进行变更，因此可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。\n如果这个选项没有产生它应有的效果，请考虑使用自定义的用户代理。关于自定义用户代理的方式及详情，请见下方。</string>
     <string name="settings_title_advanced_sertings">高级选项</string>
-    <string name="allow_http">允许使用 HTTP</string>
-    <string name="switch_allow_http_extra_text"><b>警告：</b>不同于 HTTPS，HTTP 是个不安全的通信协议。除非您正在内网测试自有服务器，否则不建议启用此选项。</string>
+    <string name="allow_http">HTTP 相容模式</string>
+    <string name="switch_allow_http_extra_text">允许使用 HTTP（而非 HTTPS）作为通信协议。\n\n<b>警告：</b>不同于 HTTPS，HTTP 是个不安全的通信协议。除非您正在内网测试自有服务器，否则不建议启用此选项。</string>
     <string name="manually_set_languages">手动设置偏好的语言</string>
     <string name="add_language">添加语言</string>
     <string name="switch_manually_set_languages_extra_string">若未启用，则将使用默认值。若启用了却未设置，则会防止发送任何语言标签。\n若此选项未产生其应有的效果，请考虑变更此应用程序的语言。若您的设备支持，则用来变更此应用程序语言的选项会出现在设备的设置界面中。\n网站可能忽略此信息。\n\n<b>警告：</b>请注意，若使用高度自定义的语言标签则可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
