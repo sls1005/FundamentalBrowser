@@ -24,7 +24,7 @@
     <string name="close">關閉</string>
     <string name="text_default">預設</string>
     <string name="tap_to_set">輕觸以設定</string>
-    <string name="main_button_go">載入</string>
+    <string name="main_button_load">載入</string>
     <string name="main_button_run">執行</string>
     <string name="settings_title_options">選項</string>
     <string name="allow_javascript">允許使用 JavaScript</string>
@@ -48,7 +48,7 @@
     <string name="settings_text2"> JavaScript 是甲骨文公司（Oracle Corporation）的商標或註冊商標。</string>
     <string name="see_doc">閱讀使用手冊</string>
     <string name="see_libs">顯示所使用的開放原始碼程式庫</string>
-    <string name="remove_spaces_and_linebreaks_when_loading">載入網址時移除空格及換行符號</string>
+    <string name="remove_spaces_and_linebreaks_when_loading">載入網址時移除空格及換行字元</string>
     <string name="switch_remove_spaces_and_linebreaks_extra_text">建議讓此選項保持開啟。</string>
     <string name="show_button_run">顯示用於將網址欄的輸入視為程式執行的按鍵</string>
     <string name="switch_show_button_run_extra_text">該按鍵僅在 JavaScript 為啟用狀態時有效。</string>
@@ -59,13 +59,23 @@
     <string name="settings_title_advanced_sertings">進階選項</string>
     <string name="allow_http">HTTP 相容模式</string>
     <string name="switch_allow_http_extra_text">允許使用 HTTP（而非 HTTPS）作為通訊協定。\n\n<b>警告：</b>不同於 HTTPS， HTTP 是個不安全的通訊協定。除非您正於內網測試自有伺服器，否則不建議啟用此選項。</string>
-    <string name="manually_set_languages">手動設定語言標籤</string>
+    <string name="manually_set_languages">設定偏好的語言</string>
     <string name="add_language">新增語言</string>
-    <string name="switch_manually_set_languages_extra_string">如未啟用，則將使用預設值。若啟用了卻未設定，則會防止發送任何語言標籤。\n若此選項未產生其應有的效果，請考慮變更此應用程式的語言。若您的裝置支援，則用於變更此應用程式語言的選項會出現在裝置的設定介面中。\n網站可能忽略此資訊。\n\n<b>警告：</b>請注意，若使用高度客製化的語言標籤則可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
+    <string name="switch_manually_set_languages_extra_string">這用於指定使用者偏好的、用於網頁中的語言，而非用於介面的語言。\n如未啟用，則將使用預設值。若啟用了卻未設定，則會防止發送任何語言標籤。\n若此選項未產生其應有的效果，請考慮變更此應用程式的語言。若您的裝置支援，則用於變更此應用程式語言的選項會出現在裝置的設定介面中。\n網站可能忽略此資訊。\n\n<b>警告：</b>請注意，若使用高度客製化的語言標籤則可能導致隱私相關的問題。此類問題在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
     <string name="clear_log_before_running_script">執行指令碼前清空記錄檔</string>
-    <string name="autoscroll_log_msgs">記錄檔自動滾動</string>
+    <string name="autoscroll_log_msgs">自動滾動記錄檔</string>
     <string name="allow_js_when_loading_url_that_is_from_another_app">載入來源為其他應用程式的網址時，允許使用JavaScript</string>
     <string name="ask_before_loading_url_that_is_from_another_app">載入來自其他應用程式的網址之前先詢問</string>
+    <string name="ask_before_following_redirection">跟隨重定向之前先詢問</string>
+    <string name="switch_ask_before_following_redirection_extra_text">啟用後，本應用程式將不再自動跟隨重定向。</string>
+    <string name="confirm_following_redirection_to_load_page">您想跟隨網頁的重定向，載入「%1$s」這個頁面嗎？</string>
+    <string name="show_advanced_developer_tools">進階開發者工具</string>
+    <string name="switch_show_advanced_developer_tools_extra_text_part1">在本應用程式的「更多」子選單中顯示進階開發者工具。</string>
+    <string name="switch_show_advanced_developer_tools_extra_text_part2">即使禁用此選項，您依然可以使用諸如 JavaScript 控制臺（若其處於啟用狀態）和記錄檔等一般開發者工具，且仍然能夠檢視網頁原始碼和網站憑證。此選項目前僅提供較少見且不常使用的額外工具。</string>
+    <string name="auto_turn_urls_in_log_into_links">自動將日誌紀錄中的網址轉化為連結</string>
+    <string name="switch_auto_link_urls_in_log_extra_text">並非每條網址都會被轉為連結。本應用程式會自動選擇轉換某些網址。某條網址指向網路上的頁面（或圖片之類的資源）或快取中的檔案的機率愈高，其被轉為連結的機率就愈高。當您點擊日誌中的連結時，將在本應用程式中開啟它；若該檔案仍存在於快取中，則能夠在無網路連接的情況下開啟。</string>
+    <string name="disable_dynamic_colors">禁用動態色彩</string>
+    <string name="switch_disable_dynamic_colors_extra_text">當此選項為啟用狀態且此應用程式被設為預設以外的主題時，其介面顏色將不會隨著系統設定變更。然而，這並不保證此選項為非啟用狀態時介面顏色就會隨著系統變更。</string>
     <string name="number_field_title1">請輸入數字</string>
     <string name="url_field_title1">請輸入網址</string>
     <string name="string_field_title_1">請輸入文字</string>
@@ -77,6 +87,7 @@
     <string name="dont_load">不要載入</string>
     <string name="try_encryption">嘗試加密</string>
     <string name="repeat_to_close">重複該手勢以關閉視窗</string>
+    <string name="menu1_action_hide_tool_bar">隱藏工具列</string>
     <string name="menu1_action_show_or_hide_url_bar">顯示/隱藏網址列</string>
     <!-- “網址列” for the URL bar, “網址欄” for the URL field. -->
     <string name="menu1_action_edit_url">編輯網址</string>
@@ -92,9 +103,11 @@
     <string name="menu1_action_clear_log">清空記錄檔</string>
     <string name="menu1_action_open_in_another_window">在新視窗中開啟這個頁面</string>
     <string name="menu1_action_view_source">檢視頁面原始碼</string>
-    <string name="menu1_action_copy_url">以純文字形式複製當前網址</string>
-    <string name="menu1_action_copy_url_as_link">以連結形式複製當前網址</string>
+    <string name="menu1_action_copy_url">複製當前網址為純文字</string>
+    <string name="menu1_action_copy_url_as_link">複製當前網址為連結</string>
     <string name="menu1_action_view_cert">檢視此網站的憑證</string>
+    <string name="menu1_action_find_robots_txt">找出此網站的「robots.txt」</string>
+    <string name="error">錯誤：%1$s</string>
     <string name="error1">錯誤：搜尋專用網址未設置。請於設定中設置之。</string>
     <string name="error2">請輸入關鍵字。</string>
     <string name="error3">請輸入網址。</string>
@@ -158,4 +171,8 @@
         In the context of RSA, the alternative translation of "modulus" would be "除數" ("divisor").
     -->
     <string name="cert_final_part">"\n簽章演算法：%1$s\n\n簽章：%2$s\n"</string>
+    <string name="theme">主題</string>
+    <string name="theme_default">預設（系統預設或深色）</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_light">淺色</string>
 </resources>

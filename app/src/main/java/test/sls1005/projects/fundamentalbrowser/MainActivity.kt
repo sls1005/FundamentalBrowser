@@ -1,6 +1,7 @@
 package test.sls1005.projects.fundamentalbrowser
 
 import android.annotation.SuppressLint
+import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -10,10 +11,9 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.text.Editable
-import android.text.SpannableString
-import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.TextWatcher
+import android.text.method.ScrollingMovementMethod
 import android.text.style.URLSpan
 import android.view.Menu
 import android.view.MenuItem
@@ -35,7 +35,6 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.Button
 import android.widget.EditText
 import android.widget.HorizontalScrollView
 import android.widget.ImageView
@@ -45,7 +44,12 @@ import android.widget.ScrollView
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AlertDialog
+import androidx.core.text.buildSpannedString
+import androidx.core.text.method.LinkMovementMethodCompat
+import androidx.fragment.app.DialogFragment
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.appbar.MaterialToolbar
 import java.net.URISyntaxException
 import java.security.interfaces.DSAPublicKey
 import java.security.interfaces.ECPublicKey
@@ -54,22 +58,51 @@ import java.security.interfaces.RSAPublicKey
 import java.security.interfaces.XECPublicKey
 import java.security.spec.ECFieldF2m
 import java.security.spec.ECFieldFp
+import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicInteger
 import javax.crypto.interfaces.DHPublicKey
 
 open class MainActivity : ConfiguratedActivity() {
-    private val logMsgs = ArrayDeque<String>()
-    private var previousTitle = ""
-    private var allowsForegroundLogging = false
-    private var shouldLeaveOnBackGesture = false
-    private var isCurrentlyAllowingSearchingInLog = true
+    private inner class BrowserHttpOrHttpsGetMethodSpan(url: String) : URLSpan(url) {
+        override fun onClick(v: View) {
+            if (v.context == this@MainActivity) {
+                val url = (this@BrowserHttpOrHttpsGetMethodSpan).getURL()
+                if (isHttpOrHttpsUri(
+                    Uri.parse(url)
+                )) {
+                    hideLogIfShowing()
+                    hideSearchBarIfShowing()
+                    supportActionBar?.apply {
+                        if (!isShowing()) {
+                            show()
+                        }
+                    }
+                    load(url) // The browser is supposed to use the cached files instead of making new requests.
+                }
+            } else {
+                super.onClick(v)
+            }
+        }
+    }
+
     protected var languageTags = ""
     protected var urlToLoad = ""
     protected var currentURL = ""
     protected var textToDisplayInUrlField = ""
-    public val clickListener = OnClickListener { view ->
+    private val logMsgs = ArrayDeque<CharSequence>()
+    private val maxLogMsgsAtomic = AtomicInteger(maxLogMsgs)
+    private val shouldLinkURLsInLogAtomic = AtomicBoolean(shouldLinkURLsInLog)
+    private val manuallySetLanguageTagsAtomic = AtomicBoolean(manuallySetLanguageTags)
+    private val allowsForegroundLogging = AtomicBoolean(foregroundLoggingEnabled)
+    private var previousTitle = ""
+    private var previousSubTitle: CharSequence? = ""
+    private var shouldLeaveOnBackGesture = false
+    private var isCurrentlyAllowingSearchingInLog = true
+    private var isResumed = false // flag for callback
+    private val clickListener = OnClickListener { view ->
         when(view.id) {
-            R.id.button_go -> run {
-                val button = findViewById<Button>(R.id.button_go).apply {
+            R.id.button_load -> run {
+                val button = findViewById<MaterialButton>(R.id.button_load).apply {
                     setClickable(false)
                 }
                 val url = findViewById<EditText>(R.id.url_field).text.toString().let {
@@ -125,9 +158,9 @@ open class MainActivity : ConfiguratedActivity() {
                     hideUrlBar()
                     hideLogIfShowing()
                     load(url).also { urlLoaded ->
-                        if (!urlLoaded && hasNotLoadedAnyPage() && !isShowingLog() && maxLogMsgs > 0) {
+                        if (!urlLoaded && hasNotLoadedAnyPage() && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
                             showLog()
-                            showUrlBarIfHidden()
+                            showUrlBarIfNotShowing()
                         }
                     }
                 } else {
@@ -162,7 +195,7 @@ open class MainActivity : ConfiguratedActivity() {
                 }
             }
             R.id.button_search -> run {
-                val button = findViewById<Button>(R.id.button_search)
+                val button = findViewById<MaterialButton>(R.id.button_search)
                 val rawInput = findViewById<EditText>(R.id.url_field).text.toString()
                 if (searchURL.isEmpty()) {
                     showMsg(getString(R.string.error1), button)
@@ -222,7 +255,7 @@ open class MainActivity : ConfiguratedActivity() {
             }
             R.id.button_run -> run {
                 if (shouldDisplayRunButton) { // check if the button is really displayed
-                    val button = findViewById<Button>(R.id.button_run)
+                    val button = findViewById<MaterialButton>(R.id.button_run)
                     findViewById<EditText>(R.id.url_field).text.toString().also {
                         if (it.isNotEmpty()) {
                             val code = it
@@ -232,26 +265,28 @@ open class MainActivity : ConfiguratedActivity() {
                                     logMsgs.clear()
                                 }
                             }
-                            if (! isShowingLog()) {
+                            if (!isShowingLog()) {
                                 showLog()
                             }
                             if (shouldUseJavaScript) { // i.e. JS is allowed, enabled. Otherwise it's impossible to execute.
                                 findViewById<WebView>(R.id.window).evaluateJavascript(code) { result ->
+                                    val maxMsgNum = maxLogMsgsAtomic.get()
+                                    val logMsg = "[REPL] $result"
                                     synchronized(logMsgs) {
                                         logMsgs.apply {
-                                            if (size >= maxLogMsgs) {
+                                            if (size >= maxMsgNum) {
                                                 removeFirst()
                                             }
-                                            add("[REPL] $result")
+                                            add(logMsg)
                                         }
-                                        updateLogIfShowing()
                                     }
+                                    updateLogIfShowing()
                                 }
                             } else {
                                 val errMsg = getString(R.string.js_not_enabled)
                                 showMsg(getString(R.string.error, errMsg), button)
                                 logMsgs.apply {
-                                    if (size >= maxLogMsgs) {
+                                    if (size >= maxLogMsgsAtomic.get()) {
                                         removeFirst()
                                     }
                                     add("[Error] $errMsg\n")
@@ -270,13 +305,7 @@ open class MainActivity : ConfiguratedActivity() {
                 findViewById<WebView>(R.id.window).findNext(true)
             }
             R.id.end_search -> run {
-                val shouldClear = isShowingContentSearchBar()
-                if (isShowingSearchBar()) {
-                    hideSearchBar()
-                }
-                if (shouldClear) {
-                    findViewById<WebView>(R.id.window).clearMatches()
-                }
+                hideSearchBarIfShowing()
             }
         }
     }
@@ -284,6 +313,7 @@ open class MainActivity : ConfiguratedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        setSupportActionBar(findViewById<MaterialToolbar>(R.id.toolbar))
         findViewById<WebView>(R.id.window).apply {
             settings.apply {
                 setSupportMultipleWindows(false)
@@ -294,81 +324,99 @@ open class MainActivity : ConfiguratedActivity() {
                 override fun shouldOverrideUrlLoading(v: WebView, req: WebResourceRequest): Boolean {
                     val schemeIsSupported = isOfSupportedScheme(req.url)
                     val schemeIsHttp = isHttpUri(req.url)
+                    val schemeIsHttpOrHttps = schemeIsHttp || checkUriScheme(req.url, "https")
                     val schemeIsKnown = (schemeIsSupported || isOfKnownScheme(req.url) || schemeIsHttp)
                     val url = req.url.toString()
                     if (schemeIsSupported) {
                         if (url.endsWith(".pdf", ignoreCase = true) && isHttpOrHttpsUri(req.url)) {
                             val x = Intent(Intent.ACTION_VIEW, req.url.buildUpon().build())
                             if (!onlyICanHandle(x)) {
-                                (AlertDialog.Builder(this@MainActivity).apply {
-                                    setView(
-                                        layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
-                                            findViewById<TextView>(R.id.url).text = url
-                                            findViewById<TextView>(R.id.warning).text = SpannableStringBuilder(
-                                                if (schemeIsHttp) {
-                                                    getText(R.string.warnings)
-                                                } else {
-                                                    getText(R.string.warning)
+                                (object: DialogFragment() {
+                                    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                                        val ctx = requireActivity()
+                                        return (AlertDialog.Builder(ctx).apply {
+                                            setView(
+                                                layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
+                                                    findViewById<TextView>(R.id.url).text = url
+                                                    findViewById<TextView>(R.id.warning).text = buildSpannedString {
+                                                        append(
+                                                            if (schemeIsHttp) {
+                                                                ctx.getText(R.string.warnings)
+                                                            } else {
+                                                                ctx.getText(R.string.warning)
+                                                            }
+                                                        )
+                                                        append(ctx.getString(R.string.cannot_display_pdf))
+                                                        if (schemeIsHttp) {
+                                                            append(ctx.getString(R.string.protocol_is_insecure))
+                                                        }
+                                                    }
                                                 }
-                                            ).apply {
-                                                append(getString(R.string.cannot_display_pdf))
-                                                if (schemeIsHttp) {
-                                                    append(getString(R.string.protocol_is_insecure))
+                                            )
+                                            setPositiveButton(R.string.yes) {_, _ ->
+                                                saveCurrentConfiguration()
+                                                try {
+                                                    ctx.startActivity(x)
+                                                } catch(_: ActivityNotFoundException) {
+                                                    showMsg(getString(R.string.error5))
                                                 }
                                             }
-                                        }
-                                    )
-                                    setPositiveButton(getString(R.string.yes)) {_, _ ->
-                                        saveCurrentConfiguration()
-                                        try {
-                                            startActivity(x)
-                                        } catch(_: ActivityNotFoundException) {
-                                            showMsg(getString(R.string.error5))
-                                        }
-                                    }
-                                    setNegativeButton(getString(R.string.open_here)) {_, _ ->
-                                        load(url).also { urlLoaded ->
-                                            if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
-                                                showLog()
+                                            setNegativeButton(R.string.open_here) {_, _ ->
+                                                load(url).also { urlLoaded ->
+                                                    if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                                        showLog()
+                                                    }
+                                                }
                                             }
-                                        }
+                                            setNeutralButton(R.string.dont_load) {_, _ -> }
+                                        }).create()
                                     }
-                                    setNeutralButton(getString(R.string.dont_load)) {_, _ -> }
-                                }).create().show()
+                                }).show(supportFragmentManager, null)
                                 return true
                             }
                         }
                         if (schemeIsHttp) {
                             if (shouldAllowHTTP) {
-                                (AlertDialog.Builder(this@MainActivity).apply {
-                                    setView(
-                                        layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
-                                            findViewById<TextView>(R.id.text1).text = SpannableStringBuilder().apply {
-                                                append(getString(R.string.confirm_loading_page, url))
-                                                append("\n\n")
-                                                append(getText(R.string.warning))
-                                                append(getString(R.string.protocol_is_insecure))
+                                (object: DialogFragment() {
+                                    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                                        val ctx = requireActivity()
+                                        return (AlertDialog.Builder(ctx).apply {
+                                            setView(
+                                                layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
+                                                    findViewById<TextView>(R.id.text1).text = buildSpannedString {
+                                                        append(ctx.getString(
+                                                            if (req.isRedirect) {
+                                                                R.string.confirm_following_redirection_to_load_page
+                                                            } else {
+                                                                R.string.confirm_loading_page
+                                                            }, url)
+                                                        )
+                                                        append("\n\n")
+                                                        append(ctx.getText(R.string.warning))
+                                                        append(ctx.getString(R.string.protocol_is_insecure))
+                                                    }
+                                                }
+                                            )
+                                            setPositiveButton(R.string.yes) {_, _ ->
+                                                load(url).also { urlLoaded ->
+                                                    if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                                        showLog()
+                                                    }
+                                                }
                                             }
-                                        }
-                                    )
-                                    setPositiveButton(getString(R.string.yes)) {_, _ ->
-                                        load(url).also { urlLoaded ->
-                                            if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
-                                                showLog()
+                                            setNegativeButton(R.string.no) {_, _ -> }
+                                            setNeutralButton(R.string.try_encryption) {_, _ -> 
+                                                load(
+                                                    (Uri.parse(url).buildUpon().apply { scheme("https") }).build().toString()
+                                                ).also { urlLoaded ->
+                                                    if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                                        showLog()
+                                                    }
+                                                }
                                             }
-                                        }
+                                        }).create()
                                     }
-                                    setNegativeButton(R.string.no) {_, _ -> }
-                                    setNeutralButton(R.string.try_encryption) {_, _ -> 
-                                        load(
-                                            (Uri.parse(url).buildUpon().apply { scheme("https") }).build().toString()
-                                        ).also { urlLoaded ->
-                                            if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
-                                                showLog()
-                                            }
-                                        }
-                                    }
-                                }).create().show()
+                                }).show(supportFragmentManager, null)
                                 return true
                             } else {
                                 val msg = buildString {
@@ -376,9 +424,10 @@ open class MainActivity : ConfiguratedActivity() {
                                     append(getString(R.string.method_was, req.method))
                                     append(getString(R.string.blocked_but_can_change_in_settings))
                                 }
+                                val maxMsgNum = maxLogMsgsAtomic.get()
                                 synchronized(logMsgs) {
                                     logMsgs.apply {
-                                        if (size >= maxLogMsgs) {
+                                        if (size >= maxMsgNum) {
                                             removeFirst()
                                         }
                                         add(msg)
@@ -387,6 +436,28 @@ open class MainActivity : ConfiguratedActivity() {
                                 showMsg(msg)
                                 return true
                             }
+                        } else if (req.isRedirect && shouldAskBeforeFollowingRedirection) {
+                            (object: DialogFragment() {
+                                override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                                    val ctx = requireActivity()
+                                    return (AlertDialog.Builder(ctx).apply {
+                                        setView(
+                                            layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
+                                                findViewById<TextView>(R.id.text1).text = ctx.getString(R.string.confirm_following_redirection_to_load_page, url)
+                                            }
+                                        )
+                                        setPositiveButton(R.string.yes) {_, _ ->
+                                            load(url).also { urlLoaded ->
+                                                if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                                    showLog()
+                                                }
+                                            }
+                                        }
+                                        setNegativeButton(R.string.no) {_, _ -> }
+                                    }).create()
+                                }
+                            }).show(supportFragmentManager, null)
+                            return true
                         }
                     } else if (checkUriScheme(req.url, "intent")) {
                         if (url.contains((this@MainActivity).packageName, ignoreCase=true)) {
@@ -395,18 +466,21 @@ open class MainActivity : ConfiguratedActivity() {
                             // An intent URL is most dangerous when targeting the app itself.
                         }
                     } else if (schemeIsKnown || url.isEmpty() || (req.url.scheme?.isEmpty() ?: true)) { // known but not supported or should be blocked
+                        val maxMsgNum = maxLogMsgsAtomic.get()
+                        val logMsg = "[Log] (ignored) ${req.method} $url\n"
                         synchronized(logMsgs) {
                             logMsgs.apply {
-                                if (size >= maxLogMsgs) {
+                                if (size >= maxMsgNum) {
                                     removeFirst()
                                 }
-                                add("[Log] (ignored) ${req.method} $url\n")
+                                add(logMsg)
                             }
                         }
                         return true
                     }
                     if (req.isRedirect || (!schemeIsSupported)) {
-                        var shouldRecord = (maxLogMsgs > 0)
+                        val maxMsgNum = maxLogMsgsAtomic.get()
+                        val shouldRecord = (maxMsgNum > 0)
                         var msg = buildString(url.length) { // could be needed even if shouldRecord is false
                             if (req.isRedirect) {
                                 append(req.method)
@@ -421,12 +495,13 @@ open class MainActivity : ConfiguratedActivity() {
                             } else if (code == -2) {
                                 if (shouldRecord) {
                                     val errMsg = getString(R.string.failed_to_parse, url)
+                                    val logMsg = "[Error] $errMsg\n"
                                     synchronized(logMsgs) {
                                         logMsgs.apply {
-                                            if (size >= maxLogMsgs) {
+                                            if (size >= maxMsgNum) {
                                                 removeFirst()
                                             }
-                                            add("[Error] $errMsg\n")
+                                            add(logMsg)
                                         }
                                     }
                                 }
@@ -436,32 +511,51 @@ open class MainActivity : ConfiguratedActivity() {
                             } // else: log
                         }
                         if (shouldRecord) {
+                            val logMsg: CharSequence = (
+                                if (shouldLinkURLsInLogAtomic.get() && req.method == "GET" && schemeIsHttpOrHttps) {
+                                    buildSpannedString {
+                                        append("[Log] ")
+                                        append(req.method)
+                                        if (req.isRedirect) {
+                                            append(getString(R.string.space_redirected_space))
+                                        } else {
+                                            // This block currently will not be executed.
+                                            append(' ')
+                                        }
+                                        append(url, BrowserHttpOrHttpsGetMethodSpan(url), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                                        append('\n')
+                                    }
+                                } else {
+                                    "[Log] $msg\n"
+                                }
+                            )
+                            val maxMsgNum = maxLogMsgsAtomic.get()
                             synchronized(logMsgs) {
                                 logMsgs.apply {
-                                    if (size >= maxLogMsgs) {
+                                    if (size >= maxMsgNum) {
                                         removeFirst()
                                     }
-                                    add("[Log] $msg\n")
+                                    add(logMsg)
                                 }
                             }
                         }
-                        if (schemeIsSupported && allowsForegroundLogging) {
+                        if (schemeIsSupported && allowsForegroundLogging.get()) {
                             showMsg(msg, v)
                         }
                     }
                     return !schemeIsSupported
                 }
                 override fun shouldInterceptRequest(v: WebView, req: WebResourceRequest): WebResourceResponse? {
-                    if (req.url.scheme?.equals("http", ignoreCase=true) ?: false) {
-                        if (synchronized(shouldAllowHTTP) { (!shouldAllowHTTP) }) {
+                    val schemeIsHttp = isHttpUri(req.url)
+                    val schemeIsHttpOrHttps = schemeIsHttp || checkUriScheme(req.url, "https")
+                    if (schemeIsHttp) {
+                        if (!shouldAllowHTTP) {
                             return WebResourceResponse(null, null, 426, "Upgrade Required", null, null)
                         }
                     }
                     val url = req.url.toString()
                     val msg = "${req.method} $url"
-                    if (synchronized(manuallySetLanguageTags){
-                            manuallySetLanguageTags
-                        }) {
+                    if (manuallySetLanguageTagsAtomic.get()) {
                         req.requestHeaders.also {
                             val languageHeader = "Accept-Language"
                             val languages = synchronized(languageTags) { languageTags }
@@ -474,20 +568,31 @@ open class MainActivity : ConfiguratedActivity() {
                             }
                         }
                     }
-                    val maxMsgNum = synchronized(maxLogMsgs) { maxLogMsgs }
+                    val maxMsgNum = maxLogMsgsAtomic.get()
                     if (maxMsgNum > 0) {
+                        val logMsg = (
+                            if (shouldLinkURLsInLogAtomic.get() && req.method == "GET" && schemeIsHttpOrHttps) {
+                                buildSpannedString {
+                                    append("[Log] ")
+                                    append(req.method)
+                                    append(' ')
+                                    append(url, BrowserHttpOrHttpsGetMethodSpan(url), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                                    append('\n')
+                                }
+                            } else {
+                                "[Log] $msg\n"
+                            }
+                        )
                         synchronized(logMsgs) {
                             logMsgs.apply {
                                 if (size >= maxMsgNum) {
                                     removeFirst()
                                 }
-                                add("[Log] $msg\n")
+                                add(logMsg)
                             }
                         }
                     }
-                    if (synchronized(allowsForegroundLogging) {
-                            allowsForegroundLogging
-                        }) {
+                    if (allowsForegroundLogging.get()) {
                         synchronized(v) {
                             showMsg(msg, v)
                         }
@@ -496,7 +601,13 @@ open class MainActivity : ConfiguratedActivity() {
                 }
                 override fun onPageFinished(v: WebView, url: String) {
                     with (this@MainActivity) {
-                        title = v.title
+                        if (previousTitle.isEmpty()) {
+                            title = v.title
+                            supportActionBar?.subtitle = url
+                        } else {
+                            previousTitle = v.title ?: ""
+                            previousSubTitle = url
+                        }
                         findViewById<EditText>(R.id.url_field).apply {
                             if (visibility == VISIBLE) {
                                 val e = isEnabled().also {
@@ -541,22 +652,26 @@ open class MainActivity : ConfiguratedActivity() {
                         append(" | Line ${consoleMessage.lineNumber()}] ")
                         append(consoleMessage.message()) // No '\n' here.
                     }
+                    val maxMsgNum = maxLogMsgsAtomic.get()
                     synchronized(logMsgs) {
                         logMsgs.apply {
-                            if (size >= maxLogMsgs) {
+                            if (size >= maxMsgNum) {
                                 removeFirst()
                             }
                             add(logMsg)
                         }
-                        updateLogIfShowing()
                     }
+                    updateLogIfShowing()
                     return true
                 }
                 override fun onReceivedTitle(v: WebView, newTitle: String) {
-                    if (previousTitle.isNotEmpty()) {
-                        previousTitle = newTitle
-                    } else {
-                        (this@MainActivity).title = newTitle
+                    with (this@MainActivity) {
+                        if (previousTitle.isEmpty()) {
+                            title = newTitle
+                        } else {
+                            previousTitle = newTitle
+                            
+                        }
                     }
                 }
             }
@@ -569,10 +684,10 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.button_copy,
             R.id.button_paste,
             R.id.button_search,
-            R.id.button_go,
+            R.id.button_load,
             R.id.button_run
         ).forEach { id ->
-            findViewById<Button>(id).setOnClickListener(clickListener)
+            findViewById<MaterialButton>(id).setOnClickListener(clickListener)
         }
         intArrayOf(
             R.id.search_previous,
@@ -594,10 +709,26 @@ open class MainActivity : ConfiguratedActivity() {
                         val records = synchronized(logMsgs) { logMsgs.toList() }
                         findViewById<TextView>(R.id.log).also {
                             if (it.visibility == VISIBLE) {
-                                it.text = if (s.isEmpty()) {
-                                    records.joinToString("\n")
-                                } else {
-                                    records.filter({ it -> it.indexOf(s, ignoreCase=true) != -1 }).joinToString("\n")
+                                it.text = buildSpannedString {
+                                    var flag = false
+                                    if (s.isEmpty()) {
+                                        records
+                                    } else {
+                                        records.filter({ it -> it.indexOf(s, ignoreCase=true) != -1 })
+                                    }.forEach { record ->
+                                        if (flag) {
+                                            append('\n')
+                                        } else {
+                                            flag = true
+                                        }
+                                        append(
+                                            if (shouldLinkURLsInLogAtomic.get()) {
+                                                record
+                                            } else {
+                                                record.toString()
+                                            }
+                                        )
+                                    }
                                 }
                             }
                             it.postDelayed(
@@ -617,8 +748,10 @@ open class MainActivity : ConfiguratedActivity() {
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     if (isShowingSearchBar()) {
-                        hideSearchBar()
+                        hideSearchBarIfShowing() // This handles cases like searching in the log or the page
                         updateLogIfShowing()
+                    } else if (!(supportActionBar?.isShowing() ?: true)) { // The result of this expression: false if showing or (unlikely) null, true if not null and not showing
+                        supportActionBar?.show()
                     } else if (isShowingLog()) {
                         hideLog()
                     } else {
@@ -659,6 +792,10 @@ open class MainActivity : ConfiguratedActivity() {
 
     override fun onResume() {
         super.onResume()
+        maxLogMsgsAtomic.set(maxLogMsgs)
+        shouldLinkURLsInLogAtomic.set(shouldLinkURLsInLog)
+        manuallySetLanguageTagsAtomic.set(manuallySetLanguageTags)
+        allowsForegroundLogging.set(foregroundLoggingEnabled)
         findViewById<WebView>(R.id.window).apply {
             settings.apply {
                 javaScriptEnabled = shouldUseJavaScript
@@ -672,21 +809,31 @@ open class MainActivity : ConfiguratedActivity() {
             }
         }
         updateWindowSizeAndSetCorrectUserAgent()
+        findViewById<TextView>(R.id.log).movementMethod = (
+            if (shouldLinkURLsInLogAtomic.get()) {
+                LinkMovementMethodCompat.getInstance()
+            } else {
+                ScrollingMovementMethod.getInstance()
+            }
+        )
         if (manuallySetLanguageTags) {
             languageTags = getStoredLanguageTags()  ?: ""
         }
-        allowsForegroundLogging = foregroundLoggingEnabled
         showRunButtonIfApplicable()
+        val maxMsgNum = maxLogMsgsAtomic.get()
         synchronized(logMsgs) {
             logMsgs.apply {
-                if (maxLogMsgs >= 0) {
-                    while (size > maxLogMsgs) {
+                if (maxMsgNum >= 0) {
+                    while (size > maxMsgNum) {
                         removeFirst()
                     }
                 }
             }
         }
-        afterInitialization()
+        if (!isResumed) {
+            isResumed = true
+            afterInitialization()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -755,6 +902,14 @@ open class MainActivity : ConfiguratedActivity() {
                         hasLoadedPage
                     ),
                     Pair(
+                        R.id.menu1_sub1_group_advanced_tools,
+                        showAdvancedDeveloperTools && hasLoadedPage
+                    ),
+                    Pair(
+                        R.id.menu1_sub1_group_copy_url,
+                        hasLoadedPage
+                    ),
+                    Pair(
                         R.id.menu1_sub1_group_log,
                         logMsgs.isNotEmpty()
                     )
@@ -777,8 +932,17 @@ open class MainActivity : ConfiguratedActivity() {
                 }
                 (true)
             }
+            R.id.action_hide_tool_bar -> run {
+                supportActionBar?.apply {
+                    if (isShowing()) {
+                        hide()
+                    }
+                }
+                hideUrlBarIfShowing()
+                (true)
+            }
             R.id.action_edit_url -> run {
-                showUrlBarIfHidden()
+                showUrlBarIfNotShowing()
                 (true)
             }
             R.id.action_refresh -> run {
@@ -817,7 +981,7 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.action_enable_disable_foreground_logging -> run {
                 foregroundLoggingEnabled = !item.isChecked()
                 if (!isShowingSearchBar()) {
-                    allowsForegroundLogging = foregroundLoggingEnabled
+                    allowsForegroundLogging.set(foregroundLoggingEnabled)
                 }
                 item.setChecked(foregroundLoggingEnabled)
                 (true)
@@ -911,14 +1075,14 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.action_copy_url -> run {
                 if (currentURL.isNotEmpty()) {
                     copyTextToClipboard(currentURL)
-                }
+                } // else: do nothing, as no one would intend to copy an empty string
                 (true)
             }
             R.id.action_copy_url_as_link -> run {
                 if (currentURL.isNotEmpty()) {
                     copyTextToClipboard(
-                        SpannableString(currentURL).apply {
-                            setSpan(URLSpan(currentURL), 0, length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        buildSpannedString {
+                            append(currentURL, URLSpan(currentURL), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
                         }
                     )
                 }
@@ -935,12 +1099,30 @@ open class MainActivity : ConfiguratedActivity() {
                 showCurrentSiteCert()
                 (true)
             }
+            R.id.action_find_robots_txt -> run {
+                if (currentURL.isNotEmpty()) {
+                    Uri.parse(currentURL).also { uri ->
+                        val scheme = if (isHttpUri(uri)) { "http" } else { "https" }
+                        val host = uri.host
+                        if (host != null) {
+                            load(Uri.Builder().scheme(scheme).authority(host).path("robots.txt").build().toString()) // should use default port? Don't know, but it would be strange for a bot to use another port.
+                        }
+                    }
+                }
+                (true)
+            }
             else -> false
         }
     }
 
     override fun onConfigurationChanged(config: Configuration) {
         super.onConfigurationChanged(config)
+    }
+
+    override fun onDestroy() {
+        logMsgs.clear()
+        findViewById<TextView>(R.id.log).text = ""
+        super.onDestroy()
     }
 
     private fun updateWindowSizeAndSetCorrectUserAgent() {
@@ -1014,9 +1196,9 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.button_copy,
             R.id.button_paste,
             R.id.button_search,
-            R.id.button_go
+            R.id.button_load
         ).forEach { id ->
-            findViewById<Button>(id).apply {
+            findViewById<MaterialButton>(id).apply {
                 visibility = VISIBLE
                 setEnabled(true)
             }
@@ -1042,9 +1224,9 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.button_copy,
             R.id.button_paste,
             R.id.button_search,
-            R.id.button_go
+            R.id.button_load
         ).forEach { id ->
-            findViewById<Button>(id).apply {
+            findViewById<MaterialButton>(id).apply {
                 setEnabled(false)
                 visibility = GONE
             }
@@ -1071,6 +1253,27 @@ open class MainActivity : ConfiguratedActivity() {
         }
     }
 
+    private fun logMsgsToText(): CharSequence {
+        val records = synchronized(logMsgs) { logMsgs.toList() }
+        return buildSpannedString {
+            var flag = false
+            for (record in records) {
+                if (flag) {
+                    append('\n')
+                } else {
+                    flag = true
+                }
+                append(
+                    if (shouldLinkURLsInLogAtomic.get()) {
+                        record
+                    } else {
+                        record.toString()
+                    }
+                )
+            }
+        }
+    }
+
     private fun showLog() {
         findViewById<WebView>(R.id.window).visibility = GONE
         findViewById<ScrollView>(R.id.log_scroll).apply {
@@ -1080,13 +1283,41 @@ open class MainActivity : ConfiguratedActivity() {
         findViewById<TextView>(R.id.log).apply {
             visibility = VISIBLE
             layoutParams!!.height = LayoutParams.MATCH_PARENT
-            text = synchronized(logMsgs) {
-                logMsgs.joinToString("\n")
-            }
+            text = logMsgsToText()
         }
         (this@MainActivity).apply {
             previousTitle = title.toString()
             title = getString(R.string.log)
+            supportActionBar?.also {
+                previousSubTitle = it.subtitle
+                it.subtitle = null
+            }
+        }
+    }
+
+    private inline fun isShowingLog(): Boolean {
+        return (findViewById<TextView>(R.id.log).visibility == VISIBLE)
+    }
+
+    private fun updateLogIfShowing() {
+        findViewById<TextView>(R.id.log).apply {
+            if (visibility == VISIBLE) {
+                text = logMsgsToText()
+                postDelayed({
+                    (this@MainActivity).apply {
+                        if (autoscrollLogMsgs) {
+                            val y = findViewById<TextView>(R.id.log).bottom.let {
+                                if (it > 1) {
+                                    it - 1
+                                } else {
+                                    it
+                                }
+                            }
+                            findViewById<ScrollView>(R.id.log_scroll).scrollTo(0, y)
+                        }
+                    }
+                }, 10)
+            }
         }
     }
 
@@ -1103,6 +1334,16 @@ open class MainActivity : ConfiguratedActivity() {
         if (previousTitle.isNotEmpty()) {
             title = previousTitle
             previousTitle = ""
+            supportActionBar?.also {
+                it.subtitle = previousSubTitle
+                previousSubTitle = null
+            }
+        }
+    }
+
+    private inline fun hideLogIfShowing() {
+        if (isShowingLog()) {
+            hideLog()
         }
     }
 
@@ -1110,18 +1351,10 @@ open class MainActivity : ConfiguratedActivity() {
         return findViewById<RelativeLayout>(R.id.search_area).visibility == VISIBLE
     }
 
-    private inline fun isShowingContentSearchBar(): Boolean {
-        return (
-            findViewById<RelativeLayout>(R.id.search_area).visibility == VISIBLE
-        ) && (
-            findViewById<ImageView>(R.id.search_next).visibility == VISIBLE
-        )
-    }
-
     private fun showContentSearchBar() {
-        allowsForegroundLogging = false
+        allowsForegroundLogging.set(false)
         hideUrlBarIfShowing()
-        this.supportActionBar?.hide()
+        supportActionBar?.hide()
         findViewById<RelativeLayout>(R.id.search_area).visibility = VISIBLE
         findViewById<EditText>(R.id.content_search_field).apply {
             visibility = VISIBLE
@@ -1141,9 +1374,9 @@ open class MainActivity : ConfiguratedActivity() {
     }
 
     private fun showSearchBarForLog() {
-        allowsForegroundLogging = false
+        allowsForegroundLogging.set(false)
         hideUrlBarIfShowing()
-        this.supportActionBar?.hide()
+        supportActionBar?.hide()
         findViewById<RelativeLayout>(R.id.search_area).visibility = VISIBLE
         findViewById<EditText>(R.id.content_search_field).apply {
             visibility = VISIBLE
@@ -1173,16 +1406,26 @@ open class MainActivity : ConfiguratedActivity() {
             }
         }
         findViewById<RelativeLayout>(R.id.search_area).visibility = GONE
-        this.supportActionBar?.show()
-        allowsForegroundLogging = foregroundLoggingEnabled
+        supportActionBar?.show()
+        allowsForegroundLogging.set(foregroundLoggingEnabled)
+    }
+    
+    private inline fun hideSearchBarIfShowing() {
+        if (isShowingSearchBar()) {
+            val shouldClear = (findViewById<ImageView>(R.id.search_next).visibility == VISIBLE) // searching in content
+            hideSearchBar()
+            if (shouldClear) {
+                findViewById<WebView>(R.id.window).clearMatches()
+            }
+        }
     }
 
     private inline fun isShowingUrlBar(): Boolean {
         return (findViewById<EditText>(R.id.url_field).visibility == VISIBLE)
     }
 
-    private inline fun showUrlBarIfHidden() {
-        if (! isShowingUrlBar()) {
+    private inline fun showUrlBarIfNotShowing() {
+        if (!isShowingUrlBar()) {
             showUrlBar()
         }
     }
@@ -1193,40 +1436,8 @@ open class MainActivity : ConfiguratedActivity() {
         }
     }
 
-    private inline fun isShowingLog(): Boolean {
-        return (findViewById<TextView>(R.id.log).visibility == VISIBLE)
-    }
-
-    private fun updateLogIfShowing() {
-        findViewById<TextView>(R.id.log).apply {
-            if (visibility == VISIBLE) {
-                text = synchronized(logMsgs) { logMsgs.joinToString("\n") }
-                postDelayed({
-                    (this@MainActivity).apply {
-                        if (autoscrollLogMsgs) {
-                            val y = findViewById<TextView>(R.id.log).bottom.let {
-                                if (it > 1) {
-                                    it - 1
-                                } else {
-                                    it
-                                }
-                            }
-                            findViewById<ScrollView>(R.id.log_scroll).scrollTo(0, y)
-                        }
-                    }
-                }, 10)
-            }
-        }
-    }
-
-    private inline fun hideLogIfShowing() {
-        if (isShowingLog()) {
-            hideLog()
-        }
-    }
-
     private fun showRunButtonIfApplicable() {
-        findViewById<Button>(R.id.button_run).apply {
+        findViewById<MaterialButton>(R.id.button_run).apply {
             if (isShowingUrlBar() && shouldDisplayRunButton) {
                 visibility = VISIBLE
                 setEnabled(true)
@@ -1238,7 +1449,7 @@ open class MainActivity : ConfiguratedActivity() {
     }
 
     private fun hideRunButtonIfShowing() {
-        findViewById<Button>(R.id.button_run).apply {
+        findViewById<MaterialButton>(R.id.button_run).apply {
             if (visibility == VISIBLE) {
                 visibility = GONE
                 setEnabled(false)
@@ -1305,23 +1516,28 @@ open class MainActivity : ConfiguratedActivity() {
         if (onlyICanHandle(x)) {
             return 1
         } else {
-            (AlertDialog.Builder(this).apply {
-                setView(
-                    layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
-                        findViewById<TextView>(R.id.url).text = url
-                        findViewById<TextView>(R.id.warning).text = getText(R.string.confirm_opening_url_with_another_app_warning1)
-                    }
-                )
-                setPositiveButton(getString(R.string.yes)) { _, _ ->
-                    saveCurrentConfiguration()
-                    try {
-                        startActivity(x)
-                    } catch(_: ActivityNotFoundException) {
-                        showMsg(getString(R.string.error5))
-                    }
+            (object: DialogFragment() {
+                override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                    val ctx = requireActivity()
+                    return (AlertDialog.Builder(ctx).apply {
+                        setView(
+                            layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
+                                findViewById<TextView>(R.id.url).text = url
+                                findViewById<TextView>(R.id.warning).text = ctx.getText(R.string.confirm_opening_url_with_another_app_warning1)
+                            }
+                        )
+                        setPositiveButton(R.string.yes) { _, _ ->
+                            saveCurrentConfiguration()
+                            try {
+                                ctx.startActivity(x)
+                            } catch(_: ActivityNotFoundException) {
+                                showMsg(ctx.getString(R.string.error5))
+                            }
+                        }
+                        setNegativeButton(R.string.no) {_, _ -> }
+                    }).create()
                 }
-                setNegativeButton(R.string.no) {_, _ -> }
-            }).create().show()
+            }).show(supportFragmentManager, null)
         }
         return 0
     }
@@ -1449,13 +1665,17 @@ open class MainActivity : ConfiguratedActivity() {
                 val subject = sslCert.issuedTo.dName
                 content.append(getString(R.string.cert_part2, issuer, notBefore, notAfter, subject))
             }
-            (AlertDialog.Builder(this@MainActivity).apply {
-                setView(
-                    layoutInflater.inflate(R.layout.cert, null).apply {
-                        findViewById<TextView>(R.id.content).text = content
-                    }
-                )
-            }).create().show()
+            (object: DialogFragment() {
+                override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                    return (AlertDialog.Builder(requireActivity()).apply {
+                        setView(
+                            layoutInflater.inflate(R.layout.cert, null).apply {
+                                findViewById<TextView>(R.id.content).text = content
+                            }
+                        )
+                    }).create()
+                }
+            }).show(supportFragmentManager, null)
         }
     }
 
@@ -1475,38 +1695,43 @@ open class MainActivity : ConfiguratedActivity() {
             val schemeIsHttp = isHttpUri(Uri.parse(url))
             val isPDF = url.endsWith(".pdf", ignoreCase = true)
             if (shouldAskBeforeLoadingUrlThatIsFromAnotherApp) {
-                (AlertDialog.Builder(this).apply {
-                    setView(
-                        layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
-                            findViewById<TextView>(R.id.text1).text = SpannableStringBuilder().apply {
-                                append(getString(R.string.confirm_loading_page, url))
-                                if (isPDF || schemeIsHttp) {
-                                    append("\n\n")
-                                    append(getText(R.string.warning))
+                (object: DialogFragment() {
+                    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                        val ctx = requireActivity()
+                        return (AlertDialog.Builder(ctx).apply {
+                            setView(
+                                layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
+                                    findViewById<TextView>(R.id.text1).text = buildSpannedString {
+                                        append(ctx.getString(R.string.confirm_loading_page, url))
+                                        if (isPDF || schemeIsHttp) {
+                                            append("\n\n")
+                                            append(ctx.getText(R.string.warning))
+                                        }
+                                        if (isPDF) {
+                                            append(ctx.getString(R.string.cannot_display_pdf))
+                                        }
+                                        if (schemeIsHttp) {
+                                            append(ctx.getString(R.string.protocol_is_insecure))
+                                        }
+                                    }
                                 }
-                                if (isPDF) {
-                                    append(getString(R.string.cannot_display_pdf))
-                                }
-                                if (schemeIsHttp) {
-                                    append(getString(R.string.protocol_is_insecure))
+                            )
+                            setPositiveButton(R.string.ok) {_, _ ->
+                                disableJavaScriptAsRequested()
+                                load(url).also { urlLoaded ->
+                                    if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                        showLog()
+                                    }
                                 }
                             }
-                        }
-                    )
-                    setPositiveButton(getString(R.string.ok)) {_, _ ->
-                        disableJavaScriptAsRequested()
-                        load(url).also { urlLoaded ->
-                            if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
-                                showLog()
-                            }
-                        }
+                            setNegativeButton(R.string.cancel) {_, _ -> }
+                        }).create()
                     }
-                    setNegativeButton(R.string.cancel) {_, _ -> }
-                }).create().show()
+                })
             } else {
                 disableJavaScriptAsRequested()
                 load(url).also { urlLoaded ->
-                    if (!urlLoaded && !isShowingLog() && maxLogMsgs > 0) {
+                    if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
                         showLog()
                     }
                 }
@@ -1524,15 +1749,16 @@ open class MainActivity : ConfiguratedActivity() {
                     append(getString(R.string.blocked_but_can_change_in_settings))
                 }
             }
+            val maxMsgNum = maxLogMsgsAtomic.get()
             synchronized(logMsgs) {
                 logMsgs.apply {
-                    if (size >= maxLogMsgs) {
+                    if (size >= maxMsgNum) {
                         removeFirst()
                     }
                     add(msg)
                 }
             }
-            showMsg(msg, w) // even if allowsForegroundLogging is false
+            showMsg(msg, w) // even if allowsForegroundLogging.get() is false
         }
         if (schemeIsOrSeemsLikeHttp && (!shouldAllowHTTP)) {
             return false
@@ -1541,7 +1767,7 @@ open class MainActivity : ConfiguratedActivity() {
                 currentURL = url
                 textToDisplayInUrlField = url
             }
-            if (manuallySetLanguageTags && languageTags.isNotEmpty()) {
+            if (manuallySetLanguageTagsAtomic.get() && languageTags.isNotEmpty()) {
                 w.loadUrl(url, mutableMapOf(Pair("Accept-Language", languageTags)))
             } else {
                 w.loadUrl(url)
@@ -1552,8 +1778,8 @@ open class MainActivity : ConfiguratedActivity() {
     }
 }
 
-private inline fun containedIgnoringCase(s: String, container: Array<String>): Boolean { // Array<String> seems to be the most efficient type here
-    for (e in container) {
+private inline fun containedIgnoringCase(s: String, a: Array<String>): Boolean { // Array<String> seems to be the most efficient type here
+    for (e in a) {
         if (s.equals(e, ignoreCase=true)) {
             return true
         }

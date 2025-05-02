@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Traditional Chinese characters are a little too information-intensive and thus need a specifically formed UI. -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/linearlayout1"
@@ -7,6 +6,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="top">
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
     <EditText
         android:id="@+id/url_field"
         android:layout_width="match_parent"
@@ -22,7 +25,7 @@
         android:fontFamily="monospace"
         android:hint="@string/main_url_field_hint"
         android:enabled="true"
-        tools:ignore="TextFields" />
+        tools:ignore="TextFields"/>
     <HorizontalScrollView
         android:id="@+id/button_area"
         android:layout_width="match_parent"
@@ -34,86 +37,86 @@
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
             android:gravity="end">
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_close"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/close"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textAllCaps="false"/>
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_decode"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/decode"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textAllCaps="false"/>
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_clear"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/clear"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textAllCaps="false"/>
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_restore"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/restore"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textAllCaps="false"/>
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_copy"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/copy"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textAllCaps="false"/>
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_paste"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/paste"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textAllCaps="false"/>
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_search"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/search"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textAllCaps="false"/>
-            <Button
-                android:id="@+id/button_go"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_load"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
-                android:text="@string/main_button_go"
-                android:textSize="17sp"
+                android:text="@string/main_button_load"
+                android:textSize="18sp"
                 android:textAllCaps="false"/>
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_run"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
                 android:text="@string/main_button_run"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:textAllCaps="false"
                 android:visibility="gone"/>
         </LinearLayout>

@@ -1,11 +1,12 @@
 package test.sls1005.projects.fundamentalbrowser
 
 import android.os.Bundle
-import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.appbar.MaterialToolbar
 
-class DocumentationActivity: AppCompatActivity() {
+class DocumentationActivity: ThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_documentation)
+        setSupportActionBar(findViewById<MaterialToolbar>(R.id.toolbar))
     }
 }

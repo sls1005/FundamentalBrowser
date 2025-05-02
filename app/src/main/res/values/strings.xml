@@ -25,7 +25,7 @@
     <string name="close">Close</string>
     <string name="text_default">Default</string>
     <string name="tap_to_set">Tap to set</string>
-    <string name="main_button_go">Go</string>
+    <string name="main_button_load">Load</string>
     <string name="main_button_run">Run</string>
     <string name="settings_title_options">Options</string>
     <string name="allow_javascript">Allow JavaScript</string>
@@ -59,13 +59,23 @@
     <string name="settings_title_advanced_sertings">Advanced settings</string>
     <string name="allow_http">HTTP-compatible mode</string>
     <string name="switch_allow_http_extra_text">Allow using HTTP (not HTTPS) as the communication protocol.\n\n<b>Warning:</b> HTTP is an insecure protocol and is different from HTTPS. It is recommended to keep this off unless you are testing your own server in LAN.</string>
-    <string name="manually_set_languages">Manually set preferred languages</string>
+    <string name="manually_set_languages">Set preferred languages</string>
     <string name="add_language">Add a language</string>
-    <string name="switch_manually_set_languages_extra_string">When disabled, the default will be used. If enabled but not set, no language tag will be sent.\nIf this doesn\'t work, please consider changing the language of this app. If your device supports doing so, the option for changing the language of this application will appear in the device settings.\nA website may ignore this.\n\n<b>Warning:</b> Please note that the use of highly customized language tags may result in privacy-related issues as described in https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 .</string>
+    <string name="switch_manually_set_languages_extra_string">This specifies the preferred languages of webpages, not the language of the UI.\nWhen disabled, the default will be used. If enabled but not set, no language tag will be sent.\nIf this doesn\'t work, please consider changing the language of this app. If your device supports doing so, the option for changing the language of this application will appear in the device settings.\nA website may ignore this.\n\n<b>Warning:</b> Please note that the use of highly customized language tags may result in privacy-related issues as described in https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 .</string>
     <string name="clear_log_before_running_script">Clear log before running a script</string>
     <string name="autoscroll_log_msgs">Autoscroll log messages</string>
     <string name="allow_js_when_loading_url_that_is_from_another_app">Allow the use of JavaScript when loading a URL that is from another application</string>
     <string name="ask_before_loading_url_that_is_from_another_app">Ask before loading a URL that is from another application</string>
+    <string name="confirm_following_redirection_to_load_page">Do you want to follow the redirection to load the page of ‘%1$s’?</string>
+    <string name="ask_before_following_redirection">Ask before following redirection</string>
+    <string name="switch_ask_before_following_redirection_extra_text">When enabled, this app will no longer automatically follow redirection.</string>
+    <string name="show_advanced_developer_tools">Advanced developer tools</string>
+    <string name="switch_show_advanced_developer_tools_extra_text_part1">Show advanced developer tools in the ‘More’ submenu of this application.</string>
+    <string name="switch_show_advanced_developer_tools_extra_text_part2">Even if this is disabled, you can still use common developer tools such as the JavaScript console (if it is enabled) and the log, and can still view the source code of a web page or the certificate of a website. This option currently only covers less common tools.</string>
+    <string name="auto_turn_urls_in_log_into_links">Automatically turn URLs in the log into links</string>
+    <string name="switch_auto_link_urls_in_log_extra_text">Not all URLs will be turned into links. This app will selectively link the URLs. The more likely a URL would point to a page (or resource like image) on the web or to a file in the cache, the more likely it will be linked by this app. When you click a link in the log, it will be opened in this app; it will work offline if the file is still in the cache.</string>
+    <string name="disable_dynamic_colors">Disable dynamic colors</string>
+    <string name="switch_disable_dynamic_colors_extra_text">When this is turned on and the theme of this app is set to a theme other than the default, the colors of the UI of this app will not change according to system settings. There is, however, no guarantee that the colors would change according to system settings while this is turned off.</string>
     <string name="number_field_title1">Enter a number</string>
     <string name="url_field_title1">Enter a URL</string>
     <string name="string_field_title_1">Enter text</string>
@@ -77,6 +87,7 @@
     <string name="open_here">Open here</string>
     <string name="dont_load">Don\'t load</string>
     <string name="try_encryption">Try encryption</string>
+    <string name="menu1_action_hide_tool_bar">Hide the tool bar</string>
     <string name="menu1_action_show_or_hide_url_bar">Show/hide URL bar</string>
     <string name="menu1_action_edit_url">Edit URL</string>
     <string name="menu1_action_refresh">Refresh</string>
@@ -94,6 +105,7 @@
     <string name="menu1_action_copy_url">Copy current URL as plain text</string>
     <string name="menu1_action_copy_url_as_link">Copy current URL as link</string>
     <string name="menu1_action_view_cert">View the certificate of this website</string>
+    <string name="menu1_action_find_robots_txt">Find the ‘robots.txt’ of this website</string>
     <string name="error">Error: %1$s</string>
     <string name="error1">Error: Search URL is not set. Please set it in Settings.</string>
     <string name="error2">Please enter some keywords.</string>
@@ -121,14 +133,14 @@
     <string name="doc_title1">1. UI</string>
     <string name="doc_title1_1">i. The URL bar</string>
     <string name="doc_text1_1_1">The URL bar of this app is a little different from that of other browsers. It is still the place where the URL is displayed or edited, but now it is usually hidden and only shows up when the user needs it.\n\nWhen you need to see the URL bar, tap on the ‘<code>://</code>’ symbol if it is present in the top bar, or use the ‘Show/hide URL bar’ or ‘Edit URL’ option from the menu that is opened by tapping the three-dot icon in the top bar. Tapping the ‘<code>://</code>’ symbol once again (if it is present) will close the URL bar if it is already opened.\n\nThe URL bar allows multiline editing, that is, text that is too long will be wrapped to the next line. This makes it easier to view and edit when the URL is very long.\n\nThere are several buttons at the bottom of the URL bar. Those are:\n</string>
-    <string name="doc_text1_1_2"><b>Go</b>: load the web page corresponding to a given URL. Unlike the ‘Search’ button, this does not do search.\n\n<b>Search</b>: search the web by using the text in the URL field as keywords. Only usable if the ‘search URL’ is set. Unlike the ‘Go’ button, this will not load a URL but… will search for it.\n\n<b>Copy</b>: copy the text in the URL field, or the selected text in the URL field, if any.\n\n<b>Paste</b>: paste the text to the URL field, either at the end of text or at the selected position if any text is selected.\n\n<b>Clear</b>: clear the URL field, removing all text.\n\n<b>Restore</b>: replace any text in the URL field with a previously loaded URL. This can also be used if the field is empty, in which case the previously loaded URL will still be restored, if any.\n\n<b>Decode</b>: decode the URL if it is pct-encoded. See https://datatracker.ietf.org/doc/html/rfc3986 for more details about pct-encoding.\n\n<b>Close</b>: close the URL bar.\n</string>
+    <string name="doc_text1_1_2"><b>Load</b>: load the web page corresponding to a given URL. Unlike the ‘Search’ button, this does not do search.\n\n<b>Search</b>: search the web by using the text in the URL field as keywords. Only usable if the ‘search URL’ is set. Unlike the ‘Load’ button, this will not load a URL but… will search for it.\n\n<b>Copy</b>: copy the text in the URL field, or the selected text in the URL field, if any.\n\n<b>Paste</b>: paste the text to the URL field, either at the end of text or at the selected position if any text is selected.\n\n<b>Clear</b>: clear the URL field, removing all text.\n\n<b>Restore</b>: replace any text in the URL field with a previously loaded URL. This can also be used if the field is empty, in which case the previously loaded URL will still be restored, if any.\n\n<b>Decode</b>: decode the URL if it is pct-encoded. See https://datatracker.ietf.org/doc/html/rfc3986 for more details about pct-encoding.\n\n<b>Close</b>: close the URL bar.\n</string>
     <string name="doc_title1_2">ii. The main window</string>
     <string name="doc_text1_2">This is where the web page is displayed.\n</string>
     <string name="doc_title1_3">iii. The log</string>
     <string name="doc_text1_3">The log is a record of the web requests this app has made, including the requests for images, scripts, data (e.g., JSON) and other kinds of resources. It also contains the output of each script that has been run.\n\nTo open the log, use the ‘view log’ option from the option menu. The option is only available if there is anything in the log.\n\nEach request-related entry consists of:\n  (1) the method, e.g., GET.\n  (2) if it is the result of a redirection, a string that indicates so.\n  (3) the URL associated with that request.\n\nTo search for a specific record in the log, use the ‘Search in log’ option from the option menu. The option will be available when you open the menu while the log is opened.\n\nUsing the back button of the device (or an equivalent gesture) will close the log.\n</string>
     <string name="doc_title2">2. Usage</string>
     <string name="doc_title2_1">i. Load a URL</string>
-    <string name="doc_text2_1">To load a URL, paste it to the URL field and then tap ‘Go’.\n</string>
+    <string name="doc_text2_1">To load a URL, paste it to the URL field and then tap ‘Load’.\n</string>
     <string name="doc_title2_2">ii. Search the web</string>
     <string name="doc_text2_2">To do search, firstly set the search URL in settings and enter the keyword, and then tap ‘Search’.\n</string>
     <string name="doc_title2_3">iii. Search a web page</string>
@@ -164,4 +176,8 @@
     <string name="cert_x_is_odd">"    x is odd: %1$s\n"</string>
     <string name="cert_modulus_exponent">"    Modulus: %1$s\n    Exponent: %2$d\n"</string>
     <string name="cert_final_part">"\nSignature algorithm: %1$s\n\nSignature: %2$s\n"</string>
+    <string name="theme">Theme</string>
+    <string name="theme_default">Default (System default or Dark)</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
 </resources>

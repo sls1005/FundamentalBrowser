@@ -12,12 +12,12 @@ android {
         applicationId = "test.sls1005.projects.fundamentalbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 18
-        versionName = "1.2.1"
-        resourceConfigurations += arrayOf("en", "en-rGB", "en-rUS", "zh-rCN", "zh-rHK", "zh-rTW", "b+zh+Hans", "b+zh+Hant")
+        versionCode = 19
+        versionName = "2.0.1"
     }
     androidResources {
         generateLocaleConfig = true
+        localeFilters += arrayOf("en", "en-rGB", "en-rUS", "zh-rCN", "zh-rHK", "zh-rTW", "b+zh+Hant")
     }
     signingConfigs {
         register("release") {

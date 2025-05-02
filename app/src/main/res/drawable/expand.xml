@@ -1,0 +1,13 @@
+<!--
+    This symbol is not copyrighted as it only consists of simple lines.
+    This file is copyrighted as the vector path is manually written by me.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="100dp"
+    android:height="100dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path android:pathData="M 20,40 L 20,20 L 40,20 M 60,20 L 80,20 L 80,40 M 80,60 L 80,80 L 60,80 M 40,80 L 20,80 L 20,60 M 20,20 L 40,40 M 80,20 L 60,40 M 80,80 L 60,60 M 20,80 L 40,60"
+        android:strokeWidth="5"
+        android:strokeColor="@color/white"/>
+</vector>

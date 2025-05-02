@@ -16,6 +16,8 @@ However, the functionality of this app will not exceed what it should have as a 
 
 ![](screenshots/screenshot3.jpg)
 
+![](screenshots/screenshot4.jpg)
+
 ### Features to be implemented
 
 A developer-friendly browser should: (A checked box means implemented or already supported.)
@@ -60,7 +62,7 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 - [ ] Bookmarks
 
-- [ ] History (Use the log instead.)
+- [ ] History
 
 - [ ] PDF viewer
 
@@ -68,29 +70,31 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 #### Separated buttons for searching and URL loading
 
-To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Go' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search for it. Such strict distinguishment between tasks is supposed to be helpful to prevent unintended URL loading and to allow the user to search for a domain-name-like or URL-like string.
+To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Load' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search for it. Such strict distinguishment between tasks is supposed to be helpful to prevent accidental URL loading and to allow the user to search for a domain-name-like or URL-like string.
 
 #### Console and REPL
 
 To use the console and REPL features, input some code (should normally be JS code) in the URL field and then use the 'Run' button (enabled in settings) to execute it.
 
-![](screenshots/screenshot4.jpg)
-
 ![](screenshots/screenshot5.jpg)
 
 ![](screenshots/screenshot6.jpg)
+
+![](screenshots/screenshot7.jpg)
 
 The support for `javascript:` scheme in this app is considered deprecated since Mar. 2025, and now the recommended way to run code in this app is to use the 'Run' button.
 
 #### Generalized intent sender and activity launcher
 
-![](screenshots/screenshot7.jpg)
+![](screenshots/screenshot8.jpg)
 
 See <a href="#Details">details</a> for more information about this usage.
 
 ### Note
 
-* Since this app allows multiline editing, the 'Go' and 'Search' buttons (but not the 'Run' button) will by default replace newline characters in the URL field with spaces, or encode them as `%20` (meaning space).
+* Since this app allows multiline editing, the 'Load' and 'Search' buttons (but not the 'Run' button) will by default replace newline characters in the URL field with spaces, or encode them as `%20` (meaning space).
+
+* This app has no so-called 'History' feature that one would expect. It instead has a log that logs everything including data and images. Some of the URLs in the log will be rendered clickable by default, and when you click one of them, it will be opened in this app. When you close the app, the log will be cleared, and therefore, the information in the log will not be preserved. The internal history of the browser is also supposed to be cleared and not be preserved once you close the app. There is no any mechanism implemented to preserved the history for this app, nor is any such feature planned to be implemented. If you want to preserve the history, just manually make a copy of the log in the form of plain text or rich text. When copied as rich text, the URLs rendered as links are supposed to still work outside this app, but will instead be opened in your default browser when clicked.
 
 * To keep things simple, new windows are implemented in this app as new tasks/activities. Using more than one window may consume a lot of system resources due to this reason. Hence, new windows are not created automatically in most cases.
 

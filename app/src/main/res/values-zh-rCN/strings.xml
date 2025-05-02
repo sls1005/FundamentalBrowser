@@ -23,7 +23,7 @@
     <string name="close">关闭</string>
     <string name="text_default">默认</string>
     <string name="tap_to_set">轻触来设定</string>
-    <string name="main_button_go">载入</string>
+    <string name="main_button_load">载入</string>
     <!-- This file uses “载入” to mean loading a page for the first time, and “加载” in other cases.
          “载入” is need here anyway as “加载” does not carry enough meaning about what this button does. -->
     <string name="main_button_run">执行</string>
@@ -65,11 +65,22 @@
     <string name="switch_allow_http_extra_text">允许使用 HTTP（而非 HTTPS）作为通信协议。\n\n<b>警告：</b>不同于 HTTPS，HTTP 是个不安全的通信协议。除非您正在内网测试自有服务器，否则不建议启用此选项。</string>
     <string name="manually_set_languages">手动设置偏好的语言</string>
     <string name="add_language">添加语言</string>
-    <string name="switch_manually_set_languages_extra_string">若未启用，则将使用默认值。若启用了却未设置，则会防止发送任何语言标签。\n若此选项未产生其应有的效果，请考虑变更此应用程序的语言。若您的设备支持，则用来变更此应用程序语言的选项会出现在设备的设置界面中。\n网站可能忽略此信息。\n\n<b>警告：</b>请注意，若使用高度自定义的语言标签则可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
+    <string name="switch_manually_set_languages_extra_string">这是用来指定用户偏好的、用于网页中的语言，而非用于界面的语言。\n若未启用，则将使用默认值。若启用了却未设置，则会防止发送任何语言标签。\n若此选项未产生其应有的效果，请考虑变更此应用程序的语言。若您的设备支持，则用来变更此应用程序语言的选项会出现在设备的设置界面中。\n网站可能忽略此信息。\n\n<b>警告：</b>请注意，若使用高度自定义的语言标签则可能造成隐私相关的问题。这类问题在 https://datatracker.ietf.org/doc/html/rfc7231#section-9.7 中有所描述。</string>
     <string name="clear_log_before_running_script">执行代码前清空日志</string>
     <string name="autoscroll_log_msgs">日志自动滚屏</string>
     <string name="allow_js_when_loading_url_that_is_from_another_app">加载来自其他应用的网址时，允许使用JavaScript</string>
     <string name="ask_before_loading_url_that_is_from_another_app">加载来自其他应用的网址之前先询问</string>
+    <string name="ask_before_following_redirection">跟随重定向之前先询问</string>
+    <string name="switch_ask_before_following_redirection_extra_text">启用后，本应用程序将不再自动跟随重定向。</string>
+    <string name="confirm_following_redirection_to_load_page">您想跟随网页的重定向，载入“%1$s”这个页面吗？</string>
+    <string name="show_advanced_developer_tools">进阶开发者工具</string>
+    <string name="switch_show_advanced_developer_tools_extra_text_part1">在本应用程序的“更多”子选单中显示进阶开发者工具。</string>
+    <string name="switch_show_advanced_developer_tools_extra_text_part2">即使禁用此选项，您依然可以使用诸如 JavaScript 控制台（若其处于启用状态）和日志等一般开发者工具，且仍然能够检视网页源代码和网站证书。此选项目前仅提供较少见且不常使用的额外工具。</string>
+    <string name="auto_turn_urls_in_log_into_links">自动将日志纪录中的网址转化为链接</string>
+    <string name="switch_auto_link_urls_in_log_extra_text">并非每条网址都会被转为链接。本应用程序会自动选择转换某些网址。某条网址指向网络上的页面（或图片之类的资源）或者缓存中的文件的概率愈高，其被转为链接的概率就愈高。当您点击日志中的链接时，将在本应用程序中开启它；若该文件仍存在于缓存中，则能够在无网络连接的情况下开启。</string>
+    <string name="disable_dynamic_colors">禁用动态色彩</string>
+    <string name="switch_disable_dynamic_colors_extra_text">当此选项为启用状态且此应用程序被设为默认以外的主题时，其界面颜色将不会随着系统设置变更。然而，这并不保证此选项为非启用状态时界面颜色就会随着系统变更。</string>
+    <!-- 界面, not 接口 (in this context) -->
     <string name="number_field_title1">请输入数字</string>
     <string name="url_field_title1">请输入网址</string>
     <string name="string_field_title_1">请输入文字</string>
@@ -78,6 +89,7 @@
     <string name="weight">权重</string>
     <string name="language_selection_extra_text">较高的权重代表较高优先级。具有较高优先级的语言会被认为是用户偏好的语言。“默认”代表最优先。</string>
     <string name="repeat_to_close">重复该手势来关闭视窗</string>
+    <string name="menu1_action_hide_tool_bar">隐藏工具列</string>
     <string name="menu1_action_show_or_hide_url_bar">显示/隐藏网址列</string>
     <string name="menu1_action_edit_url">编辑网址</string>
     <string name="menu1_action_refresh">重新加载</string>
@@ -95,6 +107,8 @@
     <string name="menu1_action_copy_url">复制当前网址为纯文字</string>
     <string name="menu1_action_copy_url_as_link">复制当前网址为链接</string>
     <string name="menu1_action_view_cert">检视此网站的证书</string>
+    <string name="menu1_action_find_robots_txt">找出此网站的“robots.txt”</string>
+    <string name="error">错误：%1$s</string>
     <string name="error1">错误：搜索专用网址未设置，请在设置中设置它。</string>
     <string name="error2">请输入关键词。</string>
     <string name="error3">请输入网址。</string>
@@ -155,4 +169,8 @@
     <string name="cert_modulus_exponent">"     模数（Modulus）：%1$s\n    指数（Exponent）：%2$d\n"</string>
     <!-- See the TW version for explanation. -->
     <string name="cert_final_part">"\n签名算法：%1$s\n\n签名：%2$s\n"</string>
+    <string name="theme">主题</string>
+    <string name="theme_default">默认（系统默认或深色）</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_light">浅色</string>
 </resources>

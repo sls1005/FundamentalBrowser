@@ -1,14 +1,13 @@
 package test.sls1005.projects.fundamentalbrowser
 
-import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 
 private const val START_INDEX_OF_MAX_LOGS = 1
 private const val FINAL_INDEX_OF_MAX_LOGS = 4
 private const val START_INDEX_OF_SEARCH_URL = 5
 
-open class ConfiguratedActivity : AppCompatActivity() {
-    // Default:                                                         // Stored file format:
+open class ConfiguratedActivity : ThemedActivity() {
+    // Default configuration:                                           // Stored file format:
     protected var shouldUseJavaScript = true                            // Line 1, Byte 1, Bit 1 (LSB), true if set, false if not set
     protected var shouldLoadImages = true                               //         Bit 2
     protected var shouldLoadResources = true                            //         Bit 3
@@ -27,6 +26,9 @@ open class ConfiguratedActivity : AppCompatActivity() {
     protected var shouldAskBeforeLoadingUrlThatIsFromAnotherApp = false //                 Bit 6
     protected var autoscrollLogMsgs = false                             //                 Bit 7
     protected var shouldAllowHTTP = false                               //                 Bit 8
+    protected var showAdvancedDeveloperTools = false                    // Line 2, Byte 2, Bit 1
+    protected var shouldAskBeforeFollowingRedirection = false           //                 Bit 2
+    protected var shouldLinkURLsInLog = true                            //                 Bit 3
 
     override fun onResume() {
         super.onResume()
@@ -36,16 +38,17 @@ open class ConfiguratedActivity : AppCompatActivity() {
             if (data1.size < FINAL_INDEX_OF_MAX_LOGS + 1) {
                 file.delete()
             } else {
-                val a1 = bitsSetOrNot(data1[0])
-                shouldUseJavaScript = a1[0]
-                shouldLoadImages = a1[1]
-                shouldLoadResources = a1[2]
-                foregroundLoggingEnabled = a1[3]
-                shouldAccept3rdPartyCookies = a1[4]
-                shouldRemoveLfAndSpacesFromUrl = a1[5]
-                desktopMode = a1[6]
-                shouldAcceptCookies = a1[7]
-
+                run {
+                    val a = bitsSetOrNot(data1[0])
+                    shouldUseJavaScript = a[0]
+                    shouldLoadImages = a[1]
+                    shouldLoadResources = a[2]
+                    foregroundLoggingEnabled = a[3]
+                    shouldAccept3rdPartyCookies = a[4]
+                    shouldRemoveLfAndSpacesFromUrl = a[5]
+                    desktopMode = a[6]
+                    shouldAcceptCookies = a[7]
+                }
                 maxLogMsgs = run {
                     var k = 0
                     for (i in FINAL_INDEX_OF_MAX_LOGS downTo START_INDEX_OF_MAX_LOGS) {
@@ -73,15 +76,23 @@ open class ConfiguratedActivity : AppCompatActivity() {
                         }
                     }).toByteArray().decodeToString()
                     if (n > lastIndex + 1) {
-                        val a2 = bitsSetOrNot(data1[lastIndex+1])
-                        shouldDisplayRunButton = a2[0]
-                        shouldClearLogWhenRunningScript = a2[1]
-                        useCustomUserAgent = a2[2]
-                        manuallySetLanguageTags = a2[3]
-                        shouldAllowJSForUrlsFromOtherApps = a2[4]
-                        shouldAskBeforeLoadingUrlThatIsFromAnotherApp = a2[5]
-                        autoscrollLogMsgs = a2[6]
-                        shouldAllowHTTP = a2[7]
+                        run {
+                            val a = bitsSetOrNot(data1[lastIndex+1])
+                            shouldDisplayRunButton = a[0]
+                            shouldClearLogWhenRunningScript = a[1]
+                            useCustomUserAgent = a[2]
+                            manuallySetLanguageTags = a[3]
+                            shouldAllowJSForUrlsFromOtherApps = a[4]
+                            shouldAskBeforeLoadingUrlThatIsFromAnotherApp = a[5]
+                            autoscrollLogMsgs = a[6]
+                            shouldAllowHTTP = a[7]
+                        }
+                        if (n > lastIndex + 2) {
+                            val a = bitsSetOrNot(data1[lastIndex+2])
+                            showAdvancedDeveloperTools = a[0]
+                            shouldAskBeforeFollowingRedirection = a[1]
+                            shouldLinkURLsInLog = a[2]
+                        }
                     }
                 } else {
                     searchURL = "" // if it has been assigned another string.
@@ -105,8 +116,9 @@ open class ConfiguratedActivity : AppCompatActivity() {
         if (file.exists()) {
             file.delete()
         }
-        val byte1 = bitsSetAccordingTo(
-            arrayOf(
+        val a = ByteArray(FINAL_INDEX_OF_MAX_LOGS + 1)
+        a[0] = bitsSetAccordingTo(
+            booleanArrayOf(
                 shouldUseJavaScript,
                 shouldLoadImages,
                 shouldLoadResources,
@@ -115,10 +127,8 @@ open class ConfiguratedActivity : AppCompatActivity() {
                 shouldRemoveLfAndSpacesFromUrl,
                 desktopMode,
                 shouldAcceptCookies
-            ).toBooleanArray()
+            )
         )
-        val a = ByteArray(FINAL_INDEX_OF_MAX_LOGS + 1)
-        a[0] = byte1
         var k = maxLogMsgs
         for (i in START_INDEX_OF_MAX_LOGS .. FINAL_INDEX_OF_MAX_LOGS) {
             a[i] = k.mod(256).toUByte().toByte()
@@ -127,9 +137,9 @@ open class ConfiguratedActivity : AppCompatActivity() {
         file.writeBytes(a)
         file.appendText(searchURL + "\n")
         file.appendBytes(
-            arrayOf(
+            byteArrayOf(
                 bitsSetAccordingTo(
-                    arrayOf(
+                    booleanArrayOf(
                         shouldDisplayRunButton,
                         shouldClearLogWhenRunningScript,
                         useCustomUserAgent,
@@ -138,9 +148,16 @@ open class ConfiguratedActivity : AppCompatActivity() {
                         shouldAskBeforeLoadingUrlThatIsFromAnotherApp,
                         autoscrollLogMsgs,
                         shouldAllowHTTP
-                    ).toBooleanArray()
+                    )
+                ),
+                bitsSetAccordingTo(
+                    booleanArrayOf(
+                        showAdvancedDeveloperTools,
+                        shouldAskBeforeFollowingRedirection,
+                        shouldLinkURLsInLog
+                    )
                 )
-            ).toByteArray()
+            )
         )
     }
 
@@ -183,7 +200,7 @@ open class ConfiguratedActivity : AppCompatActivity() {
     }
 }
 
-private fun bitsSetOrNot(byte: Byte): BooleanArray {
+internal fun bitsSetOrNot(byte: Byte): BooleanArray {
     val res = BooleanArray(8)
     val u = byte.toUByte()
     for (i in 0 .. 7) {
@@ -193,7 +210,7 @@ private fun bitsSetOrNot(byte: Byte): BooleanArray {
     return res
 }
 
-private fun bitsSetAccordingTo(a: BooleanArray): Byte {
+internal fun bitsSetAccordingTo(a: BooleanArray): Byte {
     var b = 0.toUByte()
     for (i in 0 ..< a.size) {
         if (i > 7) {
