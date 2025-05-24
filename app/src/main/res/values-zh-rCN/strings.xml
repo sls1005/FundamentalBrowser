@@ -129,11 +129,12 @@
     <string name="blocked_but_can_change_in_settings">已封锁。此行为可在设置中更改。</string>
     <string name="view_privacy_policy">查看隐私政策</string>
     <string name="privacy_policy_title1">隐私政策</string>
-    <string name="privacy_policy_text">1. 这是一份通知书，而不是法律文件。\n\n2. 在使用本应用程序时，您所提供的一部分信息，或许包括，但不限於用户自定义的所谓“用户代理”（“user agent”）或用户选择的语言标签（language tags），可能会被储存在设备中。上述的数据可能会以未加密的方式被储存。\n\n3. 当用户使用本应用访问网站的时候，用户提供的一些信息（其中较重要的有自定义的用户代理以及用户所选择的语言标签）可能会被送至该网站。依据所使用的协定，这些信息可能会以未加密的形式被传送。\n\n4. 本应用程序不会有意地在超出其作为浏览器所应当收集的范围外收集您的信息。另外，它永不会有意地协助隐藏您在网络上的身份，亦不会有意地阻止您在网络上隐藏身份。\n\n5. 关于本应用程序如何收集以及使用信息的更多详情，请参阅其源代码。</string>
+    <string name="privacy_policy_text">1. 这是一份通知书，而不是法律文件。\n\n2. 在使用本应用程序时，您所提供的一部分信息，或许包括，但不限於用户自定义的所谓“用户代理”（“user agent”）或用户选择的语言标签（language tags），可能会被储存在设备中。上述的数据可能会以未加密的方式被储存。\n\n3. 当用户使用本应用访问网站的时候，用户提供的一些信息（其中较重要的有自定义的用户代理以及用户所选择的语言标签）可能会被送至该网站。依据所使用的协定，这些信息可能会以未加密的形式被传送。\n\n4. 本应用程序本身不会对您进行追踪，但也不会阻止任何人或物在网络上对您进行追踪。\n\n5. 关于本应用程序如何收集以及使用信息的更多详情，请参阅其源代码。</string>
     <string name="confirm_manually_setting_language_tags">您想要手动设置语言标签吗？</string>
     <string name="confirm_opening_url_with_another_app1">您想要在其他应用程式中开启这个网址吗？</string>
     <string name="confirm_opening_url_with_another_app_warning1"><b>警告：</b>您必须为此行为的任何后果承担完全责任，因此请仔细检视这个 URL/URI，尤其是当它以“<b><code>intent:</code></b>”开头的时候。</string>
     <string name="confirm_loading_page">您想要载入“%1$s”这个页面吗？</string>
+    <string name="confirm_search_instead">您想要改为进行搜索吗？</string>
     <string name="doc_title1">1. UI</string>
     <string name="doc_title1_1">i. 网址列</string>
     <string name="doc_text1_1_1">本应用程序的网址列与其他浏览器的网址列有些不同。它依然是用来显示或编辑网址的地方，但在本应用程序中，它一般是隐藏的，并且只在用户需要它的时候才会显示。\n\n当您需要检视网址的时候，轻触顶部栏中的“<code>://</code>”符号（若顶部栏中存在该符号）或者使用选单中的“显示/隐藏网址列”或“编辑网址”选项即可。（该选单可以透过轻触顶部栏中由三个圆点组成的符号来开启。）网址列处于展开状态时，再度点击“<code>://</code>”符号（若其存在）则会令其收合。\n\n这个网址列允许多行编辑，亦即过长的文字会显示在下一行。\n\n在网址列底部有不少按钮。这些按钮即：\n</string>
@@ -173,4 +174,6 @@
     <string name="theme_default">默认（系统默认或深色）</string>
     <string name="theme_dark">深色</string>
     <string name="theme_light">浅色</string>
+    <string name="parsing_issue_title">解析错误</string>
+    <string name="failed_to_parse_url">无法解析以下网址：“%1$s”</string>
 </resources>

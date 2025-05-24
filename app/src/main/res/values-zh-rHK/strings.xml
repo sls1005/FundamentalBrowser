@@ -124,11 +124,12 @@
     <string name="blocked_but_can_change_in_settings">已封鎖。此行為可於設定中更改。</string>
     <string name="view_privacy_policy">檢視私隱政策</string>
     <string name="privacy_policy_title1">私隱政策</string>
-    <string name="privacy_policy_text">1. 這是一份通知書，而非法律文件。\n\n2. 在使用本應用程式時，您所提供的部份資訊，或許包括，但不限於用戶自訂的所謂「用戶代理」（“user agent”）或用戶選擇的語言標籤（language tags），可能會被儲存在裝置中。上述這些資料可能會以未加密的方式被儲存。\n\n3. 當用戶透過此應用程式造訪網站的時候，用戶提供的一些資訊（其中較重要的有自訂的用戶代理以及用戶選擇的語言標籤）可能會被送至該網站。依據所使用的協定，這些資料可能會以未加密的形式被傳送。\n\n4. 本應用程式不會有意地在超出其作為瀏覽器所應當收集的範圍外收集您的資訊。另外，它永不會有意地協助隱藏您在網路上的身份，亦不會有意地阻止您在網路上隱藏身份。\n\n5. 關於本應用程式如何收集以及使用資訊的更多詳情，請參閱其原始碼。</string>
+    <string name="privacy_policy_text">1. 這是一份通知書，而非法律文件。\n\n2. 在使用本應用程式時，您所提供的部份資訊，或許包括，但不限於用戶自訂的所謂「用戶代理」（“user agent”）或用戶選擇的語言標籤（language tags），可能會被儲存在裝置中。上述這些資料可能會以未加密的方式被儲存。\n\n3. 當用戶透過此應用程式造訪網站的時候，用戶提供的一些資訊（其中較重要的有自訂的用戶代理以及用戶選擇的語言標籤）可能會被送至該網站。依據所使用的協定，這些資料可能會以未加密的形式被傳送。\n\n4. 本應用程式本身不會對您進行追蹤，但也不會阻止任何人或物於網絡上對您進行追蹤。\n\n5. 關於本應用程式如何收集以及使用資訊的更多詳情，請參閱其原始碼。</string>
     <string name="confirm_manually_setting_language_tags">您想要手動設置語言標籤嗎？</string>
     <string name="confirm_opening_url_with_another_app1">您想要在其他應用程式中開啟這個網址嗎？</string>
     <string name="confirm_opening_url_with_another_app_warning1"><b>警告：</b>您必須為此行為的任何後果承擔完全責任，因此請仔細檢視此 URL/URI ，尤其是當它以「<b><code>intent:</code></b>」開頭的時候。</string>
     <string name="confirm_loading_page">您想要載入「%1$s」這個頁面嗎？</string>
+    <string name="confirm_search_instead">您想要改為進行搜尋嗎？</string>
     <string name="doc_title1">1. UI</string>
     <string name="doc_title1_1">i. 網址列</string>
     <string name="doc_text1_1_1">本應用程式的網址列與其他瀏覽器的網址列有些不同。它依然是用來顯示或編輯網址的地方，但在本應用程式中，它一般是隱藏的，並且只在用戶需要它的時候才會顯示。\n\n當您需要檢視網址時，輕觸頂部欄中的「<code>://</code>」符號（若頂部欄中存在該符號）或者使用選單中的「顯示/隱藏網址列」或「編輯網址」選項即可。（該選單可以透過輕觸頂部欄中由三個圓點組成的符號來開啟。）網址列處於展開狀態時，再度點擊「<code>://</code>」符號（若其存在）則會令其收合。\n\n這個網址列允許多行編輯，亦即過長的文字超出的部份將會顯示在下一行。這使得檢視或編輯極長的網址變得較為容易。\n\n在網址列底部有不少按鈕。這些按鈕即：\n</string>
@@ -170,4 +171,6 @@
     <string name="theme_default">預設（系統預設或深色）</string>
     <string name="theme_dark">深色</string>
     <string name="theme_light">淺色</string>
+    <string name="parsing_issue_title">解析錯誤</string>
+    <string name="failed_to_parse_url">無法解析以下網址：“%1$s”</string>
 </resources>

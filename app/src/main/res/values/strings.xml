@@ -125,11 +125,12 @@
     <string name="blocked_but_can_change_in_settings">" Blocked. This behavior can be changed in settings."</string>
     <string name="view_privacy_policy">View the privacy policy</string>
     <string name="privacy_policy_title1">Privacy Policy</string>
-    <string name="privacy_policy_text">1. This is a notice, not a legal document.\n\n2. When using this app, some of the information you provide, possibly including, but not limited to, a customized so-called ‘user agent’ or user-selected language tags, may be stored in the device by this app. Such data may be stored unencrypted.\n\n3. When the user visits a website by using this app, some information provided by the user, notably a customized user agent or user-selected language tags, may be sent to the website. Depending on the protocol, such data may be sent unencrypted.\n\n4. This application will not intentionally collect your information beyond what it should as a browser. In addition, it will never intentionally help you to hide your identity on the net nor prevent you from hiding your identity on the net.\n\n5. For more details about how this application collects and uses information, please see the source code of this application.</string>
+    <string name="privacy_policy_text">1. This is a notice, not a legal document.\n\n2. When using this app, some of the information you provide, possibly including, but not limited to, a customized so-called ‘user agent’ or user-selected language tags, may be stored in the device by this app. Such data may be stored unencrypted.\n\n3. When the user visits a website by using this app, some information provided by the user, notably a customized user agent or user-selected language tags, may be sent to the website. Depending on the protocol, such data may be sent unencrypted.\n\n4. This application itself will not track you, but it also will not prevent anyone or anything from tracking you on the net.\n\n5. For more details about how this application collects and uses information, please see the source code of this application.</string>
     <string name="confirm_manually_setting_language_tags">Do you want to manually set the language tags?</string>
     <string name="confirm_opening_url_with_another_app1">Do you want to open this URL with another application?</string>
     <string name="confirm_opening_url_with_another_app_warning1"><b>Warning:</b> you are the one responsible for any damage caused by this action, so please read the URL/URI carefully, especially if it starts with ‘<b><code>intent:</code></b>’.</string>
     <string name="confirm_loading_page">Do you want to load the page of ‘%1$s’?</string>
+    <string name="confirm_search_instead">Do you want to search for it instead?</string>
     <string name="doc_title1">1. UI</string>
     <string name="doc_title1_1">i. The URL bar</string>
     <string name="doc_text1_1_1">The URL bar of this app is a little different from that of other browsers. It is still the place where the URL is displayed or edited, but now it is usually hidden and only shows up when the user needs it.\n\nWhen you need to see the URL bar, tap on the ‘<code>://</code>’ symbol if it is present in the top bar, or use the ‘Show/hide URL bar’ or ‘Edit URL’ option from the menu that is opened by tapping the three-dot icon in the top bar. Tapping the ‘<code>://</code>’ symbol once again (if it is present) will close the URL bar if it is already opened.\n\nThe URL bar allows multiline editing, that is, text that is too long will be wrapped to the next line. This makes it easier to view and edit when the URL is very long.\n\nThere are several buttons at the bottom of the URL bar. Those are:\n</string>
@@ -180,4 +181,6 @@
     <string name="theme_default">Default (System default or Dark)</string>
     <string name="theme_dark">Dark</string>
     <string name="theme_light">Light</string>
+    <string name="parsing_issue_title">Parsing Issue</string>
+    <string name="failed_to_parse_url">Failed to parse the following URL: ‘%1$s’</string>
 </resources>

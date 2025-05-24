@@ -105,22 +105,23 @@ open class MainActivity : ConfiguratedActivity() {
                 val button = findViewById<MaterialButton>(R.id.button_load).apply {
                     setClickable(false)
                 }
-                val url = findViewById<EditText>(R.id.url_field).text.toString().let {
-                    val textLooksLikeDomainWithoutScheme = (it.indexOf('.') != -1 && it.indexOf(':') == -1)
+                val rawInput = findViewById<EditText>(R.id.url_field).text.toString()
+                val url = run {
+                    val textLooksLikeDomainWithoutScheme = (rawInput.indexOf('.') != -1 && rawInput.indexOf(':') == -1)
                     val k = if (shouldRemoveLfAndSpacesFromUrl) { 2 } else { 1 }
                     val n = if (textLooksLikeDomainWithoutScheme) { 8 } else { 0 }
-                    buildString(n + (it.length) / k) {
+                    buildString(n + rawInput.length / k) {
                         if (textLooksLikeDomainWithoutScheme) {
                             append("https://")
                         }
                         if (shouldRemoveLfAndSpacesFromUrl) {
-                            for (c in it) {
+                            for (c in rawInput) {
                                 if (c != ' ' && c != '\n') {
                                     append(c)
                                 }
                             }
                         } else {
-                            append(it)
+                            append(rawInput)
                         }
                     }
                 }
@@ -144,8 +145,31 @@ open class MainActivity : ConfiguratedActivity() {
                 } else if (url.isEmpty()) {
                     showMsg(getString(R.string.error3), button)
                 } else if (scheme.isEmpty()) {
-                    val msg = getString(R.string.error, getString(R.string.failed_to_parse, url))
-                    showMsg(msg, button)
+                    (object: DialogFragment() {
+                        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                            val ctx = requireActivity()
+                            return (AlertDialog.Builder(ctx).apply {
+                                setView(
+                                    layoutInflater.inflate(R.layout.issue_dialog, null).apply {
+                                        findViewById<TextView>(R.id.title).text = ctx.getString(R.string.parsing_issue_title)
+                                        findViewById<TextView>(R.id.issue).text = buildString {
+                                            append(ctx.getString(R.string.failed_to_parse_url, rawInput))
+                                            append('\n')
+                                            append(ctx.getString(R.string.confirm_search_instead))
+                                        }
+                                    }
+                                )
+                                setPositiveButton(R.string.ok) {_, _ ->
+                                    search(rawInput).also { success ->
+                                        if (!success && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                            showLog()
+                                        }
+                                    }
+                                }
+                                setNegativeButton(R.string.cancel) {_, _ -> }
+                            }).create()
+                        }
+                    }).show(supportFragmentManager, null)
                 } else if (scheme.equals("intent", ignoreCase=true)) {
                     val code = showDialogForOpeningURLWithAnotherApp(url)
                     if (code == 1) {
@@ -195,19 +219,11 @@ open class MainActivity : ConfiguratedActivity() {
                 }
             }
             R.id.button_search -> run {
-                val button = findViewById<MaterialButton>(R.id.button_search)
-                val rawInput = findViewById<EditText>(R.id.url_field).text.toString()
-                if (searchURL.isEmpty()) {
-                    showMsg(getString(R.string.error1), button)
-                } else if (rawInput.isEmpty()) {
-                    showMsg(getString(R.string.error2), button)
-                } else {
-                    button.setClickable(false)
-                    hideUrlBar()
-                    hideLogIfShowing()
-                    load(searchURL + Uri.encode(rawInput.replace('\n', ' ')))
-                    button.setClickable(true)
+                val button = findViewById<MaterialButton>(R.id.button_search).apply {
+                    setClickable(false)
                 }
+                search(findViewById<EditText>(R.id.url_field).text.toString())
+                button.setClickable(true)
             }
             R.id.button_copy -> run {
                 findViewById<EditText>(R.id.url_field).run {
@@ -382,7 +398,7 @@ open class MainActivity : ConfiguratedActivity() {
                                         val ctx = requireActivity()
                                         return (AlertDialog.Builder(ctx).apply {
                                             setView(
-                                                layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
+                                                layoutInflater.inflate(R.layout.question_dialog, null).apply {
                                                     findViewById<TextView>(R.id.text1).text = buildSpannedString {
                                                         append(ctx.getString(
                                                             if (req.isRedirect) {
@@ -442,7 +458,7 @@ open class MainActivity : ConfiguratedActivity() {
                                     val ctx = requireActivity()
                                     return (AlertDialog.Builder(ctx).apply {
                                         setView(
-                                            layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
+                                            layoutInflater.inflate(R.layout.question_dialog, null).apply {
                                                 findViewById<TextView>(R.id.text1).text = ctx.getString(R.string.confirm_following_redirection_to_load_page, url)
                                             }
                                         )
@@ -1679,6 +1695,20 @@ open class MainActivity : ConfiguratedActivity() {
         }
     }
 
+    private inline fun search(keywords: String): Boolean {
+        return if (searchURL.isEmpty()) {
+            showMsg(getString(R.string.error1))
+            (false)
+        } else if (keywords.isEmpty()) {
+            showMsg(getString(R.string.error2))
+            (false)
+        } else {
+            hideUrlBar()
+            hideLogIfShowing()
+            load(searchURL + Uri.encode(keywords.replace('\n', ' ')))
+        }
+    }
+
     private inline fun disableJavaScriptAsRequested() {
         if (!shouldAllowJSForUrlsFromOtherApps) {
             shouldUseJavaScript = false
@@ -1700,7 +1730,7 @@ open class MainActivity : ConfiguratedActivity() {
                         val ctx = requireActivity()
                         return (AlertDialog.Builder(ctx).apply {
                             setView(
-                                layoutInflater.inflate(R.layout.confirm_loading_url, null).apply {
+                                layoutInflater.inflate(R.layout.question_dialog, null).apply {
                                     findViewById<TextView>(R.id.text1).text = buildSpannedString {
                                         append(ctx.getString(R.string.confirm_loading_page, url))
                                         if (isPDF || schemeIsHttp) {

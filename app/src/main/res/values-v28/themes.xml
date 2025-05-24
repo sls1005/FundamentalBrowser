@@ -1,0 +1,10 @@
+<resources>
+    <!-- Use system default since v28 if light/dark is not set.
+         Before api level 28, there was no night mode, but this app should default to dark, so it would apply dark theme by default, but not after v28, as this file will be loaded instead -->
+    <style name="Theme.FundamentalBrowser" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/black</item>
+    </style>
+    <style name="Theme.FundamentalBrowserDynamic" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@color/black</item>
+    </style>
+</resources>
