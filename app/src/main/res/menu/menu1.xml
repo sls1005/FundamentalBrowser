@@ -85,15 +85,27 @@
                     android:id="@+id/action_view_source"
                     android:title="@string/menu1_action_view_source"
                     app:showAsAction="never"/>
+            </group>
+            <group android:id="@+id/menu1_sub1_group_website">
                 <item
                     android:id="@+id/action_view_cert"
                     android:title="@string/menu1_action_view_cert"
                     app:showAsAction="never"/>
             </group>
-            <group android:id="@+id/menu1_sub1_group_advanced_tools">
+            <group android:id="@+id/menu1_sub1_group_advanced_tools_website_only">
                 <item
                     android:id="@+id/action_find_robots_txt"
                     android:title="@string/menu1_action_find_robots_txt"
+                    app:showAsAction="never"/>
+            </group>
+            <group android:id="@+id/menu1_sub1_group_advanced_tools">
+                <item
+                    android:id="@+id/action_simulate_disconnection"
+                    android:title="@string/menu1_action_simulate_disconnection"
+                    app:showAsAction="never"/>
+                <item
+                    android:id="@+id/action_load_html_code"
+                    android:title="@string/menu1_action_load_html"
                     app:showAsAction="never"/>
             </group>
             <group android:id="@+id/menu1_sub1_group_copy_url">

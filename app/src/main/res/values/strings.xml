@@ -79,6 +79,8 @@
     <string name="number_field_title1">Enter a number</string>
     <string name="url_field_title1">Enter a URL</string>
     <string name="string_field_title_1">Enter text</string>
+    <string name="html_input_field_hint">HTML code</string>
+    <string name="html_input_field_load">Load</string>
     <string name="language_selection_title1">Select a language</string>
     <string name="language">Language</string>
     <string name="weight">Weight</string>
@@ -106,6 +108,9 @@
     <string name="menu1_action_copy_url_as_link">Copy current URL as link</string>
     <string name="menu1_action_view_cert">View the certificate of this website</string>
     <string name="menu1_action_find_robots_txt">Find the ‘robots.txt’ of this website</string>
+    <string name="menu1_action_load_html">Load HTML code</string>
+    <string name="menu1_action_simulate_disconnection">Simulate disconnection (offline)</string>
+    <string name="menu1_stop_simulating_disconnection">Stop simulating disconnection</string>
     <string name="error">Error: %1$s</string>
     <string name="error1">Error: Search URL is not set. Please set it in Settings.</string>
     <string name="error2">Please enter some keywords.</string>
@@ -125,7 +130,7 @@
     <string name="blocked_but_can_change_in_settings">" Blocked. This behavior can be changed in settings."</string>
     <string name="view_privacy_policy">View the privacy policy</string>
     <string name="privacy_policy_title1">Privacy Policy</string>
-    <string name="privacy_policy_text">1. This is a notice, not a legal document.\n\n2. When using this app, some of the information you provide, possibly including, but not limited to, a customized so-called ‘user agent’ or user-selected language tags, may be stored in the device by this app. Such data may be stored unencrypted.\n\n3. When the user visits a website by using this app, some information provided by the user, notably a customized user agent or user-selected language tags, may be sent to the website. Depending on the protocol, such data may be sent unencrypted.\n\n4. This application itself will not track you, but it also will not prevent anyone or anything from tracking you on the net.\n\n5. For more details about how this application collects and uses information, please see the source code of this application.</string>
+    <string name="privacy_policy_text">1. This is a notice, not a legal document.\n\n2. When using this app, some of the information you provide, possibly including, but not limited to, a customized so-called ‘user agent’ or user-selected language tags, may be stored in the device by this app. Such data may be stored unencrypted.\n\n3. When the user visits a website by using this app, some information provided by the user, notably a customized user agent or user-selected language tags, may be sent to the website. Depending on the protocol, such data may be sent unencrypted.\n\n4. Please note that, if you enable for your device the feature called ‘live threat protection’ in the settings of your device, certain data resulted from your online activities and the use of this application may be obtained by the entity that provides such security-related service for your device. See https://chromium.googlesource.com/chromium/src.git/+/master/android_webview/browser/safe_browsing/README.md for more information. (The link points to the description of a feature of your device, not necessarily related with this app.)\n\n5. This application itself will not track you, but it also will not prevent anyone or anything from tracking you on the net.\n\n6. For more details about how this application collects and uses information, please see the source code of this application.</string>
     <string name="confirm_manually_setting_language_tags">Do you want to manually set the language tags?</string>
     <string name="confirm_opening_url_with_another_app1">Do you want to open this URL with another application?</string>
     <string name="confirm_opening_url_with_another_app_warning1"><b>Warning:</b> you are the one responsible for any damage caused by this action, so please read the URL/URI carefully, especially if it starts with ‘<b><code>intent:</code></b>’.</string>
@@ -147,13 +152,15 @@
     <string name="doc_title2_3">iii. Search a web page</string>
     <string name="doc_text2_3">To do search in a web page, use the ‘search content’ option from the option menu (only available if any page is loaded).\n</string>
     <string name="doc_title2_4">iv. View the source code</string>
-    <string name="doc_text2_4">To see the source code of a web page, add ‘view-source:’ to the start of the URL that points to it. For example: ‘<code>view-source:https://example.com/index.html</code>’. This usage is supported through the framework.\n\nAlternatively, you can use the ‘view the source code of this page’ option hidden in the menu that is opened by tapping the three-dot icon and then tapping ‘more’.\n\nTo search in the source code, you may use the ‘search content’ option as if it were a normal web page.\n</string>
+    <string name="doc_text2_4">To see the source code of a web page, add ‘view-source:’ to the start of the URL that points to it. For example: ‘<code>view-source:https://example.com/index.html</code>’. This usage is supported through the framework.\n\nAlternatively, you can use the ‘view the source code of this page’ option hidden in the submenu that is opened by tapping the three-dot icon and then tapping ‘more’.\n\nTo search in the source code, you may use the ‘search content’ option as if it were a normal web page.\n\nIf none of these methods works, please consider using the JavaScript console of this app to access the document object.\n</string>
     <string name="doc_title2_5">v. Console and REPL</string>
     <string name="doc_text2_5">To use the console and REPL features, input some code (should normally be JS code) into the URL field and use the ‘Run’ button (enabled in settings) to execute it. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.\n</string>
     <string name="doc_title2_6">vi. Logging</string>
     <string name="doc_text2_6">The ‘foreground logging’ feature gives you some meta-information about the page you are reading. The format of it is the same as that of a log entry. See above for more details.\n</string>
     <string name="doc_title2_7">vii. Using this app as a generalized intent sender or activity launcher</string>
     <string name="doc_text2_7">By using some code that looks like ‘<b><code>location.href=\"intent:#Intent;...;end\"</code></b>’, you can utilize this app as a generalized intent sender and activity launcher (by specifying ‘action’, ‘component’, etc. in the form of text), with the restriction that, the intent can only be sent to an app other than this application. For security concerns, this app will refuse to send such an intent if it detects its own package name in the URI or intent, in which case it can show an error message and might not log.\n\nIntent scheme URIs are half-supported by this app. That is to say, they will usually be processed correctly, but this app usually doesn\'t check if a URI is an ‘<b><code>intent:</code></b>’ URI, except when trying to protect itself from intent-based attacks. (See https://www.mbsd.jp/Whitepaper/IntentScheme. for information about this issue.)\n\nInstead, `<b><code>intent:</code></b>` URIs will be treated as if they were URIs of unrecognized schemes (such as ‘<b><code>abc://</code></b>’), for any of which this app will ask the user whether to launch an intent, except in the specific situations mentioned above.</string>
+    <string name="doc_title2_8">viii. Locally loading and debugging HTML</string>
+    <string name="doc_text2_8">To locally load and debug a piece of HTML code, you may load it as a <b><code>data:</code></b> URI (by prefixing it with ‘<b><code>data:text/html,</code></b>’ or ‘<b><code>data:,</code></b>’). This usage is half-supported by this application through the framework.\n\nAlternatively, you may use the ‘Load HTML code’ option in the submenu that is opened by tapping the three-dot icon and then tapping ‘more’. You must enable the ‘advanced developer tools’ option in the settings of this app in order to see the option in the submenu.</string>
     <string name="settings_activity_label">Settings</string>
     <string name="doc_activity_label">Documentation</string>
     <string name="certificate">Certificate</string>

@@ -99,8 +99,16 @@ open class MainActivity : ConfiguratedActivity() {
     private var shouldLeaveOnBackGesture = false
     private var isCurrentlyAllowingSearchingInLog = true
     private var isResumed = false // flag for callback
+    private var simulatingDisconnection = false
     private val clickListener = OnClickListener { view ->
         when(view.id) {
+            R.id.toolbar -> run {
+                if (isShowingUrlBar()) {
+                    hideUrlBar()
+                } else {
+                    showUrlBar()
+                }
+            }
             R.id.button_load -> run {
                 val button = findViewById<MaterialButton>(R.id.button_load).apply {
                     setClickable(false)
@@ -326,10 +334,27 @@ open class MainActivity : ConfiguratedActivity() {
         }
     }
 
+    private val longClickListener = View.OnLongClickListener { view ->
+        when(view.id) {
+            R.id.toolbar -> run {
+                if (currentURL.isNotEmpty()) {
+                    copyTextToClipboard(currentURL)
+                }
+            }
+        }
+        (true)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        setSupportActionBar(findViewById<MaterialToolbar>(R.id.toolbar))
+        findViewById<MaterialToolbar>(R.id.toolbar).also { toolBar ->
+            toolBar.apply {
+                setOnClickListener(clickListener)
+                setOnLongClickListener(longClickListener)
+            }
+            setSupportActionBar(toolBar)
+        }
         findViewById<WebView>(R.id.window).apply {
             settings.apply {
                 setSupportMultipleWindows(false)
@@ -889,6 +914,15 @@ open class MainActivity : ConfiguratedActivity() {
             val (id, state) = it
             menu.findItem(id).setChecked(state)
         }
+        if (showAdvancedDeveloperTools) {
+            menu.findItem(R.id.action_simulate_disconnection).setTitle(
+                if (simulatingDisconnection) {
+                    getString(R.string.menu1_stop_simulating_disconnection)
+                } else {
+                    getString(R.string.menu1_action_simulate_disconnection)
+                }
+            )
+        }
         arrayOf(
             Pair(
                 R.id.group_url,
@@ -918,8 +952,16 @@ open class MainActivity : ConfiguratedActivity() {
                         hasLoadedPage
                     ),
                     Pair(
+                        R.id.menu1_sub1_group_website,
+                        hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "blob", "file", "content")))
+                    ),
+                    Pair(
                         R.id.menu1_sub1_group_advanced_tools,
-                        showAdvancedDeveloperTools && hasLoadedPage
+                        showAdvancedDeveloperTools
+                    ),
+                    Pair(
+                        R.id.menu1_sub1_group_advanced_tools_website_only,
+                        showAdvancedDeveloperTools && hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "blob", "file", "content")))
                     ),
                     Pair(
                         R.id.menu1_sub1_group_copy_url,
@@ -1125,6 +1167,78 @@ open class MainActivity : ConfiguratedActivity() {
                         }
                     }
                 }
+                (true)
+            }
+            R.id.action_simulate_disconnection -> run {
+                findViewById<WebView>(R.id.window).setNetworkAvailable(/* !! */ simulatingDisconnection)
+                simulatingDisconnection = !simulatingDisconnection
+                (true)
+            }
+            R.id.action_load_html_code -> run {
+                (object: DialogFragment() {
+                    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                        val ctx = requireActivity()
+                        return (AlertDialog.Builder(ctx).apply {
+                            val v = layoutInflater.inflate(R.layout.html_input_field, null)
+                            setView(v)
+                            setPositiveButton(R.string.html_input_field_load) {_, _ ->
+                                v.findViewById<TextView>(R.id.html_input_field).text.toString().also {
+                                    if (it.isNotEmpty()) {
+                                        val encoded = Uri.encode(it)
+                                        val dataUri = "data:text/html,$encoded"
+                                        currentURL = dataUri
+                                        textToDisplayInUrlField = dataUri
+                                        ctx.apply {
+                                            previousTitle = ""
+                                            previousSubTitle = dataUri
+                                            findViewById<ScrollView>(R.id.log_scroll).visibility = GONE
+                                            findViewById<TextView>(R.id.log).apply {
+                                                text = ""
+                                                visibility = GONE
+                                            }
+                                            intArrayOf(
+                                                R.id.button_close,
+                                                R.id.button_decode,
+                                                R.id.button_clear,
+                                                R.id.button_restore,
+                                                R.id.button_copy,
+                                                R.id.button_paste,
+                                                R.id.button_search,
+                                                R.id.button_load
+                                            ).forEach { id ->
+                                                findViewById<MaterialButton>(id).apply {
+                                                    setEnabled(false)
+                                                    visibility = GONE
+                                                }
+                                            }
+                                            findViewById<MaterialButton>(R.id.button_run).apply {
+                                                if (visibility == VISIBLE) {
+                                                    visibility = GONE
+                                                    setEnabled(false)
+                                                }
+                                            }
+                                            findViewById<EditText>(R.id.url_field).apply {
+                                                setEnabled(false)
+                                                text.clear()
+                                                if (isFocused()) {
+                                                    clearFocus()
+                                                }
+                                                visibility = GONE
+                                            }
+                                            findViewById<HorizontalScrollView>(R.id.button_area).visibility = GONE
+                                            findViewById<WebView>(R.id.window).apply {
+                                                visibility = VISIBLE
+                                                layoutParams!!.height = LayoutParams.MATCH_PARENT
+                                            }
+                                            findViewById<WebView>(R.id.window).loadDataWithBaseURL(dataUri, encoded, "text/html", null, null)
+                                        }
+                                    }
+                                }
+                            }
+                            setNegativeButton(R.string.cancel) {_, _ -> }
+                        }).create()
+                    }
+                }).show(supportFragmentManager, null)
                 (true)
             }
             else -> false
@@ -1757,7 +1871,7 @@ open class MainActivity : ConfiguratedActivity() {
                             setNegativeButton(R.string.cancel) {_, _ -> }
                         }).create()
                     }
-                })
+                }).show(supportFragmentManager, null)
             } else {
                 disableJavaScriptAsRequested()
                 load(url).also { urlLoaded ->
@@ -1818,9 +1932,7 @@ private inline fun containedIgnoringCase(s: String, a: Array<String>): Boolean {
 }
 
 private inline fun checkUriScheme(uri: Uri, scheme: String): Boolean {
-    return uri.scheme?.let { uriScheme ->
-        uriScheme.equals(scheme, ignoreCase=true)
-    } ?: false
+    return uri.scheme?.equals(scheme, ignoreCase=true) ?: false
 }
 
 private inline fun checkUriScheme(uri: Uri, schemes: Array<String>): Boolean {
