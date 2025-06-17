@@ -10,6 +10,7 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.FileUriExposedException
 import android.text.Editable
 import android.text.Spanned
 import android.text.TextWatcher
@@ -22,6 +23,7 @@ import android.view.View.OnClickListener
 import android.view.View.VISIBLE
 import android.view.View.GONE
 import android.view.ViewGroup.LayoutParams
+import android.view.inputmethod.InputMethodManager
 import android.webkit.ConsoleMessage
 import android.webkit.ConsoleMessage.MessageLevel.DEBUG
 import android.webkit.ConsoleMessage.MessageLevel.ERROR
@@ -133,7 +135,9 @@ open class MainActivity : ConfiguratedActivity() {
                         }
                     }
                 }
-                val scheme = Uri.parse(url).scheme ?: ""
+                val parsed = Uri.parse(url)
+                val scheme = parsed.scheme ?: ""
+                val schemeIsKnown = isOfKnownScheme(parsed)
                 if (scheme.equals("javascript", ignoreCase=true)) {
                     if (shouldClearLogWhenRunningScript) {
                         synchronized(logMsgs) {
@@ -159,8 +163,8 @@ open class MainActivity : ConfiguratedActivity() {
                             return (AlertDialog.Builder(ctx).apply {
                                 setView(
                                     layoutInflater.inflate(R.layout.issue_dialog, null).apply {
-                                        findViewById<TextView>(R.id.title).text = ctx.getString(R.string.parsing_issue_title)
-                                        findViewById<TextView>(R.id.issue).text = buildString {
+                                        findViewById<TextView>(R.id.issue_dialog_title).text = ctx.getString(R.string.parsing_issue_title)
+                                        findViewById<TextView>(R.id.issue_dialog_text1).text = buildString {
                                             append(ctx.getString(R.string.failed_to_parse_url, rawInput))
                                             append('\n')
                                             append(ctx.getString(R.string.confirm_search_instead))
@@ -178,7 +182,7 @@ open class MainActivity : ConfiguratedActivity() {
                             }).create()
                         }
                     }).show(supportFragmentManager, null)
-                } else if (scheme.equals("intent", ignoreCase=true)) {
+                } else if (!schemeIsKnown) {
                     val code = showDialogForOpeningURLWithAnotherApp(url)
                     if (code == 1) {
                         showMsg(getString(R.string.error6), button)
@@ -377,9 +381,10 @@ open class MainActivity : ConfiguratedActivity() {
                                         val ctx = requireActivity()
                                         return (AlertDialog.Builder(ctx).apply {
                                             setView(
-                                                layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
-                                                    findViewById<TextView>(R.id.url).text = url
-                                                    findViewById<TextView>(R.id.warning).text = buildSpannedString {
+                                                layoutInflater.inflate(R.layout.uri_question_dialog, null).apply {
+                                                    findViewById<TextView>(R.id.uri_question_dialog_text1).text = ctx.getString(R.string.confirm_opening_url_with_another_app1)
+                                                    findViewById<TextView>(R.id.uri_question_dialog_uri).text = url
+                                                    findViewById<TextView>(R.id.uri_question_dialog_text2).text = buildSpannedString {
                                                         append(
                                                             if (schemeIsHttp) {
                                                                 ctx.getText(R.string.warnings)
@@ -400,9 +405,12 @@ open class MainActivity : ConfiguratedActivity() {
                                                     ctx.startActivity(x)
                                                 } catch(_: ActivityNotFoundException) {
                                                     showMsg(getString(R.string.error5))
+                                                } catch (_: FileUriExposedException) { // always the case if file:/// uri is used, as min is 24
+                                                    showMsg(getString(R.string.error8))
                                                 }
                                             }
                                             setNegativeButton(R.string.open_here) {_, _ ->
+                                                hideLogIfShowing()
                                                 load(url).also { urlLoaded ->
                                                     if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
                                                         showLog()
@@ -424,7 +432,7 @@ open class MainActivity : ConfiguratedActivity() {
                                         return (AlertDialog.Builder(ctx).apply {
                                             setView(
                                                 layoutInflater.inflate(R.layout.question_dialog, null).apply {
-                                                    findViewById<TextView>(R.id.text1).text = buildSpannedString {
+                                                    findViewById<TextView>(R.id.question_dialog_text1).text = buildSpannedString {
                                                         append(ctx.getString(
                                                             if (req.isRedirect) {
                                                                 R.string.confirm_following_redirection_to_load_page
@@ -439,6 +447,7 @@ open class MainActivity : ConfiguratedActivity() {
                                                 }
                                             )
                                             setPositiveButton(R.string.yes) {_, _ ->
+                                                hideLogIfShowing()
                                                 load(url).also { urlLoaded ->
                                                     if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
                                                         showLog()
@@ -447,8 +456,9 @@ open class MainActivity : ConfiguratedActivity() {
                                             }
                                             setNegativeButton(R.string.no) {_, _ -> }
                                             setNeutralButton(R.string.try_encryption) {_, _ -> 
+                                                hideLogIfShowing()
                                                 load(
-                                                    (Uri.parse(url).buildUpon().apply { scheme("https") }).build().toString()
+                                                    (req.url.buildUpon().apply { scheme("https") }).build().toString()
                                                 ).also { urlLoaded ->
                                                     if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
                                                         showLog()
@@ -484,10 +494,11 @@ open class MainActivity : ConfiguratedActivity() {
                                     return (AlertDialog.Builder(ctx).apply {
                                         setView(
                                             layoutInflater.inflate(R.layout.question_dialog, null).apply {
-                                                findViewById<TextView>(R.id.text1).text = ctx.getString(R.string.confirm_following_redirection_to_load_page, url)
+                                                findViewById<TextView>(R.id.question_dialog_text1).text = ctx.getString(R.string.confirm_following_redirection_to_load_page, url)
                                             }
                                         )
                                         setPositiveButton(R.string.yes) {_, _ ->
+                                            hideLogIfShowing()
                                             load(url).also { urlLoaded ->
                                                 if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
                                                     showLog()
@@ -500,7 +511,7 @@ open class MainActivity : ConfiguratedActivity() {
                             }).show(supportFragmentManager, null)
                             return true
                         }
-                    } else if (checkUriScheme(req.url, "intent")) {
+                    } else if (checkUriScheme(req.url, arrayOf("intent", "android-app"))) {
                         if (url.contains((this@MainActivity).packageName, ignoreCase=true)) {
                             return true
                             // See: https://www.mbsd.jp/Whitepaper/IntentScheme.pdf
@@ -953,7 +964,7 @@ open class MainActivity : ConfiguratedActivity() {
                     ),
                     Pair(
                         R.id.menu1_sub1_group_website,
-                        hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "blob", "file", "content")))
+                        hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "android-app", "blob", "file", "content")))
                     ),
                     Pair(
                         R.id.menu1_sub1_group_advanced_tools,
@@ -961,7 +972,7 @@ open class MainActivity : ConfiguratedActivity() {
                     ),
                     Pair(
                         R.id.menu1_sub1_group_advanced_tools_website_only,
-                        showAdvancedDeveloperTools && hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "blob", "file", "content")))
+                        showAdvancedDeveloperTools && hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "android-app", "blob", "file", "content")))
                     ),
                     Pair(
                         R.id.menu1_sub1_group_copy_url,
@@ -1063,6 +1074,7 @@ open class MainActivity : ConfiguratedActivity() {
                 (true)
             }
             R.id.action_settings -> run {
+                saveCurrentConfiguration()
                 startActivity(
                     Intent(this@MainActivity, SettingsActivity::class.java)
                 )
@@ -1122,6 +1134,8 @@ open class MainActivity : ConfiguratedActivity() {
                                         startActivity(it)
                                     } catch(_: ActivityNotFoundException) {
                                         showMsg(getString(R.string.error5))
+                                    } catch (_: FileUriExposedException) {
+                                        showMsg(getString(R.string.error8))
                                     }
                                 }
                             }
@@ -1486,7 +1500,7 @@ open class MainActivity : ConfiguratedActivity() {
         hideUrlBarIfShowing()
         supportActionBar?.hide()
         findViewById<RelativeLayout>(R.id.search_area).visibility = VISIBLE
-        findViewById<EditText>(R.id.content_search_field).apply {
+        val searchField = findViewById<EditText>(R.id.content_search_field).apply {
             visibility = VISIBLE
             hint = getString(R.string.main_search_field_hint1)
             setEnabled(true)
@@ -1501,6 +1515,17 @@ open class MainActivity : ConfiguratedActivity() {
                 setEnabled(true)
             }
         }
+        searchField.apply {
+            requestFocus()
+            postDelayed({
+                getSystemService(INPUT_METHOD_SERVICE).also {
+                    if (it is InputMethodManager) {
+                        it.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                    }
+                }
+            }, 200)
+        }
+
     }
 
     private fun showSearchBarForLog() {
@@ -1508,7 +1533,7 @@ open class MainActivity : ConfiguratedActivity() {
         hideUrlBarIfShowing()
         supportActionBar?.hide()
         findViewById<RelativeLayout>(R.id.search_area).visibility = VISIBLE
-        findViewById<EditText>(R.id.content_search_field).apply {
+        val searchField = findViewById<EditText>(R.id.content_search_field).apply {
             visibility = VISIBLE
             hint = getString(R.string.main_search_field_hint2)
             setEnabled(true)
@@ -1516,6 +1541,16 @@ open class MainActivity : ConfiguratedActivity() {
         findViewById<ImageView>(R.id.end_search).apply {
             visibility = VISIBLE
             setEnabled(true)
+        }
+        searchField.apply {
+            requestFocus()
+            postDelayed({
+                getSystemService(INPUT_METHOD_SERVICE).also {
+                    if (it is InputMethodManager) {
+                        it.showSoftInput(this, InputMethodManager.SHOW_IMPLICIT)
+                    }
+                }
+            }, 200)
         }
     }
 
@@ -1633,7 +1668,8 @@ open class MainActivity : ConfiguratedActivity() {
         if (url.isEmpty() || Uri.parse(url).scheme == null) {
             return -1
         }
-        if (checkUriScheme(Uri.parse(url), "intent")) {
+        val originalSchemeIntentSchemeFlag = checkUriScheme(Uri.parse(url), arrayOf("intent", "android-app"))
+        if (originalSchemeIntentSchemeFlag) {
             if (url.contains((this@MainActivity).packageName, ignoreCase=true)) {
                 return -3
             }
@@ -1643,6 +1679,18 @@ open class MainActivity : ConfiguratedActivity() {
         } catch (_: URISyntaxException) {
             return -2
         }
+        val altUrl /* : String? */ = (
+            if (originalSchemeIntentSchemeFlag) {
+                x.getStringExtra("browser_fallback_url")?.let {
+                    Uri.decode(it)
+                }
+            } else {
+                null
+            }
+        )
+        if (altUrl != null) {
+            x.removeExtra("browser_fallback_url")
+        }
         if (onlyICanHandle(x)) {
             return 1
         } else {
@@ -1651,9 +1699,10 @@ open class MainActivity : ConfiguratedActivity() {
                     val ctx = requireActivity()
                     return (AlertDialog.Builder(ctx).apply {
                         setView(
-                            layoutInflater.inflate(R.layout.confirm_opening_url_with_another_app, null).apply {
-                                findViewById<TextView>(R.id.url).text = url
-                                findViewById<TextView>(R.id.warning).text = ctx.getText(R.string.confirm_opening_url_with_another_app_warning1)
+                            layoutInflater.inflate(R.layout.uri_question_dialog, null).apply {
+                                findViewById<TextView>(R.id.uri_question_dialog_text1).text = ctx.getString(R.string.confirm_opening_url_with_another_app1)
+                                findViewById<TextView>(R.id.uri_question_dialog_uri).text = url
+                                findViewById<TextView>(R.id.uri_question_dialog_text2).text = ctx.getText(R.string.confirm_opening_url_with_another_app_warning1)
                             }
                         )
                         setPositiveButton(R.string.yes) { _, _ ->
@@ -1662,9 +1711,67 @@ open class MainActivity : ConfiguratedActivity() {
                                 ctx.startActivity(x)
                             } catch(_: ActivityNotFoundException) {
                                 showMsg(ctx.getString(R.string.error5))
+                            } catch (_: FileUriExposedException) {
+                                showMsg(getString(R.string.error8))
                             }
                         }
-                        setNegativeButton(R.string.no) {_, _ -> }
+                        setNegativeButton(R.string.no,
+                            if (altUrl == null) {
+                                { _, _ -> }
+                            } else {
+                                { _, _ ->
+                                    (object: DialogFragment() {
+                                        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                                            val ctx = requireActivity()
+                                            val altUri = Uri.parse(altUrl)
+                                            val schemeIsHttp = isHttpUri(altUri)
+                                            val schemeIsHttpOrHttps = schemeIsHttp || checkUriScheme(altUri, "https")
+                                            return (AlertDialog.Builder(ctx).apply {
+                                                setView(
+                                                    layoutInflater.inflate(R.layout.uri_question_dialog, null).apply {
+                                                        findViewById<TextView>(R.id.uri_question_dialog_text1).text = ctx.getString(R.string.alt_url_supplied)
+                                                        findViewById<TextView>(R.id.uri_question_dialog_uri).text = altUrl
+                                                        findViewById<TextView>(R.id.uri_question_dialog_text2).text = buildSpannedString {
+                                                            if (schemeIsHttp) {
+                                                                append(ctx.getText(R.string.warning))
+                                                                append(ctx.getString(R.string.protocol_is_insecure))
+                                                                append("\n\n")
+                                                            }
+                                                            append(ctx.getString(R.string.confirm_loading_alt_url))
+                                                        }
+                                                    }
+                                                )
+                                                setPositiveButton(R.string.yes) {_, _ ->
+                                                    if (schemeIsHttpOrHttps) {
+                                                        hideLogIfShowing()
+                                                        load(altUrl).also { urlLoaded ->
+                                                            if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                                                showLog()
+                                                            }
+                                                        }
+                                                    } else {
+                                                        showMsg(ctx.getString(R.string.error8))
+                                                    }
+                                                }
+                                                setNegativeButton(R.string.no) {_, _ -> }
+                                                if (schemeIsHttp) {
+                                                    setNeutralButton(R.string.try_encryption_and_load) {_, _ ->
+                                                        hideLogIfShowing()
+                                                        load(
+                                                            (altUri.buildUpon().apply { scheme("https") }).build().toString()
+                                                        ).also { urlLoaded ->
+                                                            if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                                                showLog()
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }).create()
+                                        }
+                                    }).show(ctx.supportFragmentManager, null)
+                                }
+                            }
+                        )
                     }).create()
                 }
             }).show(supportFragmentManager, null)
@@ -1838,14 +1945,14 @@ open class MainActivity : ConfiguratedActivity() {
             urlToLoad = ""
             val schemeIsHttp = isHttpUri(Uri.parse(url))
             val isPDF = url.endsWith(".pdf", ignoreCase = true)
-            if (shouldAskBeforeLoadingUrlThatIsFromAnotherApp) {
+            if (schemeIsHttp || isPDF || shouldAskBeforeLoadingUrlThatIsFromAnotherApp) {
                 (object: DialogFragment() {
                     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
                         val ctx = requireActivity()
                         return (AlertDialog.Builder(ctx).apply {
                             setView(
                                 layoutInflater.inflate(R.layout.question_dialog, null).apply {
-                                    findViewById<TextView>(R.id.text1).text = buildSpannedString {
+                                    findViewById<TextView>(R.id.question_dialog_text1).text = buildSpannedString {
                                         append(ctx.getString(R.string.confirm_loading_page, url))
                                         if (isPDF || schemeIsHttp) {
                                             append("\n\n")
@@ -1869,6 +1976,18 @@ open class MainActivity : ConfiguratedActivity() {
                                 }
                             }
                             setNegativeButton(R.string.cancel) {_, _ -> }
+                            if (schemeIsHttp) {
+                                disableJavaScriptAsRequested()
+                                setNeutralButton(R.string.try_encryption) {_, _ ->
+                                    load(
+                                        (Uri.parse(url).buildUpon().apply { scheme("https") }).build().toString()
+                                    ).also { urlLoaded ->
+                                        if (!urlLoaded && !isShowingLog() && maxLogMsgsAtomic.get() > 0) {
+                                            showLog()
+                                        }
+                                    }
+                                }
+                            }
                         }).create()
                     }
                 }).show(supportFragmentManager, null)
@@ -1980,14 +2099,15 @@ private inline fun isOfSupportedScheme(uri: Uri): Boolean {
 }
 
 private inline fun isOfKnownScheme(uri: Uri): Boolean { // schemes that should be handled by the browser, if at all
-    return checkUriScheme(uri, arrayOf("http", "https", "javascript", "data", "blob", "view-source", "android.resource"))
-    // Excluded: "file", "content", "intent"
+    return checkUriScheme(uri, arrayOf("http", "https", "javascript", "data", "file", "blob", "view-source", "android.resource"))
+    // Excluded: "content", "intent", "android-app"
 }
 
 private inline fun shouldNotBlockUserLoading(url: String): Boolean {
+    // This only lists known schemes. Unknown schemes and `intent:` and `android-app:` will be handled differently (not directly loaded nor always blocked).
     return checkUriScheme(
         Uri.parse(url),
-        arrayOf("http", "https", "javascript", "view-source", "data", "intent")
+        arrayOf("http", "https", "javascript", "view-source", "data")
     )
-    // Excluded: "file", "content", "blob"
+    // Excluded: "file", "content", "blob", "intent", "android-app"
 }

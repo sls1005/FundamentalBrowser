@@ -10,7 +10,7 @@
         android:paddingBottom="5dp"
         android:gravity="top|start">
         <TextView
-            android:id="@+id/title"
+            android:id="@+id/issue_dialog_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="15dp"
@@ -20,7 +20,7 @@
             android:textColor="?android:attr/textColorPrimary"
             android:textStyle="bold"/>
         <TextView
-            android:id="@+id/issue"
+            android:id="@+id/issue_dialog_text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="15dp"

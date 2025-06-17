@@ -8,6 +8,7 @@
         android:layout_height="wrap_content"
         android:gravity="top|start">
         <TextView
+            android:id="@+id/uri_question_dialog_text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="20dp"
@@ -15,10 +16,10 @@
             android:paddingTop="10dp"
             android:paddingBottom="10dp"
             android:textSize="18sp"
-            android:text="@string/confirm_opening_url_with_another_app1"
+            android:text=""
             android:textColor="?android:attr/textColorPrimary"/>
         <TextView
-            android:id="@+id/url"
+            android:id="@+id/uri_question_dialog_uri"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="25dp"
@@ -31,7 +32,7 @@
             android:textStyle="bold"
             android:hyphenationFrequency="normalFast"/>
         <TextView
-            android:id="@+id/warning"
+            android:id="@+id/uri_question_dialog_text2"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:paddingStart="20dp"

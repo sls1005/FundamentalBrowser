@@ -89,6 +89,7 @@
     <string name="open_here">Open here</string>
     <string name="dont_load">Don\'t load</string>
     <string name="try_encryption">Try encryption</string>
+    <string name="try_encryption_and_load">Try encryption and load</string>
     <string name="menu1_action_hide_tool_bar">Hide the tool bar</string>
     <string name="menu1_action_show_or_hide_url_bar">Show/hide URL bar</string>
     <string name="menu1_action_edit_url">Edit URL</string>
@@ -119,6 +120,7 @@
     <string name="error5">Error: Couldn\'t find an application that can handle this uri.</string>
     <string name="error6">Error: Couldn\'t find an application other than this that can handle this uri.</string>
     <string name="error7">Error: Manually loading a URL of ‘%1$s’ scheme is not allowed.</string>
+    <string name="error8">Error: Forbidden scheme</string>
     <string name="error_no_cert">No certificate provided.</string>
     <string name="js_not_enabled">JavaScript must be enabled in order to run code.</string>
     <string name="warning"><b>Warning:</b></string>
@@ -160,7 +162,7 @@
     <string name="doc_title2_7">vii. Using this app as a generalized intent sender or activity launcher</string>
     <string name="doc_text2_7">By using some code that looks like ‘<b><code>location.href=\"intent:#Intent;...;end\"</code></b>’, you can utilize this app as a generalized intent sender and activity launcher (by specifying ‘action’, ‘component’, etc. in the form of text), with the restriction that, the intent can only be sent to an app other than this application. For security concerns, this app will refuse to send such an intent if it detects its own package name in the URI or intent, in which case it can show an error message and might not log.\n\nIntent scheme URIs are half-supported by this app. That is to say, they will usually be processed correctly, but this app usually doesn\'t check if a URI is an ‘<b><code>intent:</code></b>’ URI, except when trying to protect itself from intent-based attacks. (See https://www.mbsd.jp/Whitepaper/IntentScheme. for information about this issue.)\n\nInstead, `<b><code>intent:</code></b>` URIs will be treated as if they were URIs of unrecognized schemes (such as ‘<b><code>abc://</code></b>’), for any of which this app will ask the user whether to launch an intent, except in the specific situations mentioned above.</string>
     <string name="doc_title2_8">viii. Locally loading and debugging HTML</string>
-    <string name="doc_text2_8">To locally load and debug a piece of HTML code, you may load it as a <b><code>data:</code></b> URI (by prefixing it with ‘<b><code>data:text/html,</code></b>’ or ‘<b><code>data:,</code></b>’). This usage is half-supported by this application through the framework.\n\nAlternatively, you may use the ‘Load HTML code’ option in the submenu that is opened by tapping the three-dot icon and then tapping ‘more’. You must enable the ‘advanced developer tools’ option in the settings of this app in order to see the option in the submenu.</string>
+    <string name="doc_text2_8">To locally load and debug a piece of HTML code, you may load it as a <b><code>data:</code></b> URI (by prefixing it with ‘<b><code>data:text/html,</code></b>’ or ‘<b><code>data:,</code></b>’). This usage is half-supported by this application through the framework.\n\nAlternatively, you may use the ‘Load HTML code’ option in the submenu that is opened by tapping the three-dot icon and then tapping ‘more’. You must enable the ‘advanced developer tools’ option in the settings of this app in order to see the option in the submenu. If you use this method, this app will automatically convert the HTML code into a data URI and present it in the URL field. The data URI will be pct-encoded, which means you may load it into another browser that supports doing so. The ‘Decode’ button below the URL field can be used to decode the pct-encoded string and restore the HTML code.</string>
     <string name="settings_activity_label">Settings</string>
     <string name="doc_activity_label">Documentation</string>
     <string name="certificate">Certificate</string>
@@ -190,4 +192,6 @@
     <string name="theme_light">Light</string>
     <string name="parsing_issue_title">Parsing Issue</string>
     <string name="failed_to_parse_url">Failed to parse the following URL: ‘%1$s’</string>
+    <string name="alt_url_supplied">An alternative URL is supplied:</string>
+    <string name="confirm_loading_alt_url">Do you want to load this alternative URL instead?</string>
 </resources>

@@ -86,6 +86,7 @@
     <string name="open_here">在此開啟</string>
     <string name="dont_load">不要載入</string>
     <string name="try_encryption">嘗試加密</string>
+    <string name="try_encryption_and_load">嘗試加密並載入</string>
     <string name="repeat_to_close">重複該手勢以關閉視窗</string>
     <string name="menu1_action_hide_tool_bar">隱藏工具列</string>
     <string name="menu1_action_show_or_hide_url_bar">顯示/隱藏網址列</string>
@@ -159,7 +160,7 @@
     <string name="doc_title2_7">vii. 使用這個應用程式作為通用意圖發送器及活動啟動器</string>
     <string name="doc_text2_7">若使用形如「<b><code>location.href=\"intent:#Intent;...;end\"</code></b>」的指令碼，則可能利用這個應用程式作為通用意圖發送器及活動啟動器（方法是以文字形式指明「action」、「component」等參數），但必須遵循以下限制：意圖只能被送往其他應用程式，不可送回此應用程式。基於安全上的考量，若此應用程式在 URI 中或意圖中檢測到自身的包名（package name），則會拒絕發送該意圖；在這種情況下，此應用程式可能不會將該事件記錄在日誌中，且可能會顯示錯誤訊息。\n\n本應用程式半正式地支援 intent scheme URI 。亦即它們通常能被正常解析，但此應用程式通常不會確認其是否為「<b><code>intent:</code></b>」URI，而僅在試圖避免自身受到基於意圖的攻擊（intent-based attack）時才進行確認。（請參閱 https://www.mbsd.jp/Whitepaper/IntentScheme.pdf 以瞭解更多詳情。）\n\n相反地，<b><code>intent:</code></b> URI 會被視為類型未知的 URI（例如 <b><code>abc://</code></b>）並做一樣處理：對於每一個未知類型的 URI ，此應用程式都會詢問用戶是否要發送意圖；只有先前提及的特定情況會是例外。</string>
     <string name="doc_title2_8">viii. 載入及偵錯本機 HTML</string>
-    <string name="doc_text2_8">若想在本機載入並偵錯一段 HTML 碼，您可將其作為 <b><code>data:</code></b> URI 載入。（方法為在其前方加上 「<b><code>data:text/html,</code></b>」 或 「<b><code>data:,</code></b>」。）本應用程式透過框架半正式地支援此用法。\n\n作為替代，您也可以使用選單（輕觸由三個圓點組成的符號來開啟）的「更多」子選單中的「手動加載 HTML 碼」選項。您必須啟用本應用程式設定中的「進階開發者工具」才會在上述的子選單中看到該選項。</string>
+    <string name="doc_text2_8">若想在本機載入並偵錯一段 HTML 碼，您可將其作為 <b><code>data:</code></b> URI 載入。（方法為在其前方加上 「<b><code>data:text/html,</code></b>」 或 「<b><code>data:,</code></b>」。）本應用程式透過框架半正式地支援此用法。\n\n作為替代，您也可以使用選單（輕觸由三個圓點組成的符號來開啟）的「更多」子選單中的「手動加載 HTML 碼」選項。您必須啟用本應用程式設定中的「進階開發者工具」才會在上述的子選單中看到該選項。若使用此方式，程式會自動將 HTML 碼轉成 <b><code>data:</code></b> URI 並顯示於網址欄中。該 <b><code>data:</code></b> URI 經過百分號編碼；這意味着您可將其載入其他支援此類網址的瀏覽器。您可使用位在網址欄下方的「解碼」按鈕來解碼這類經過百分號編碼的字串並將其恢復為 HTML 碼。</string>
     <string name="settings_activity_label">設定</string>
     <string name="doc_activity_label">使用手冊</string>
     <string name="menu1_action_view_cert">檢視此網站的證書</string>
@@ -179,4 +180,6 @@
     <string name="theme_light">淺色</string>
     <string name="parsing_issue_title">解析錯誤</string>
     <string name="failed_to_parse_url">無法解析以下網址：“%1$s”</string>
+    <string name="alt_url_supplied">伺服器提供了替代網址：</string>
+    <string name="confirm_loading_alt_url">您想改為載入替代網址嗎？</string>
 </resources>

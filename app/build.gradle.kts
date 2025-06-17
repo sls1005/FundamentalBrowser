@@ -12,8 +12,8 @@ android {
         applicationId = "test.sls1005.projects.fundamentalbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 22
-        versionName = "2.3.0"
+        versionCode = 23
+        versionName = "2.4.0"
     }
     androidResources {
         generateLocaleConfig = true
