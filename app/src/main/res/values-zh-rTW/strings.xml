@@ -187,4 +187,10 @@
     <string name="failed_to_parse_url">無法解析以下網址：“%1$s”</string>
     <string name="alt_url_supplied">伺服器提供了替代網址：</string>
     <string name="confirm_loading_alt_url">您想改為載入替代網址嗎？</string>
+    <string name="menu1_action_reload_page">重新載入頁面</string>
+    <string name="menu1_action_refresh_log">刷新日誌</string>
+    <string name="menu1_action_close_log">收起日誌</string>
+    <string name="menu1_item_navigation">換頁</string>
+    <string name="menu1_action_previous_page">上一頁</string>
+    <string name="menu1_action_next_page">下一頁</string>
 </resources>

@@ -341,8 +341,53 @@ open class MainActivity : ConfiguratedActivity() {
     private val longClickListener = View.OnLongClickListener { view ->
         when(view.id) {
             R.id.toolbar -> run {
-                if (currentURL.isNotEmpty()) {
-                    copyTextToClipboard(currentURL)
+                if (isShowingLog()) {
+                    (object: DialogFragment() {
+                        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                            return (AlertDialog.Builder(requireActivity()).apply {
+                                setItems(
+                                    arrayOf(
+                                        getString(R.string.menu1_action_refresh_log),
+                                        getString(R.string.menu1_action_search_in_log),
+                                        getString(R.string.menu1_action_clear_log),
+                                        getString(R.string.menu1_action_close_log)
+                                    )
+                                ) { _, i ->
+                                    when (i) {
+                                        0 -> updateLogIfShowing()
+                                        1 -> showSearchBarForLog()
+                                        2 -> run {
+                                            synchronized(logMsgs) {
+                                                logMsgs.clear()
+                                            }
+                                            updateLogIfShowing()
+                                        }
+                                        3 -> hideLogIfShowing()
+                                        else -> Unit
+                                    }
+                                }
+                            }).create()
+                        }
+                    }).show(supportFragmentManager, null)
+                } else if (currentURL.isNotEmpty()) {
+                    (object: DialogFragment() {
+                        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                            return (AlertDialog.Builder(requireActivity()).apply {
+                                setItems(
+                                    arrayOf(title.toString(), currentURL)) { _, i ->
+                                    when (i) {
+                                        0 -> run {
+                                            copyTextToClipboard(title.toString())
+                                        }
+                                        1 -> run {
+                                            copyTextToClipboard(currentURL)
+                                        }
+                                        else -> Unit
+                                    }
+                                }
+                            }).create()
+                        }
+                    }).show(supportFragmentManager, null)
                 }
             }
         }
@@ -900,6 +945,8 @@ open class MainActivity : ConfiguratedActivity() {
         val w = findViewById<WebView>(R.id.window)
         val hasLoadedPage = !hasNotLoadedAnyPage()
         val showingLog = isShowingLog()
+        val forwardPossible = w.canGoForward()
+        val backwardPossible = w.canGoBack()
         arrayOf(
             Pair(
                 R.id.action_enable_disable_js,
@@ -925,15 +972,6 @@ open class MainActivity : ConfiguratedActivity() {
             val (id, state) = it
             menu.findItem(id).setChecked(state)
         }
-        if (showAdvancedDeveloperTools) {
-            menu.findItem(R.id.action_simulate_disconnection).setTitle(
-                if (simulatingDisconnection) {
-                    getString(R.string.menu1_stop_simulating_disconnection)
-                } else {
-                    getString(R.string.menu1_action_simulate_disconnection)
-                }
-            )
-        }
         arrayOf(
             Pair(
                 R.id.group_url,
@@ -950,42 +988,88 @@ open class MainActivity : ConfiguratedActivity() {
             Pair(
                 R.id.group_search_log,
                 showingLog && logMsgs.isNotEmpty()
+            ),
+            Pair(
+                R.id.group_navigation,
+                forwardPossible || backwardPossible
             )
         ).forEach { it ->
             val (id, state) = it
             menu.setGroupVisible(id, state)
         }
-        menu.findItem(R.id.submenu1).subMenu.also { sub ->
-            if (sub != null) {
+        menu.findItem(R.id.action_refresh).title = getString(
+            if (hasLoadedPage && showingLog) {
+                R.string.menu1_action_reload_page
+            } else {
+                R.string.menu1_action_refresh
+            }
+        )
+        if (forwardPossible || backwardPossible) {
+            menu.findItem(R.id.menu1_submenu_navigation)?.subMenu?.also { sub ->
                 arrayOf(
                     Pair(
-                        R.id.menu1_sub1_group_page,
-                        hasLoadedPage
+                        R.id.menu1_submenu_navigation_group_backward,
+                        backwardPossible
                     ),
                     Pair(
-                        R.id.menu1_sub1_group_website,
-                        hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "android-app", "blob", "file", "content")))
-                    ),
-                    Pair(
-                        R.id.menu1_sub1_group_advanced_tools,
-                        showAdvancedDeveloperTools
-                    ),
-                    Pair(
-                        R.id.menu1_sub1_group_advanced_tools_website_only,
-                        showAdvancedDeveloperTools && hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "android-app", "blob", "file", "content")))
-                    ),
-                    Pair(
-                        R.id.menu1_sub1_group_copy_url,
-                        hasLoadedPage
-                    ),
-                    Pair(
-                        R.id.menu1_sub1_group_log,
-                        logMsgs.isNotEmpty()
+                        R.id.menu1_submenu_navigation_group_forward,
+                        forwardPossible
                     )
                 ).forEach { it ->
                     val (id, state) = it
                     sub.setGroupVisible(id, state)
                 }
+            }
+        }
+        menu.findItem(R.id.menu1_submenu_more)?.subMenu?.also { sub ->
+            arrayOf(
+                Pair(
+                    R.id.menu1_submenu_more_group_page,
+                    hasLoadedPage
+                ),
+                Pair(
+                    R.id.menu1_submenu_more_group_website,
+                    hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "android-app", "blob", "file", "content")))
+                ),
+                Pair(
+                    R.id.menu1_submenu_more_group_advanced_tools,
+                    showAdvancedDeveloperTools
+                ),
+                Pair(
+                    R.id.menu1_submenu_more_group_copy_url,
+                    hasLoadedPage
+                ),
+                Pair(
+                    R.id.menu1_submenu_more_group_advanced_tools_website_only,
+                    showAdvancedDeveloperTools && hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "android-app", "blob", "file", "content")))
+                ),
+                Pair(
+                    R.id.menu1_submenu_more_group_log,
+                    logMsgs.isNotEmpty()
+                ),
+                Pair(
+                    R.id.menu1_submenu_more_group_showing_log,
+                    showingLog
+                )
+            ).forEach { it ->
+                val (id, state) = it
+                sub.setGroupVisible(id, state)
+            }
+            sub.findItem(R.id.action_view_log).title = getString(
+                if (showingLog) {
+                    R.string.menu1_action_refresh_log
+                } else {
+                    R.string.menu1_action_view_log
+                }
+            )
+            if (showAdvancedDeveloperTools) {
+                sub.findItem(R.id.action_simulate_disconnection).setTitle(
+                    if (simulatingDisconnection) {
+                        getString(R.string.menu1_stop_simulating_disconnection)
+                    } else {
+                        getString(R.string.menu1_action_simulate_disconnection)
+                    }
+                )
             }
         }
         return true
@@ -1092,9 +1176,11 @@ open class MainActivity : ConfiguratedActivity() {
                 synchronized(logMsgs) {
                     logMsgs.clear()
                 }
-                if (isShowingLog()) {
-                    updateLogIfShowing()
-                }
+                updateLogIfShowing()
+                (true)
+            }
+            R.id.action_close_log -> run {
+                hideLogIfShowing()
                 (true)
             }
             R.id.action_new_window -> run {
@@ -1186,6 +1272,22 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.action_simulate_disconnection -> run {
                 findViewById<WebView>(R.id.window).setNetworkAvailable(/* !! */ simulatingDisconnection)
                 simulatingDisconnection = !simulatingDisconnection
+                (true)
+            }
+            R.id.action_previous_page -> run {
+                findViewById<WebView>(R.id.window).apply {
+                    if (canGoBack()) {
+                        goBack()
+                    }
+                }
+                (true)
+            }
+            R.id.action_next_page -> run {
+                findViewById<WebView>(R.id.window).apply {
+                    if (canGoForward()) {
+                        goForward()
+                    }
+                }
                 (true)
             }
             R.id.action_load_html_code -> run {
@@ -1495,7 +1597,7 @@ open class MainActivity : ConfiguratedActivity() {
         return findViewById<RelativeLayout>(R.id.search_area).visibility == VISIBLE
     }
 
-    private fun showContentSearchBar() {
+    private inline fun showContentSearchBar() {
         allowsForegroundLogging.set(false)
         hideUrlBarIfShowing()
         supportActionBar?.hide()
@@ -1528,7 +1630,7 @@ open class MainActivity : ConfiguratedActivity() {
 
     }
 
-    private fun showSearchBarForLog() {
+    private inline fun showSearchBarForLog() {
         allowsForegroundLogging.set(false)
         hideUrlBarIfShowing()
         supportActionBar?.hide()
@@ -1554,7 +1656,7 @@ open class MainActivity : ConfiguratedActivity() {
         }
     }
 
-    private fun hideSearchBar() {
+    private inline fun hideSearchBar() {
         findViewById<EditText>(R.id.content_search_field).apply {
             setEnabled(false)
             text.clear()
@@ -1613,7 +1715,7 @@ open class MainActivity : ConfiguratedActivity() {
         }
     }
 
-    private fun hideRunButtonIfShowing() {
+    private inline fun hideRunButtonIfShowing() {
         findViewById<MaterialButton>(R.id.button_run).apply {
             if (visibility == VISIBLE) {
                 visibility = GONE

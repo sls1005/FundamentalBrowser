@@ -20,7 +20,7 @@
     <group android:id="@+id/group_page">
         <item
             android:id="@+id/action_refresh"
-            android:title="@string/menu1_action_refresh"
+            android:title=""
             app:showAsAction="never"/>
     </group>
     <item
@@ -64,15 +64,36 @@
         android:id="@+id/action_settings"
         android:title="@string/settings"
         app:showAsAction="never"/>
+    <group
+        android:id="@+id/group_navigation">
+        <item
+            android:id="@+id/menu1_submenu_navigation"
+            android:title="@string/menu1_item_navigation">
+            <menu>
+                <group android:id="@+id/menu1_submenu_navigation_group_backward">
+                    <item
+                        android:id="@+id/action_previous_page"
+                        android:title="@string/menu1_action_previous_page"
+                        app:showAsAction="never"/>
+                </group>
+                <group android:id="@+id/menu1_submenu_navigation_group_forward">
+                    <item
+                        android:id="@+id/action_next_page"
+                        android:title="@string/menu1_action_next_page"
+                        app:showAsAction="never"/>
+                </group>
+            </menu>
+        </item>
+    </group>
     <item
-        android:id="@+id/submenu1"
+        android:id="@+id/menu1_submenu_more"
         android:title="@string/menu1_item_more">
         <menu>
             <item
                 android:id="@+id/action_new_window"
                 android:title="@string/menu1_action_new_window"
                 app:showAsAction="never"/>
-            <group android:id="@+id/menu1_sub1_group_page">
+            <group android:id="@+id/menu1_submenu_more_group_page">
                 <item
                     android:id="@+id/action_open_in_new_window"
                     android:title="@string/menu1_action_open_in_another_window"
@@ -86,19 +107,19 @@
                     android:title="@string/menu1_action_view_source"
                     app:showAsAction="never"/>
             </group>
-            <group android:id="@+id/menu1_sub1_group_website">
+            <group android:id="@+id/menu1_submenu_more_group_website">
                 <item
                     android:id="@+id/action_view_cert"
                     android:title="@string/menu1_action_view_cert"
                     app:showAsAction="never"/>
             </group>
-            <group android:id="@+id/menu1_sub1_group_advanced_tools_website_only">
+            <group android:id="@+id/menu1_submenu_more_group_advanced_tools_website_only">
                 <item
                     android:id="@+id/action_find_robots_txt"
                     android:title="@string/menu1_action_find_robots_txt"
                     app:showAsAction="never"/>
             </group>
-            <group android:id="@+id/menu1_sub1_group_advanced_tools">
+            <group android:id="@+id/menu1_submenu_more_group_advanced_tools">
                 <item
                     android:id="@+id/action_simulate_disconnection"
                     android:title="@string/menu1_action_simulate_disconnection"
@@ -108,7 +129,7 @@
                     android:title="@string/menu1_action_load_html"
                     app:showAsAction="never"/>
             </group>
-            <group android:id="@+id/menu1_sub1_group_copy_url">
+            <group android:id="@+id/menu1_submenu_more_group_copy_url">
                 <item
                     android:id="@+id/action_copy_url"
                     android:title="@string/menu1_action_copy_url"
@@ -118,14 +139,20 @@
                     android:title="@string/menu1_action_copy_url_as_link"
                     app:showAsAction="never"/>
             </group>
-            <group android:id="@+id/menu1_sub1_group_log">
+            <group android:id="@+id/menu1_submenu_more_group_log">
                 <item
                     android:id="@+id/action_view_log"
-                    android:title="@string/menu1_action_view_log"
+                    android:title=""
                     app:showAsAction="never"/>
                 <item
                     android:id="@+id/action_clear_log"
                     android:title="@string/menu1_action_clear_log"
+                    app:showAsAction="never"/>
+            </group>
+            <group android:id="@+id/menu1_submenu_more_group_showing_log">
+                <item
+                    android:id="@+id/action_close_log"
+                    android:title="@string/menu1_action_close_log"
                     app:showAsAction="never"/>
             </group>
         </menu>

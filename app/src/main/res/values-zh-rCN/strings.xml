@@ -185,4 +185,10 @@
     <string name="failed_to_parse_url">无法解析以下网址：“%1$s”</string>
     <string name="alt_url_supplied">服务器提供了替代网址：</string>
     <string name="confirm_loading_alt_url">您想改为加载替代网址吗？</string>
+    <string name="menu1_action_reload_page">重新加载页面</string>
+    <string name="menu1_action_refresh_log">刷新日志</string>
+    <string name="menu1_action_close_log">收起日志</string>
+    <string name="menu1_item_navigation">换页</string>
+    <string name="menu1_action_previous_page">上一页</string>
+    <string name="menu1_action_next_page">下一页</string>
 </resources>

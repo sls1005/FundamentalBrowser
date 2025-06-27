@@ -194,4 +194,10 @@
     <string name="failed_to_parse_url">Failed to parse the following URL: ‘%1$s’</string>
     <string name="alt_url_supplied">An alternative URL is supplied:</string>
     <string name="confirm_loading_alt_url">Do you want to load this alternative URL instead?</string>
+    <string name="menu1_action_reload_page">Reload page</string>
+    <string name="menu1_action_refresh_log">Refresh the log</string>
+    <string name="menu1_action_close_log">Close log</string>
+    <string name="menu1_item_navigation">Navigation</string>
+    <string name="menu1_action_previous_page">Previous page</string>
+    <string name="menu1_action_next_page">Next page</string>
 </resources>
