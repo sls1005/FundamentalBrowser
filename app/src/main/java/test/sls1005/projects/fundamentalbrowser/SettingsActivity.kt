@@ -2,7 +2,6 @@ package test.sls1005.projects.fundamentalbrowser
 
 import android.app.Dialog
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.view.View.VISIBLE
 import android.view.View.GONE

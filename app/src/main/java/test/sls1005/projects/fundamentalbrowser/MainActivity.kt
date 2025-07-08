@@ -77,7 +77,6 @@ import java.util.concurrent.Executors
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import javax.crypto.interfaces.DHPublicKey
-import kotlin.math.log
 
 open class MainActivity : ConfiguratedActivity() {
     private inner class BrowserHttpOrHttpsGetMethodSpan(url: String) : URLSpan(url) {
