@@ -48,6 +48,13 @@
         android:title="@string/desktop_mode"
         android:checkable="true"
         app:showAsAction="never"/>
+    <group android:id="@+id/group_only_enabled_under_dark_mode_on_level_29_or_later">
+        <item
+            android:id="@+id/action_enable_disable_algorithmic_darkening"
+            android:title="@string/menu1_algorithmic_darkening"
+            android:checkable="true"
+            app:showAsAction="never"/>
+    </group>
     <group android:id="@+id/group_content_search">
         <item
             android:id="@+id/action_content_search"
@@ -65,7 +72,19 @@
         android:title="@string/settings"
         app:showAsAction="never"/>
     <group
-        android:id="@+id/group_navigation">
+        android:id="@+id/group_tools">
+        <item
+            android:id="@+id/menu1_submenu_tools"
+            android:title="@string/menu1_item_tools">
+            <menu>
+                <item
+                    android:id="@+id/menu1_tool_dns_resolver"
+                    android:title="@string/dns_resolver"
+                    app:showAsAction="never"/>
+            </menu>
+        </item>
+    </group>
+    <group android:id="@+id/group_navigation">
         <item
             android:id="@+id/menu1_submenu_navigation"
             android:title="@string/menu1_item_navigation">

@@ -29,6 +29,8 @@ open class ConfiguratedActivity : ThemedActivity() {
     protected var showAdvancedDeveloperTools = false                    // Line 2, Byte 2, Bit 1
     protected var shouldAskBeforeFollowingRedirection = false           //                 Bit 2
     protected var shouldLinkURLsInLog = true                            //                 Bit 3
+    protected var shouldUseAlgorithmicDarkening = false                 //                 Bit 4
+    protected var shouldUseAlternativeSourceViewer = false              //                 Bit 5
 
     override fun onResume() {
         super.onResume()
@@ -92,6 +94,8 @@ open class ConfiguratedActivity : ThemedActivity() {
                             showAdvancedDeveloperTools = a[0]
                             shouldAskBeforeFollowingRedirection = a[1]
                             shouldLinkURLsInLog = a[2]
+                            shouldUseAlgorithmicDarkening = a[3]
+                            shouldUseAlternativeSourceViewer = a[4]
                         }
                     }
                 } else {
@@ -135,7 +139,7 @@ open class ConfiguratedActivity : ThemedActivity() {
             k = k shr 8
         }
         file.writeBytes(a)
-        file.appendText(searchURL + "\n")
+        file.appendText(searchURL.replace("\n", "") + "\n")
         file.appendBytes(
             byteArrayOf(
                 bitsSetAccordingTo(
@@ -154,7 +158,9 @@ open class ConfiguratedActivity : ThemedActivity() {
                     booleanArrayOf(
                         showAdvancedDeveloperTools,
                         shouldAskBeforeFollowingRedirection,
-                        shouldLinkURLsInLog
+                        shouldLinkURLsInLog,
+                        shouldUseAlgorithmicDarkening,
+                        shouldUseAlternativeSourceViewer
                     )
                 )
             )
@@ -197,6 +203,29 @@ open class ConfiguratedActivity : ThemedActivity() {
                 null
             }
         }
+    }
+
+    protected fun saveEncodingForText(encoding: String) {
+        File(filesDir, "text_encoding.txt").also {
+            if (it.exists()) {
+                it.delete()
+            }
+            it.writeText(encoding)
+        }
+    }
+
+    protected fun getStoredEncodingForText(): String? {
+        return with(File(filesDir, "text_encoding.txt")) {
+            if (exists()) {
+                readText()
+            } else {
+                null
+            }
+        }
+    }
+
+    protected fun getStoredOrDefaultEncodingForText(): String {
+        return getStoredEncodingForText().orEmpty().ifEmpty { "UTF-8" }
     }
 }
 

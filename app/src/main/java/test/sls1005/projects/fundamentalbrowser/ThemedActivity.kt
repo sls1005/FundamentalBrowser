@@ -1,5 +1,7 @@
 package test.sls1005.projects.fundamentalbrowser
 
+import android.app.UiModeManager
+import android.os.Build
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import java.io.File

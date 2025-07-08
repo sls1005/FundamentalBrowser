@@ -23,6 +23,7 @@
             android:layout_marginStart="10dp"
             android:layout_marginEnd="10dp"
             android:inputType="textUri"
-            android:textSize="20sp"/>
+            android:textSize="20sp"
+            android:fontFamily="monospace"/>
     </LinearLayout>
 </ScrollView>

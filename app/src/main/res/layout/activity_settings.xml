@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="top|start">
+    android:gravity="top|start"
+    android:fitsSystemWindows="true">
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolbar"
         android:layout_width="match_parent"
@@ -110,6 +111,26 @@
                 android:text="@string/switch_remove_spaces_and_linebreaks_extra_text"
                 android:textColor="?android:attr/textColorPrimary"/>
             <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_algorithmic_darkening"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/algorithmic_darkening"
+                android:textSize="16sp"/>
+            <TextView
+                android:id="@+id/switch_algorithmic_darkening_extra_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="12sp"
+                android:text="@string/switch_algorithmic_darkening_extra_text"
+                android:textColor="?android:attr/textColorPrimary"
+                android:visibility="gone"/>
+            <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/switch_desktop_mode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -175,34 +196,6 @@
                 android:text="@string/switch_ask_before_following_redirection_extra_text"
                 android:textColor="?android:attr/textColorPrimary"/>
             <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/switch_show_button_run"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/show_button_run"
-                android:textSize="16sp"/>
-            <TextView
-                android:id="@+id/switch_show_button_run_extra_text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingStart="20dp"
-                android:paddingEnd="20dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:textSize="12sp"
-                android:text="@string/switch_show_button_run_extra_text"
-                android:textColor="?android:attr/textColorPrimary"
-                android:visibility="gone"/>
-            <com.google.android.material.materialswitch.MaterialSwitch
-                android:id="@+id/switch_clear_log_before_running_script"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="15dp"
-                android:layout_marginEnd="10dp"
-                android:text="@string/clear_log_before_running_script"
-                android:textSize="16sp"/>
-            <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/switch_auto_link_urls_in_log"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -262,8 +255,10 @@
                 android:paddingStart="20dp"
                 android:paddingEnd="10dp"
                 android:textSize="16sp"
+                android:fontFamily="monospace"
                 android:text=""
                 android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone"/>
             <TextView
                 android:id="@+id/user_agent_extra_text"
@@ -296,6 +291,7 @@
                 android:textSize="16sp"
                 android:text=""
                 android:clickable="true"
+                android:focusable="true"
                 android:visibility="gone"/>
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_add_language"
@@ -350,7 +346,54 @@
                 android:textSize="12sp"
                 android:text=""
                 android:textColor="?android:attr/textColorPrimary"/>
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_show_button_run"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/show_button_run"
+                android:textSize="16sp"/>
             <TextView
+                android:id="@+id/switch_show_button_run_extra_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="20dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:textSize="12sp"
+                android:text="@string/switch_show_button_run_extra_text"
+                android:textColor="?android:attr/textColorPrimary"
+                android:visibility="gone"/>
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switch_clear_log_before_running_script"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="15dp"
+                android:layout_marginEnd="10dp"
+                android:text="@string/clear_log_before_running_script"
+                android:textSize="16sp"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="15dp"
+                android:paddingBottom="5dp"
+                android:textSize="16sp"
+                android:text="@string/settings_title_default_text_encoding"
+                android:textColor="?android:attr/colorPrimary"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/default_text_encoding"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+                android:textSize="16sp"
+                android:text=""
+                android:clickable="true"
+                android:focusable="true"/>
+           <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="15dp"
@@ -365,15 +408,17 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="20dp"
                 android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
                 android:textSize="16sp"
                 android:text=""
-                android:clickable="true"/>
+                android:clickable="true"
+                android:focusable="true"/>
             <TextView
+                android:id="@+id/max_log_msg_extra_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:textSize="12sp"
                 android:text="@string/settings_max_log_msg_extra_text"
@@ -393,20 +438,42 @@
                 android:layout_height="wrap_content"
                 android:paddingStart="20dp"
                 android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
                 android:textSize="16sp"
+                android:fontFamily="monospace"
                 android:text=""
-                android:clickable="true"/>
+                android:clickable="true"
+                android:focusable="true"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:paddingStart="20dp"
                 android:paddingEnd="20dp"
-                android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:textSize="12sp"
                 android:text="@string/settings_search_url_extra_text"
                 android:textColor="?android:attr/textColorPrimary"
                 android:autoLink="none"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="15dp"
+                android:paddingBottom="5dp"
+                android:textSize="16sp"
+                android:text="@string/settings_title_source_viewer"
+                android:textColor="?android:attr/colorPrimary"
+                android:textStyle="bold"/>
+            <TextView
+                android:id="@+id/source_viewer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:paddingStart="20dp"
+                android:paddingEnd="10dp"
+                android:paddingBottom="5dp"
+                android:textSize="16sp"
+                android:text=""
+                android:clickable="true"
+                android:focusable="true"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -425,7 +492,8 @@
                 android:paddingBottom="5dp"
                 android:textSize="16sp"
                 android:text=""
-                android:clickable="true"/>
+                android:clickable="true"
+                android:focusable="true"/>
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

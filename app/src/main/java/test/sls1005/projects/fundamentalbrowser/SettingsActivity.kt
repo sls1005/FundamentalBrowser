@@ -2,6 +2,7 @@ package test.sls1005.projects.fundamentalbrowser
 
 import android.app.Dialog
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View.VISIBLE
 import android.view.View.GONE
@@ -15,6 +16,7 @@ import android.widget.EditText
 import android.widget.RadioGroup
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.DialogFragment
 import com.google.android.material.appbar.MaterialToolbar
@@ -87,8 +89,14 @@ class SettingsActivity : ConfiguratedActivity() {
             R.id.language_tags -> run {
                 confirmManuallySettingLanguage()
             }
-            R.id.theme -> {
+            R.id.theme -> run {
                 showDialogForSettingTheme()
+            }
+            R.id.source_viewer -> run {
+                showDialogForSettingSourceViewer()
+            }
+            R.id.default_text_encoding -> run {
+                showDialogForSettingDefaultEncodingForText()
             }
         }
     }
@@ -192,11 +200,16 @@ class SettingsActivity : ConfiguratedActivity() {
                 shouldLinkURLsInLog = checked
                 findViewById<TextView>(R.id.switch_auto_link_urls_in_log_extra_text).visibility = if (checked) { VISIBLE } else { GONE }
             }
+            R.id.switch_algorithmic_darkening -> run {
+                shouldUseAlgorithmicDarkening = checked
+                findViewById<TextView>(R.id.switch_algorithmic_darkening_extra_text).visibility = if (checked) { VISIBLE } else { GONE }
+            }
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContentView(R.layout.activity_settings)
         setSupportActionBar(findViewById<MaterialToolbar>(R.id.toolbar))
         intArrayOf(
@@ -219,7 +232,8 @@ class SettingsActivity : ConfiguratedActivity() {
             R.id.switch_show_advanced_developer_tools,
             R.id.switch_ask_before_following_redirection,
             R.id.switch_disable_dynamic_colors,
-            R.id.switch_auto_link_urls_in_log
+            R.id.switch_auto_link_urls_in_log,
+            R.id.switch_algorithmic_darkening
         ).forEach { id ->
             findViewById<MaterialSwitch>(id).setOnCheckedChangeListener(checkedChangeListener)
         }
@@ -240,9 +254,16 @@ class SettingsActivity : ConfiguratedActivity() {
             R.id.search_url,
             R.id.user_agent,
             R.id.language_tags,
-            R.id.theme
+            R.id.theme,
+            R.id.default_text_encoding,
+            R.id.source_viewer
         ).forEach { id ->
             findViewById<TextView>(id).setOnClickListener(clickListener)
+        }
+        findViewById<TextView>(R.id.max_log_msg_extra_text).apply {
+            if (text.isEmpty()) {
+                visibility = GONE
+            }
         }
     }
 
@@ -265,7 +286,8 @@ class SettingsActivity : ConfiguratedActivity() {
             Pair(R.id.switch_allow_http, shouldAllowHTTP),
             Pair(R.id.switch_show_advanced_developer_tools, showAdvancedDeveloperTools),
             Pair(R.id.switch_ask_before_following_redirection, shouldAskBeforeFollowingRedirection),
-            Pair(R.id.switch_auto_link_urls_in_log, shouldLinkURLsInLog)
+            Pair(R.id.switch_auto_link_urls_in_log, shouldLinkURLsInLog),
+            Pair(R.id.switch_algorithmic_darkening, shouldUseAlgorithmicDarkening)
         ).forEach { it ->
             val (id, flag) = it
             findViewById<MaterialSwitch>(id).setChecked(flag)
@@ -284,14 +306,6 @@ class SettingsActivity : ConfiguratedActivity() {
                 setChecked(shouldAccept3rdPartyCookies)
             } else {
                 shouldAccept3rdPartyCookies = false
-            }
-        }
-        getStoredOrDefaultThemeSettings().also { settings ->
-            findViewById<MaterialSwitch>(R.id.switch_disable_dynamic_colors).setChecked(!settings.useDynamicColors)
-            findViewById<TextView>(R.id.theme).text = when (settings.theme) {
-                (1).toByte() -> getString(R.string.theme_light)
-                (2).toByte() -> getString(R.string.theme_dark)
-                else -> getString(R.string.theme_default)
             }
         }
         arrayOf(
@@ -314,14 +328,26 @@ class SettingsActivity : ConfiguratedActivity() {
                 getString(R.string.switch_show_advanced_developer_tools_extra_text_part1)
             }
         )
-        findViewById<TextView>(R.id.max_log_msgs).text = maxLogMsgs.toString()
-        findViewById<TextView>(R.id.search_url).text = searchURL.let {
-            if (it.isEmpty()) {
-                getString(R.string.none)
-            } else {
-                it
-            }
+        getStoredOrDefaultThemeSettings().also { settings ->
+            findViewById<MaterialSwitch>(R.id.switch_disable_dynamic_colors).setChecked(!settings.useDynamicColors)
+            findViewById<TextView>(R.id.theme).text = getString(
+                when (settings.theme) {
+                    (1).toByte() -> R.string.theme_light
+                    (2).toByte() -> R.string.theme_dark
+                    else -> R.string.theme_default
+                }
+            )
         }
+        findViewById<TextView>(R.id.source_viewer).text = getString(
+            if (shouldUseAlternativeSourceViewer) {
+                R.string.source_viewer_alternative
+            } else {
+                R.string.source_viewer_native
+            }
+        )
+        findViewById<TextView>(R.id.max_log_msgs).text = maxLogMsgs.toString()
+        findViewById<TextView>(R.id.search_url).text = searchURL.ifEmpty { getString(R.string.tap_to_set) }
+        findViewById<TextView>(R.id.default_text_encoding).text = getStoredOrDefaultEncodingForText()
         showUserAgentIfApplicable()
         showLanguageTagsIfApplicable()
     }
@@ -331,13 +357,7 @@ class SettingsActivity : ConfiguratedActivity() {
             findViewById<TextView>(R.id.user_agent).apply {
                 visibility = VISIBLE
             }.also {
-                it.text = getStoredUserAgent().let {
-                    if (it == null || it.isEmpty()) {
-                        getString(R.string.tap_to_set)
-                    } else {
-                        it
-                    }
-                }
+                it.text = getStoredUserAgent().orEmpty().ifEmpty { getString(R.string.tap_to_set) }
             }
             findViewById<TextView>(R.id.user_agent_extra_text).visibility = VISIBLE
         } else {
@@ -355,13 +375,7 @@ class SettingsActivity : ConfiguratedActivity() {
             findViewById<TextView>(R.id.language_tags).apply {
                 visibility = VISIBLE
             }.also {
-                it.text = getStoredLanguageTags().let {
-                    if (it == null || it.isEmpty()) {
-                        getString(R.string.tap_to_set)
-                    } else {
-                        it
-                    }
-                }
+                it.text = getStoredLanguageTags().orEmpty().ifEmpty { getString(R.string.tap_to_set) }
             }
             intArrayOf(
                 R.id.button_add_language,
@@ -445,8 +459,45 @@ class SettingsActivity : ConfiguratedActivity() {
                                 ThemeSettings(theme = theme, useDynamicColors = oldSettings.useDynamicColors)
                             )
                         }
+                        ctx.findViewById<TextView>(R.id.theme).text = ctx.getString(
+                            when (getStoredOrDefaultThemeSettings().theme) {
+                                (1).toByte() -> R.string.theme_light
+                                (2).toByte() -> R.string.theme_dark
+                                else -> R.string.theme_default
+                            }
+                        )
                         ctx.startActivity(Intent(ctx, SettingsActivity::class.java))
                         ctx.finish()
+                    }
+                    setNegativeButton(R.string.cancel) {_, _ -> }
+                }).create()
+            }
+        }).show(supportFragmentManager, null)
+    }
+
+    private fun showDialogForSettingSourceViewer() {
+        (object: DialogFragment() {
+            override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                val ctx = requireActivity()
+                return (AlertDialog.Builder(ctx).apply {
+                    val v = layoutInflater.inflate(R.layout.select_source_viewer, null)
+                    setView(v)
+                    v.findViewById<RadioGroup>(R.id.source_viewer_selection_radio_group).check(
+                        if(shouldUseAlternativeSourceViewer) {
+                            R.id.source_viewer_option_alternative
+                        } else {
+                            R.id.source_viewer_option_native
+                        }
+                    )
+                    setPositiveButton(R.string.ok) {_, _ ->
+                       shouldUseAlternativeSourceViewer = (v.findViewById<RadioGroup>(R.id.source_viewer_selection_radio_group).checkedRadioButtonId == R.id.source_viewer_option_alternative)
+                       ctx.findViewById<TextView>(R.id.source_viewer).text = ctx.getString(
+                           if (shouldUseAlternativeSourceViewer) {
+                               R.string.source_viewer_alternative
+                           } else {
+                               R.string.source_viewer_native
+                           }
+                       )
                     }
                     setNegativeButton(R.string.cancel) {_, _ -> }
                 }).create()
@@ -466,14 +517,8 @@ class SettingsActivity : ConfiguratedActivity() {
                         append(searchURL)
                     }
                     setPositiveButton(R.string.ok) {_, _ ->
-                        searchURL = v.findViewById<EditText>(R.id.url_field).text.toString()
-                        ctx.findViewById<TextView>(R.id.search_url).text = searchURL.let {
-                            if (it.isEmpty()) {
-                                ctx.getString(R.string.none)
-                            } else {
-                                it
-                            }
-                        }
+                        searchURL = v.findViewById<EditText>(R.id.url_field).text.toString().replace('\n', ' ').replace('\r', ' ')
+                        ctx.findViewById<TextView>(R.id.search_url).text = searchURL.ifEmpty { ctx.getString(R.string.tap_to_set) }
                     }
                     setNegativeButton(R.string.cancel) {_, _ -> }
                 }).create()
@@ -486,22 +531,42 @@ class SettingsActivity : ConfiguratedActivity() {
             override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
                 val ctx = requireActivity()
                 return (AlertDialog.Builder(ctx).apply {
-                    val v = layoutInflater.inflate(R.layout.string_field, null)
+                    val v = layoutInflater.inflate(R.layout.string_field_monospaced, null)
                     setView(v)
-                    v.findViewById<EditText>(R.id.str_field).text.apply {
+                    v.findViewById<EditText>(R.id.string_field_monospaced_input).text.apply {
                         clear()
                         append(getStoredUserAgent() ?: "")
                     }
                     setPositiveButton(R.string.ok) {_, _ ->
-                        v.findViewById<EditText>(R.id.str_field).text.toString().also {
+                        v.findViewById<EditText>(R.id.string_field_monospaced_input).text.toString().also {
                             saveUserAgent(it)
-                            ctx.findViewById<TextView>(R.id.user_agent).text = it.let {
-                                if (it.isEmpty()) {
-                                    getString(R.string.tap_to_set)
-                                } else {
-                                    it
-                                }
-                            }
+                            ctx.findViewById<TextView>(R.id.user_agent).text = it.ifEmpty { ctx.getString(R.string.tap_to_set) }
+                        }
+                    }
+                    setNegativeButton(R.string.cancel) {_, _ -> }
+                }).create()
+            }
+        }).show(supportFragmentManager, null)
+    }
+
+    private fun showDialogForSettingDefaultEncodingForText() {
+        (object: DialogFragment() {
+            override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                val ctx = requireActivity()
+                return (AlertDialog.Builder(ctx).apply {
+                    val v = layoutInflater.inflate(R.layout.string_field, null)
+                    setView(v)
+                    v.apply {
+                        findViewById<TextView>(R.id.string_field_title1).text = ctx.getString(R.string.string_field_title_enter_encoding_name)
+                        findViewById<EditText>(R.id.string_field_input).text.apply {
+                            clear()
+                            append(getStoredOrDefaultEncodingForText())
+                        }
+                    }
+                    setPositiveButton(R.string.ok) {_, _ ->
+                        v.findViewById<EditText>(R.id.string_field_input).text.toString().also {
+                            saveEncodingForText(it)
+                            ctx.findViewById<TextView>(R.id.default_text_encoding).text = it.ifEmpty { ctx.getString(R.string.tap_to_set) }
                         }
                     }
                     setNegativeButton(R.string.cancel) {_, _ -> }
@@ -515,22 +580,18 @@ class SettingsActivity : ConfiguratedActivity() {
             override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
                 val ctx = requireActivity()
                 return (AlertDialog.Builder(ctx).apply {
-                    val v = layoutInflater.inflate(R.layout.string_field, null)
+                    val v = layoutInflater.inflate(R.layout.string_field_monospaced, null).apply {
+                        findViewById<TextView>(R.id.monospaced_string_field_title1).text = ctx.getString(R.string.string_field_title_language_code)
+                    }
                     setView(v)
-                    v.findViewById<EditText>(R.id.str_field).text.apply {
+                    v.findViewById<EditText>(R.id.string_field_monospaced_input).text.apply {
                         clear()
                         append(getStoredLanguageTags() ?: "")
                     }
                     setPositiveButton(R.string.ok) {_, _ ->
-                        v.findViewById<EditText>(R.id.str_field).text.toString().also {
+                        v.findViewById<EditText>(R.id.string_field_monospaced_input).text.toString().also {
                             saveLanguageTags(it)
-                            ctx.findViewById<TextView>(R.id.language_tags).text = it.let {
-                                if (it.isEmpty()) {
-                                    ctx.getString(R.string.tap_to_set)
-                                } else {
-                                    it
-                                }
-                            }
+                            ctx.findViewById<TextView>(R.id.language_tags).text = it.ifEmpty { ctx.getString(R.string.tap_to_set) }
                         }
                     }
                     setNegativeButton(R.string.cancel) {_, _ -> }
@@ -610,7 +671,9 @@ class SettingsActivity : ConfiguratedActivity() {
             override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
                 return (AlertDialog.Builder(requireActivity()).apply {
                     setView(
-                        layoutInflater.inflate(R.layout.confirm_manually_setting_language, null)
+                        layoutInflater.inflate(R.layout.question_dialog, null).apply {
+                            findViewById<TextView>(R.id.question_dialog_text).text = getString(R.string.confirm_manually_setting_language_tags)
+                        }
                     )
                     setPositiveButton(R.string.yes) {_, _ ->
                         showDialogForManuallySettingLanguageTags()

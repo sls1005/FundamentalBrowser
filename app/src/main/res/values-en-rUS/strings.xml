@@ -22,7 +22,7 @@
     <string name="autoscroll_log_msgs">Autoscroll log messages</string>
     <string name="allow_js_when_loading_url_that_is_from_another_app">Allow the use of JavaScript when loading a URL that is from another application</string>
     <string name="ask_before_loading_url_that_is_from_another_app">Ask before loading a URL that is from another application</string>
-    <string name="switch_show_advanced_developer_tools_extra_text_part1">Show advanced developer tools in the “More” submenu of this application.</string>
+    <string name="switch_show_advanced_developer_tools_extra_text_part1">Show advanced developer tools in the menu and submenus of this application.</string>
     <string name="switch_show_advanced_developer_tools_extra_text_part2">Even if this is disabled, you can still use common developer tools such as the JavaScript console (if it is enabled) and the log, and can still view the source code of a web page or the certificate of a website. This option currently only covers less common tools.</string>
     <string name="language_selection_extra_text">The higher the weight, the higher the priority is. A language with higher priority is considered preferred. Default means highest priority.</string>
     <string name="repeat_to_close">Repeat the gesture to close this window</string>
@@ -71,4 +71,5 @@
     <string name="doc_text2_8">To locally load and debug a piece of HTML code, you may load it as a <b><code>data:</code></b> URI (by prefixing it with “<b><code>data:text/html,</code></b>” or “<b><code>data:,</code></b>”). This usage is half-supported by this application through the framework.\n\nAlternatively, you may use the “Load HTML code” option in the submenu that is opened by tapping the three-dot icon and then tapping “more.” You must enable the “advanced developer tools” option in the settings of this app in order to see the option in the submenu. If you use this method, this app will automatically convert the HTML code into a data URI and present it in the URL field. The data URI will be pct-encoded, which means you may load it into another browser that supports doing so. The “Decode” button below the URL field can be used to decode the pct-encoded string and restore the HTML code.</string>
     <string name="confirm_following_redirection_to_load_page">Do you want to follow the redirection to load the page of “%1$s”?</string>
     <string name="failed_to_parse_url">Failed to parse the following URL: “%1$s”</string>
+    <string name="dns_resolver_error2">Couldn\'t resolve “%1$s”</string>
 </resources>
