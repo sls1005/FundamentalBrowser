@@ -319,15 +319,19 @@ open class MainActivity : ConfiguratedActivity() {
                                 findViewById<WebView>(R.id.window).evaluateJavascript(code) { result ->
                                     val maxMsgNum = maxLogMsgsAtomic.get()
                                     val logMsg = "[REPL] $result"
-                                    synchronized(logMsgs) {
-                                        logMsgs.apply {
-                                            if (size >= maxMsgNum) {
-                                                removeFirst()
+                                    lifecycleScope.launch(loggingDispatcher) {
+                                        synchronized(logMsgs) {
+                                            logMsgs.apply {
+                                                if (size >= maxMsgNum) {
+                                                    removeFirst()
+                                                }
+                                                add(logMsg)
                                             }
-                                            add(logMsg)
+                                        }
+                                        withContext(Dispatchers.Main) {
+                                            updateLogIfShowing()
                                         }
                                     }
-                                    updateLogIfShowing()
                                 }
                             } else {
                                 val errMsg = getString(R.string.js_not_enabled)
@@ -833,6 +837,9 @@ open class MainActivity : ConfiguratedActivity() {
                                 }
                                 add(logMsg)
                             }
+                        }
+                        withContext(Dispatchers.Main) {
+                            updateLogIfShowing()
                         }
                     }
                     return true
