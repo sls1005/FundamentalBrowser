@@ -72,7 +72,7 @@ A developer-friendly browser should: (A checked box means implemented or already
 
 To make the search button usable, the 'Search URL' must be set. The search button is not the same as the 'Load' button, which loads a page of a given URL but will not do search, while the search button will not load a URL but... search for it. Such strict distinguishment between tasks is supposed to be helpful to prevent accidental URL loading and to allow the user to search for a domain-name-like or URL-like string.
 
-As a desirable side effect, this browser will not automatically try to search for a URL when the scheme isn't HTTP/HTTPS, unless explicitly asked by the user (by clicking the "search" button). When you use the "load" button, you will either successfully load a URL or fail to load it (if the website does not exist or the scheme is forbidden), but not search for it (unless you confirm to do so). And you are generally allowed to directly load `data:` or `view-source:` URIs, as long as you write them correctly.
+As a desirable side effect, this browser will not automatically try to search for a string that looks like a URL/URI, unless explicitly asked by the user (by clicking the "search" button). When you use the "load" button, you will either successfully load a URL or fail to load it (if the website does not exist or the scheme is forbidden), but not search for it (unless you confirm to do so). And you are generally allowed to directly load `data:` or `view-source:` URIs (but only manually), as long as you write them correctly.
 
 #### Console and REPL
 
@@ -100,7 +100,7 @@ See <a href="#Details">details</a> for more information about this usage.
 
 * To keep things simple, new windows are implemented in this app as new tasks/activities. Using more than one window may consume a lot of system resources due to this reason. Hence, new windows are not created automatically in most cases.
 
-* For security concerns, JavaScript is automatically disabled by default when opening a URL from within another application. This can be changed in settings. In addition, this app will not load a URL from an intent unless its scheme is `http:` or `https:` (and currently, only the latter will be successfully loaded). The latter rule is not enforced for URLs from a webpage or for URL/URIs loaded manually by the user.
+* For security concerns, JavaScript is automatically disabled by default when opening a URL from within another application. This can be changed in settings. In addition, this app will not load a URL from an intent unless its scheme is `http:` or `https:`. The latter rule is not enforced for URLs from a webpage or for URL/URIs loaded manually by the user.
 
 * This browser supports HTTP (the non-secure protocol that is similar to but different from HTTPS), but it is disabled by default, meaning this app will block (non-HTTPS) HTTP requests unless you enable HTTP in settings. HTTPS is used normally and is not subject to this rule. The reason for this application to support (non-secure) HTTP is to allow debugging custom servers in LAN. It's not for general use. Don't enable it unless you really need it.
 
@@ -118,7 +118,7 @@ See <a href="#Details">details</a> for more information about this usage.
 
 * By using some code that looks like `location.href="intent:#Intent;...;end"`, you can utilize this app as a generalized intent sender and activity launcher (by specifying `action`, `component`, etc. in the form of text; remember to use constants' values rather than their names). Unlike in <a href="#References">[1]</a>, you don't have to add `SEL` (which should have no effect anyway), as the rules mentioned above still apply: you can't use it to access any activity of this app; for other apps, only exported activities.
 
-* Currently, internet is the only required permission for this app. Optional permissions may be added in the future if and only if they would be required for accessing local network devices (but not required for now). The reason for not using more permissions is that this is merely a developer tool rather than a fully functional browser. But it can load custom pages, run custom programs and send intents, so it should be no more powerful at accessing the hardware and should be better sandboxed, or there might be a security issue.
+* Currently, internet is the only required permission for this app. Optional permissions may be added in the future if and only if they would be required for accessing local network devices (but not required for now). The reason for not using more permissions is that this is merely a developer tool rather than a fully functional browser. And it can load custom pages, run custom programs and send intents, so it should be better sandboxed, and not be granted more permissions to access the hardware, or there might be a security issue.
 
 ### Projects that offer similar functionalities
 
