@@ -118,7 +118,7 @@ See <a href="#Details">details</a> for more information about this usage.
 
 * By using some code that looks like `location.href="intent:#Intent;...;end"`, you can utilize this app as a generalized intent sender and activity launcher (by specifying `action`, `component`, etc. in the form of text; remember to use constants' values rather than their names). Unlike in <a href="#References">[1]</a>, you don't have to add `SEL` (which should have no effect anyway), as the rules mentioned above still apply: you can't use it to access any activity of this app; for other apps, only exported activities.
 
-* Currently, internet is the only required permission for this app. Optional permissions may be added in the future if and only if they would be required for accessing local network devices (but not required for now). The reason for not using more permissions is that this is merely a developer tool rather than a fully functional browser. And it can load custom pages, run custom programs and send intents, so it should be better sandboxed, and not be granted more permissions to access the hardware, or there might be a security issue.
+* Currently, internet is the only required permission for this app. Optional permissions may be added in the future if and only if they would be required for accessing local network devices (but not required for now). The reason for not using more permissions is that this is merely a developer tool rather than a fully functional browser. And it can load custom pages, run custom programs and send intents, so it should be better sandboxed and not granted more permissions to access the hardware, or there might be a security issue.
 
 ### Projects that offer similar functionalities
 
