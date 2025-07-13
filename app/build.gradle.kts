@@ -12,8 +12,8 @@ android {
         applicationId = "test.sls1005.projects.fundamentalbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 27
-        versionName = "2.7.0"
+        versionCode = 28
+        versionName = "2.7.1"
     }
     androidResources {
         generateLocaleConfig = true
@@ -63,24 +63,18 @@ dependencies {
     //implementation(libs.androidx.navigation.ui.ktx)
 }
 
-tasks.register<Copy>("Include license") {
-    include("LICENSE")
-    from("..")
-    into("src/main/assets/")
-}.also {
-    val task = it.get()
-    afterEvaluate {
-        tasks.named("preReleaseBuild") {
-            dependsOn(task)
-        }
+arrayOf(
+    tasks.register<Copy>("Include license") {
+        include("LICENSE")
+        from("..")
+        into("src/main/assets/")
+    },
+    tasks.register<Copy>("Update English strings") {
+        include("strings.xml")
+        from("src/main/res/values")
+        into("src/main/res/values-en")
     }
-}
-
-tasks.register<Copy>("Update English strings") {
-    include("strings.xml")
-    from("src/main/res/values")
-    into("src/main/res/values-en")
-}.also {
+).forEach {
     val task = it.get()
     afterEvaluate {
         tasks.named("preReleaseBuild") {

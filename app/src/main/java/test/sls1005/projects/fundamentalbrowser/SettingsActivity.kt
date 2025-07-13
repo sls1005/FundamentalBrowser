@@ -2,6 +2,7 @@ package test.sls1005.projects.fundamentalbrowser
 
 import android.app.Dialog
 import android.content.Intent
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View.VISIBLE
 import android.view.View.GONE
@@ -355,8 +356,15 @@ class SettingsActivity : ConfiguratedActivity() {
         if (useCustomUserAgent) {
             findViewById<TextView>(R.id.user_agent).apply {
                 visibility = VISIBLE
-            }.also {
-                it.text = getStoredUserAgent().orEmpty().ifEmpty { getString(R.string.tap_to_set) }
+            }.also { tv ->
+                val userAgent = getStoredUserAgent().orEmpty()
+                if (userAgent.isEmpty()) {
+                    tv.text = getString(R.string.tap_to_set)
+                    tv.typeface = Typeface.DEFAULT
+                } else {
+                    tv.text = userAgent
+                    tv.typeface = Typeface.MONOSPACE
+                }
             }
             findViewById<TextView>(R.id.user_agent_extra_text).visibility = VISIBLE
         } else {
@@ -539,7 +547,14 @@ class SettingsActivity : ConfiguratedActivity() {
                     setPositiveButton(R.string.ok) {_, _ ->
                         v.findViewById<EditText>(R.id.string_field_monospaced_input).text.toString().also {
                             saveUserAgent(it)
-                            ctx.findViewById<TextView>(R.id.user_agent).text = it.ifEmpty { ctx.getString(R.string.tap_to_set) }
+                            val tv = ctx.findViewById<TextView>(R.id.user_agent)
+                            if (it.isEmpty()) {
+                                tv.text = ctx.getString(R.string.tap_to_set)
+                                tv.typeface = Typeface.DEFAULT
+                            } else {
+                                tv.text = it
+                                tv.typeface = Typeface.MONOSPACE
+                            }
                         }
                     }
                     setNegativeButton(R.string.cancel) {_, _ -> }
