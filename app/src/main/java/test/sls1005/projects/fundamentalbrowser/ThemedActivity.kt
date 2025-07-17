@@ -1,6 +1,8 @@
 package test.sls1005.projects.fundamentalbrowser
 
+import android.os.Build
 import android.os.Bundle
+import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import java.io.File
 
@@ -13,6 +15,7 @@ open class ThemedActivity : AppCompatActivity() {
     // 1: Light
     // 2: Dark
     override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
         val stored = getStoredOrDefaultThemeSettings()
         val theme = stored.theme
         setTheme(
@@ -30,7 +33,9 @@ open class ThemedActivity : AppCompatActivity() {
                 }
             }
         )
-        super.onCreate(savedInstanceState)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            enableEdgeToEdge()
+        }
     }
 
     protected fun saveThemeSettings(settings: ThemeSettings) {

@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -12,8 +14,8 @@ android {
         applicationId = "test.sls1005.projects.fundamentalbrowser"
         minSdk = 24
         targetSdk = 35
-        versionCode = 28
-        versionName = "2.7.1"
+        versionCode = 29
+        versionName = "2.8.0"
     }
     androidResources {
         generateLocaleConfig = true
@@ -40,8 +42,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+    kotlin {
+        target {
+            compilerOptions {
+                jvmTarget = JvmTarget.JVM_11
+            }
+        }
     }
     buildFeatures {
         viewBinding = false

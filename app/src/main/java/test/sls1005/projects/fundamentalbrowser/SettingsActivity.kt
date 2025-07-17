@@ -209,7 +209,6 @@ class SettingsActivity : ConfiguratedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_settings)
         setSupportActionBar(findViewById<MaterialToolbar>(R.id.toolbar))
         intArrayOf(

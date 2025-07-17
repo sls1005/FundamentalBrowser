@@ -470,7 +470,6 @@ open class MainActivity : ConfiguratedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
         findViewById<MaterialToolbar>(R.id.toolbar).also { toolBar ->
             toolBar.apply {
