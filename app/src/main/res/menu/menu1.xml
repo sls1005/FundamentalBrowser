@@ -67,20 +67,33 @@
             android:title="@string/menu1_action_search_in_log"
             app:showAsAction="never"/>
     </group>
+    <group android:id="@+id/group_redirection_resolver_running">
+        <item
+            android:id="@+id/action_stop_redirection_resolver"
+            android:title="@string/stop_running_redirection_resolver"
+            app:showAsAction="never"/>
+    </group>
     <item
         android:id="@+id/action_settings"
         android:title="@string/settings"
         app:showAsAction="never"/>
-    <group
-        android:id="@+id/group_tools">
+    <group android:id="@+id/group_tools">
         <item
             android:id="@+id/menu1_submenu_tools"
             android:title="@string/menu1_item_tools">
             <menu>
-                <item
-                    android:id="@+id/menu1_tool_dns_resolver"
-                    android:title="@string/dns_resolver"
-                    app:showAsAction="never"/>
+                <group android:id="@+id/menu1_submenu_tools_group_redirection_resolver_not_running">
+                    <item
+                        android:id="@+id/menu1_tool_redirection_resolver"
+                        android:title="@string/menu1_tool_redirection_resolver"
+                        app:showAsAction="never"/>
+                </group>
+                <group android:id="@+id/menu1_submenu_tools_group_dns_resolver">
+                    <item
+                        android:id="@+id/menu1_tool_dns_resolver"
+                        android:title="@string/menu1_tool_dns_resolver"
+                        app:showAsAction="never"/>
+                </group>
             </menu>
         </item>
     </group>

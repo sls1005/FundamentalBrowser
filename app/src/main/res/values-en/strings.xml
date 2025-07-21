@@ -150,7 +150,7 @@
     <string name="doc_title1">1. UI</string>
     <string name="doc_title1_1">i. The URL bar</string>
     <string name="doc_text1_1_1">The URL bar of this app is a little different from that of other browsers. It is still the place where the URL is displayed or edited, but now it is usually hidden and only shows up when the user needs it.\n\nWhen you need to see the URL bar, tap on the ‘<code>://</code>’ symbol if it is present in the top bar, or use the ‘Show/hide URL bar’ or ‘Edit URL’ option from the menu that is opened by tapping the three-dot icon in the top bar. Tapping the ‘<code>://</code>’ symbol once again (if it is present) will close the URL bar if it is already opened.\n\nThe URL bar allows multiline editing, that is, text that is too long will be wrapped to the next line. This makes it easier to view and edit when the URL is very long.\n\nThere are several buttons at the bottom of the URL bar. Those are:\n</string>
-    <string name="doc_text1_1_2"><b>Load</b>: load the web page corresponding to a given URL. Unlike the ‘Search’ button, this does not do search.\n\n<b>Search</b>: search the web by using the text in the URL field as keywords. Only usable if the ‘search URL’ is set. Unlike the ‘Load’ button, this will not load a URL but… will search for it.\n\n<b>Copy</b>: copy the text in the URL field, or the selected text in the URL field, if any.\n\n<b>Paste</b>: paste the text to the URL field, either at the end of text or at the selected position if any text is selected.\n\n<b>Clear</b>: clear the URL field, removing all text.\n\n<b>Restore</b>: replace any text in the URL field with a previously loaded URL. This can also be used if the field is empty, in which case the previously loaded URL will still be restored, if any.\n\n<b>Decode</b>: decode the URL if it is pct-encoded. See https://datatracker.ietf.org/doc/html/rfc3986 for more details about pct-encoding.\n\n<b>Close</b>: close the URL bar.\n</string>
+    <string name="doc_text1_1_2"><b>Load</b>: load the web page corresponding to a given URL. Unlike the ‘Search’ button, this does not do search.\n\n<b>Search</b>: search the web by using the text in the URL field as keywords. Only usable if the ‘search URL’ is set. Unlike the ‘Load’ button, this will not load a URL but… will search for it.\n\n<b>Copy</b>: copy the text in the URL field, or the selected text in the URL field, if any.\n\n<b>Paste</b>: paste the text to the URL field, either at the end of text or at the selected position if any text is selected.\n\n<b>Clear</b>: clear the URL field, removing all text.\n\n<b>Restore</b>: replace any text in the URL field with a previously loaded URL. This can also be used if the field is empty, in which case the previously loaded URL will still be restored, if any.\n\n<b>Edit</b>: show the UI for editing the URL. It uses the entire screen to display the URL.\n\n<b>Decode</b>: decode the URL if it is pct-encoded. See https://datatracker.ietf.org/doc/html/rfc3986 for more details about pct-encoding.\n\n<b>Close</b>: close the URL bar.\n</string>
     <string name="doc_title1_2">ii. The main window</string>
     <string name="doc_text1_2">This is where the web page is displayed.\n</string>
     <string name="doc_title1_3">iii. The log</string>
@@ -163,7 +163,7 @@
     <string name="doc_title2_3">iii. Search a web page</string>
     <string name="doc_text2_3">To do search in a web page, use the ‘search content’ option from the option menu (only available if any page is loaded).\n</string>
     <string name="doc_title2_4">iv. View the source code</string>
-    <string name="doc_text2_4">To see the source code of a web page, add ‘view-source:’ to the start of the URL that points to it. For example: ‘<code>view-source:https://example.com/index.html</code>’. This usage is supported through the framework.\n\nAlternatively, you can use the ‘view the source code of this page’ option hidden in the submenu that is opened by tapping the three-dot icon and then tapping ‘more’.\n\nTo search in the source code, you may use the ‘search content’ option as if it were a normal web page.\n\nIf none of these methods works, please consider using the JavaScript console of this app to access the document object.\n</string>
+    <string name="doc_text2_4">To see the source code of a web page, add ‘view-source:’ to the start of the URL that points to it. For example: ‘<code>view-source:https://example.com/index.html</code>’. This usage is supported through the framework.\n\nAlternatively, you can use the ‘view the source code of this page’ option hidden in the submenu that is opened by tapping the three-dot icon and then tapping ‘more’. You may set in the settings the source viewer implementation that will perform this task. The default is ‘native’, which means the task is processed by the framework. However, if it doesn\'t work on your device, you may instead set it to ‘alternative’, which means that this app will use a different approach to do that.\n\nTo search in the source code, you may use the ‘search content’ option as if it were a normal web page. This is currently only supported if you are using the ‘native’ approach.\n</string>
     <string name="doc_title2_5">v. Console and REPL</string>
     <string name="doc_text2_5">To use the console and REPL features, input some code (should normally be JS code) into the URL field and use the ‘Run’ button (enabled in settings) to execute it. The execution of such code, even in the console mode, is never handled by this app, but by the framework or system. This app only implemented the logic to display the log messages.\n</string>
     <string name="doc_title2_6">vi. Logging</string>
@@ -210,9 +210,10 @@
     <string name="link_is_copied">Copied the link to the clipboard.</string>
     <string name="link_label">Copied the link label to the clipboard.</string>
     <string name="string_field_title_language_code">Please enter the language code(s)</string>
-    <string name="dns_resolver">DNS resolver</string>
+    <string name="menu1_tool_dns_resolver">DNS resolver</string>
+    <string name="dns_resolver_ui_title">DNS Resolver</string>
     <string name="domain_name">Domain name</string>
-    <string name="dns_resolver_resolve">Resolve</string>
+    <string name="resolve">Resolve</string>
     <string name="confirm">Confirm</string>
     <string name="back">Back</string>
     <string name="dns_resolver_error1">Nothing found.</string>
@@ -224,11 +225,26 @@
     <string name="source_viewer_alternative">Alternative</string>
     <string name="unsupported_protocol">Unsupported protocol.</string>
     <string name="unknown_error_occurred">Unknown error occurred.</string>
-    <string name="source_viewer_sending_request">[Log (source viewer)] Sending request…</string>
-    <string name="source_viewer_status_code">[Log (source viewer)] Status code: %1$d (%2$s)</string>
-    <string name="source_viewer_receiving">[Log (source viewer)] Receiving data…</string>
     <string name="string_field_title_enter_encoding_name">Enter the encoding name</string>
     <string name="edit">Edit</string>
     <string name="copy_url">Copy the URL</string>
     <string name="open_in_new_window">Open in a new window</string>
+    <string name="menu1_tool_redirection_resolver">Redirection (short URL) resolver</string>
+    <string name="redirection_resolver_ui_title">Redirection Resolver</string>
+    <string name="redirection_resolver_is_running_in_background">The redirection resolver is running the given task in the background.</string>
+    <string name="stop_running_redirection_resolver">End the current task of the redirection resolver</string>
+    <string name="redirection_resolver_log">[Log (redirection resolver)] %1$s\n</string>
+    <string name="sending_request_for">Sending request for ‘%1$s’</string>
+    <string name="redirects_to">‘%1$s’ redirects to ‘%2$s’</string>
+    <plurals name="redirection_resolver_resolved">
+        <item quantity="one">‘%1$s’ is resolved into ‘%2$s’ after %3$d redirect.</item>
+        <item quantity="other">‘%1$s’ is resolved into ‘%2$s’ after %3$d redirects.</item>
+    </plurals>
+    <string name="cycle_is_detected">A cycle is detected:\n\n</string>
+    <string name="hint_enter_url">Enter URL</string>
+    <string name="source_viewer_log">[Log (source viewer)] %1$s\n</string>
+    <string name="sending_request">Sending request…</string>
+    <string name="status_code_with_msg">Status code: %1$d (%2$s)</string>
+    <string name="receiving_data">Receiving data…</string>
+    <string name="hint_use_back_button_to_go_back">(Use the back button / gesture to go back.)</string>
 </resources>

@@ -152,7 +152,7 @@
     <string name="doc_title1">1. UI</string>
     <string name="doc_title1_1">i. 网址列</string>
     <string name="doc_text1_1_1">本应用程序的网址列与其他浏览器的网址列有些不同。它依然是用来显示或编辑网址的地方，但在本应用程序中，它一般是隐藏的，并且只在用户需要它的时候才会显示。\n\n当您需要检视网址的时候，轻触顶部栏中的“<code>://</code>”符号（若顶部栏中存在该符号）或者使用菜单中的“显示/隐藏网址列”或“编辑网址”选项即可。（该菜单可以透过轻触顶部栏中由三个圆点组成的符号来开启。）网址列处于展开状态时，再度点击“<code>://</code>”符号（若其存在）则会令其收合。\n\n这个网址列允许多行编辑，亦即过长的文字会显示在下一行。\n\n在网址列底部有不少按钮。这些按钮即：\n</string>
-    <string name="doc_text1_1_2"><b>载入</b>：载入与所提供的网址对应的网页。与<b>搜索</b>键不同的是，使用这个按钮无法进行搜寻。\n\n<b>搜索</b>：使用网址栏中的文字作为关键词，在网络上进行搜索。仅能在“搜索用网址”已设置的情况下使用。与<b>载入</b>键不同的是，这个按钮无法用于加载网址，却会把它当作关键词来进行搜索。\n\n<b>复制</b>：复制网址栏中的文字，或者当网址栏中的文字已被选取时，复制所选的文字。\n\n<b>粘贴</b>：将文字粘贴至网址栏；可能附加在现有文字之后，或者当一部份文字已被选取时，粘贴至所选的位置。\n\n<b>清除</b>：清空网址栏，清除所有文字。\n\n<b>还原</b>：将网址栏中的文字替换为先前载入的网址。网址栏为空时亦可使用。\n\n<b>解码</b>：若网址经过百分号编码，则将其解码。请参阅 https://datatracker.ietf.org/doc/html/rfc3986 以瞭解百分号编码的相关细节。\n\n<b>关闭</b>：收合网址列。\n</string>
+    <string name="doc_text1_1_2"><b>载入</b>：载入与所提供的网址对应的网页。与<b>搜索</b>键不同的是，使用这个按钮无法进行搜寻。\n\n<b>搜索</b>：使用网址栏中的文字作为关键词，在网络上进行搜索。仅能在“搜索用网址”已设置的情况下使用。与<b>载入</b>键不同的是，这个按钮无法用于加载网址，却会把它当作关键词来进行搜索。\n\n<b>复制</b>：复制网址栏中的文字，或者当网址栏中的文字已被选取时，复制所选的文字。\n\n<b>粘贴</b>：将文字粘贴至网址栏；可能附加在现有文字之后，或者当一部份文字已被选取时，粘贴至所选的位置。\n\n<b>清除</b>：清空网址栏，清除所有文字。\n\n<b>还原</b>：将网址栏中的文字替换为先前载入的网址。网址栏为空时亦可使用。\n\n<b>编辑</b>: 显示用于编辑网址的界面。该界面使用整个屏幕来显示网址。\n\n<b>解码</b>：若网址经过百分号编码，则将其解码。请参阅 https://datatracker.ietf.org/doc/html/rfc3986 以瞭解百分号编码的相关细节。\n\n<b>关闭</b>：收合网址列。\n</string>
     <string name="doc_title1_2">ii. 主视窗</string>
     <string name="doc_text1_2">网页将显示在此处。\n</string>
     <string name="doc_title1_3">iii. 日志</string>
@@ -165,7 +165,7 @@
     <string name="doc_title2_3">iii. 在网页中搜寻</string>
     <string name="doc_text2_3">使用菜单中的“内容搜寻”选项即可在页面中搜寻。（必须先载入任一页面。）\n</string>
     <string name="doc_title2_4">iv. 检视网页源代码</string>
-    <string name="doc_text2_4">欲检视某个页面的源代码，将“view-source:”加在指向该页面的网址之前即可。示例：“<code>view-source:https://example.com/index.html</code>”。此用法通过框架而实现支持。\n\n作为替代，您也可以使用菜单（轻触由三个圆点组成的符号来开启）的“更多”子菜单中的“检视页面源代码”选项。若想在源代码中进行搜寻，可使用“内容搜寻”选项，仿佛它是通常的网页一般。\n\n若这些方法皆无效，请考虑使用本应用程序的 JavaScript 主控台来存取 document 对象。\n</string>
+    <string name="doc_text2_4">欲检视某个页面的源代码，将“view-source:”加在指向该页面的网址之前即可。示例：“<code>view-source:https://example.com/index.html</code>”。此用法通过框架而实现支持。\n\n作为替代，您也可以使用菜单（轻触由三个圆点组成的符号来开启）的“更多”子菜单中的“检视页面源代码”选项。您可在设置中选择要使用的源码检视器实现。默认值为“内置”，意为该任务将由框架处理。但若其在您的设备上未产生应有的效果，您可将之设置为“替代作法”，这代表此应用程序将使用另一种方式来处理。\n\n若想在源代码中进行搜寻，可使用“内容搜寻”选项，仿佛它是通常的网页一般，但这种作法目前仅相容于“内置”实现。\n</string>
     <string name="doc_title2_5">v. 主控台与 REPL</string>
     <string name="doc_text2_5">欲使用主控台及 REPL 等功能，可在网址栏输入一段代码（通常必须是JS指令码），并使用“执行”键（在设置中启用）来执行它。执行结果会显示在屏幕上。这类代码的执行，即使是在主控台模式下也不是由此应用程序处理，而是由框架或系统处理。本应用程序仅仅实现了用于显示日志消息的逻辑。\n</string>
     <string name="doc_title2_6">vi. 前景日志消息</string>
@@ -201,9 +201,10 @@
     <string name="link_is_copied">已将链接复制到剪贴板。</string>
     <string name="link_label">已将该链接的标签复制到剪贴板。</string>
     <string name="string_field_title_language_code">请输入语言代码</string>
-    <string name="dns_resolver">域名解析器</string>
+    <string name="menu1_tool_dns_resolver">域名解析器</string>
+    <string name="dns_resolver_ui_title">域名解析器</string>
     <string name="domain_name">域名</string>
-    <string name="dns_resolver_resolve">解析</string>
+    <string name="resolve">解析</string>
     <string name="confirm">确认</string>
     <string name="back">返回</string>
     <string name="dns_resolver_error1">未找到对应的主机。</string>
@@ -215,11 +216,25 @@
     <string name="source_viewer_alternative">替代作法</string>
     <string name="unsupported_protocol">不支持该协议。</string>
     <string name="unknown_error_occurred">发生不明错误。</string>
-    <string name="source_viewer_sending_request">[Log (源码检视器)] 正在发送请求…</string>
-    <string name="source_viewer_status_code">[Log (源码检视器)] 状态码：%1$d (%2$s)</string>
-    <string name="source_viewer_receiving">[Log (源码检视器)] 正在接收数据…</string>
     <string name="string_field_title_enter_encoding_name">请输入编码方式名称</string>
     <string name="edit">编辑</string>
     <string name="copy_url">复制网址</string>
     <string name="open_in_new_window">在新视窗中开启</string>
+    <string name="menu1_tool_redirection_resolver">重定向（短网址）解析器</string>
+    <string name="redirection_resolver_ui_title">重定向解析器</string>
+    <string name="redirection_resolver_is_running_in_background">重定向解析器正在背景执行指定的工作。</string>
+    <string name="stop_running_redirection_resolver">终止重定向解析器目前的工作</string>
+    <string name="redirection_resolver_log">[Log (重定向解析器)] %1$s\n</string>
+    <string name="sending_request_for">正在发送对“%1$s”的请求</string>
+    <string name="redirects_to">“%1$s”重新导向至“%2$s”</string>
+    <plurals name="redirection_resolver_resolved">
+        <item quantity="other">在经过%3$d次重定向之后，“%1$s”被解析为“%2$s”</item>
+    </plurals>
+    <string name="cycle_is_detected">侦测到循环：\n\n</string>
+    <string name="hint_enter_url">请输入网址</string>
+    <string name="source_viewer_log">[Log (源码检视器)] %1$s\n</string>
+    <string name="sending_request">正在发送请求…</string>
+    <string name="status_code_with_msg">状态码：%1$d (%2$s)</string>
+    <string name="receiving_data">正在接收数据…</string>
+    <string name="hint_use_back_button_to_go_back">（使用返回键或手势以返回。）</string>
 </resources>

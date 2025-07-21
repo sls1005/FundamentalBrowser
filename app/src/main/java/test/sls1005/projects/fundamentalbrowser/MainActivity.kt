@@ -57,7 +57,9 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.appbar.MaterialToolbar
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -117,6 +119,8 @@ open class MainActivity : ConfiguratedActivity() {
     private var isResumed = false // flag for callback
     private var simulatingDisconnection = false
     private val loggingDispatcher = Executors.newSingleThreadExecutor().asCoroutineDispatcher()
+    private var redirectionResolverCurrentJob: Job? = null
+    private var currentThemeCode = (0).toByte() // it is intended that this is only once assigned to and not updated after that
     private val clickListener = OnClickListener { view ->
         when(view.id) {
             R.id.toolbar -> run {
@@ -402,7 +406,7 @@ open class MainActivity : ConfiguratedActivity() {
             R.id.window -> run {
                 findViewById<WebView>(R.id.window).hitTestResult.let { result ->
                     when (result.type) {
-                        WebView.HitTestResult.SRC_ANCHOR_TYPE -> run {
+                        WebView.HitTestResult.SRC_ANCHOR_TYPE, WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE, WebView.HitTestResult.IMAGE_TYPE -> run {
                             result.extra?.let { url ->
                                 showOptionDialog(
                                     arrayOf(
@@ -413,49 +417,25 @@ open class MainActivity : ConfiguratedActivity() {
                                         Pair(getString(R.string.copy_url)) {
                                             copyTextToClipboard(url)
                                             showMsg(getString(R.string.url_is_copied))
-                                        },
-                                        Pair(getString(R.string.open_in_new_window)) {
-                                            Uri.parse(url).also { uri ->
-                                                if (isHttpOrHttpsUri(uri)) {
-                                                    saveCurrentConfiguration()
-                                                    startActivity(
-                                                        Intent(Intent.ACTION_VIEW, uri, (this@MainActivity).applicationContext, NewWindowActivity::class.java).apply {
-                                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-                                                        }
-                                                    )
-                                                }
-                                            }
                                         }
-                                    )
-                                )
-                                (true)
-                            } ?: false
-                        }
-                        WebView.HitTestResult.SRC_IMAGE_ANCHOR_TYPE, WebView.HitTestResult.IMAGE_TYPE -> run {
-                            result.extra?.let { url ->
-                                showOptionDialog(
-                                    arrayOf(
-                                        Pair(url) {
-                                            copyTextToClipboard(url)
-                                            showMsg(getString(R.string.url_is_copied))
-                                        },
-                                        Pair(getString(R.string.copy_url)) {
-                                            copyTextToClipboard(url)
-                                            showMsg(getString(R.string.url_is_copied))
-                                        },
-                                        Pair(getString(R.string.open_in_new_window)) {
-                                            Uri.parse(url).also { uri ->
-                                                if (isHttpOrHttpsUri(uri)) {
-                                                    saveCurrentConfiguration()
-                                                    startActivity(
-                                                        Intent(Intent.ACTION_VIEW, uri, (this@MainActivity).applicationContext, NewWindowActivity::class.java).apply {
-                                                            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
-                                                        }
-                                                    )
+                                    ).let {
+                                        if (result.type == WebView.HitTestResult.IMAGE_TYPE) {
+                                            it
+                                        } else {
+                                            it + Pair(getString(R.string.open_in_new_window), {
+                                                Uri.parse(url).also { uri ->
+                                                    if (isHttpOrHttpsUri(uri)) {
+                                                        saveCurrentConfiguration()
+                                                        startActivity(
+                                                            Intent(Intent.ACTION_VIEW, uri, (this@MainActivity).applicationContext, NewWindowActivity::class.java).apply {
+                                                                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                                                            }
+                                                        )
+                                                    }
                                                 }
-                                            }
+                                            })
                                         }
-                                    )
+                                    }
                                 )
                                 (true)
                             } ?: false
@@ -470,6 +450,7 @@ open class MainActivity : ConfiguratedActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        currentThemeCode = getStoredOrDefaultThemeSettings().theme
         setContentView(R.layout.activity_main)
         findViewById<MaterialToolbar>(R.id.toolbar).also { toolBar ->
             toolBar.apply {
@@ -1019,6 +1000,13 @@ open class MainActivity : ConfiguratedActivity() {
                 }
             }
         }
+        updateLogIfShowing()
+        if (redirectionResolverCurrentJob?.isActive ?: false) {
+            showMsg(getString(R.string.redirection_resolver_is_running_in_background))
+        } else {
+            redirectionResolverCurrentJob = null
+        }
+        invalidateOptionsMenu()
         if (!isResumed) {
             isResumed = true
             afterInitialization()
@@ -1027,20 +1015,18 @@ open class MainActivity : ConfiguratedActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.menu1, menu)
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        if (! super.onPrepareOptionsMenu(menu)) {
-            return false
-        }
         val w = findViewById<WebView>(R.id.window)
-        val hasLoadedPage = !hasNotLoadedAnyPage()
-        val showingLog = isShowingLog()
-        val forwardPossible = w.canGoForward()
-        val backwardPossible = w.canGoBack()
-        val nightModeEnabled = ((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
-        val runningOnLevel29OrLater = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        val nightModeEnabled = (
+            when (currentThemeCode) {
+                (1).toByte() -> false
+                (2).toByte() -> true
+                else -> ((resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK) == Configuration.UI_MODE_NIGHT_YES)
+            }
+        )
+        val runningOnLevel33OrLater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        val runningOnLevel29OrLater = runningOnLevel33OrLater || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        val runningOnLevel29OrLaterAndNightModeEnabled = runningOnLevel29OrLater && nightModeEnabled
+        val runningOnLevel29OrLaterAndAdvancedToolsEnabled = runningOnLevel29OrLater && showAdvancedDeveloperTools
         arrayOf(
             Pair(
                 R.id.action_enable_disable_js,
@@ -1064,8 +1050,8 @@ open class MainActivity : ConfiguratedActivity() {
             ),
             Pair(
                 R.id.action_enable_disable_algorithmic_darkening,
-                runningOnLevel29OrLater && nightModeEnabled && (
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                runningOnLevel29OrLaterAndNightModeEnabled && (
+                    if (runningOnLevel33OrLater) {
                         w.settings.isAlgorithmicDarkeningAllowed()
                     } else {
                         w.settings.forceDark == WebSettings.FORCE_DARK_ON
@@ -1076,6 +1062,55 @@ open class MainActivity : ConfiguratedActivity() {
             val (id, state) = it
             menu.findItem(id).setChecked(state)
         }
+        arrayOf(
+            Pair(
+                R.id.group_only_enabled_under_dark_mode_on_level_29_or_later,
+                runningOnLevel29OrLaterAndNightModeEnabled
+            )
+        ).forEach { it ->
+            val (id, state) = it
+            menu.setGroupVisible(id, state)
+        }
+        menu.findItem(R.id.menu1_submenu_tools)?.subMenu?.also { sub ->
+            arrayOf(
+                Pair(
+                    R.id.menu1_submenu_tools_group_dns_resolver,
+                    runningOnLevel29OrLaterAndAdvancedToolsEnabled
+                )
+            ).forEach { it ->
+                val (id, state) = it
+                sub.setGroupVisible(id, state)
+            }
+        }
+        menu.findItem(R.id.menu1_submenu_more)?.subMenu?.also { sub ->
+            arrayOf(
+                Pair(
+                    R.id.menu1_submenu_more_group_advanced_tools,
+                    showAdvancedDeveloperTools
+                ),
+            ).forEach { it ->
+                val (id, state) = it
+                sub.setGroupVisible(id, state)
+            }
+        }
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        if (! super.onPrepareOptionsMenu(menu)) {
+            return false
+        }
+        val w = findViewById<WebView>(R.id.window)
+        val hasLoadedPage = !hasNotLoadedAnyPage()
+        val showingLog = isShowingLog()
+        val forwardPossible = w.canGoForward()
+        val backwardPossible = w.canGoBack()
+        val runningOnLevel33OrLater = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+        val runningOnLevel29OrLater = runningOnLevel33OrLater || (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
+        val runningOnLevel29OrLaterAndAdvancedToolsEnabled = runningOnLevel29OrLater && showAdvancedDeveloperTools
+        val redirectionResolverNotRunningTask = redirectionResolverCurrentJob?.isCompleted ?: true
+        val schemeIsHttpOrHttps = checkUriScheme(Uri.parse(currentURL), arrayOf("https", "http"))
+        val logNotEmpty = synchronized(logMsgs) { logMsgs.isNotEmpty() }
         arrayOf(
             Pair(
                 R.id.group_url,
@@ -1090,20 +1125,20 @@ open class MainActivity : ConfiguratedActivity() {
                 hasLoadedPage && (!showingLog)
             ),
             Pair(
-                R.id.group_only_enabled_under_dark_mode_on_level_29_or_later,
-                runningOnLevel29OrLater && nightModeEnabled
-            ),
-            Pair(
                 R.id.group_search_log,
-                showingLog && logMsgs.isNotEmpty()
+                showingLog && logNotEmpty
             ),
             Pair(
                 R.id.group_navigation,
-                forwardPossible || backwardPossible
+                backwardPossible || forwardPossible
             ),
             Pair(
                 R.id.group_tools,
-                showAdvancedDeveloperTools && runningOnLevel29OrLater
+                redirectionResolverNotRunningTask || runningOnLevel29OrLaterAndAdvancedToolsEnabled
+            ),
+            Pair(
+                R.id.group_redirection_resolver_running,
+                (!redirectionResolverNotRunningTask) && (redirectionResolverCurrentJob?.isActive ?: false)
             )
         ).forEach { it ->
             val (id, state) = it
@@ -1116,21 +1151,30 @@ open class MainActivity : ConfiguratedActivity() {
                 R.string.menu1_action_refresh
             }
         )
-        if (forwardPossible || backwardPossible) {
-            menu.findItem(R.id.menu1_submenu_navigation)?.subMenu?.also { sub ->
-                arrayOf(
-                    Pair(
-                        R.id.menu1_submenu_navigation_group_backward,
-                        backwardPossible
-                    ),
-                    Pair(
-                        R.id.menu1_submenu_navigation_group_forward,
-                        forwardPossible
-                    )
-                ).forEach { it ->
-                    val (id, state) = it
-                    sub.setGroupVisible(id, state)
-                }
+        menu.findItem(R.id.menu1_submenu_tools)?.subMenu?.also { sub ->
+            arrayOf(
+                Pair(
+                    R.id.menu1_submenu_tools_group_redirection_resolver_not_running,
+                    redirectionResolverNotRunningTask
+                )
+            ).forEach { it ->
+                val (id, state) = it
+                sub.setGroupVisible(id, state)
+            }
+        }
+        menu.findItem(R.id.menu1_submenu_navigation)?.subMenu?.also { sub ->
+            arrayOf(
+                Pair(
+                    R.id.menu1_submenu_navigation_group_backward,
+                    backwardPossible
+                ),
+                Pair(
+                    R.id.menu1_submenu_navigation_group_forward,
+                    forwardPossible
+                )
+            ).forEach { it ->
+                val (id, state) = it
+                sub.setGroupVisible(id, state)
             }
         }
         menu.findItem(R.id.menu1_submenu_more)?.subMenu?.also { sub ->
@@ -1141,11 +1185,7 @@ open class MainActivity : ConfiguratedActivity() {
                 ),
                 Pair(
                     R.id.menu1_submenu_more_group_website,
-                    hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "android-app", "blob", "file", "content")))
-                ),
-                Pair(
-                    R.id.menu1_submenu_more_group_advanced_tools,
-                    showAdvancedDeveloperTools
+                    hasLoadedPage && schemeIsHttpOrHttps
                 ),
                 Pair(
                     R.id.menu1_submenu_more_group_copy_url,
@@ -1153,11 +1193,11 @@ open class MainActivity : ConfiguratedActivity() {
                 ),
                 Pair(
                     R.id.menu1_submenu_more_group_advanced_tools_website_only,
-                    showAdvancedDeveloperTools && hasLoadedPage && (!checkUriScheme(Uri.parse(currentURL), arrayOf("data", "javascript", "intent", "android-app", "blob", "file", "content")))
+                    showAdvancedDeveloperTools && hasLoadedPage && schemeIsHttpOrHttps
                 ),
                 Pair(
                     R.id.menu1_submenu_more_group_log,
-                    logMsgs.isNotEmpty()
+                    logNotEmpty
                 ),
                 Pair(
                     R.id.menu1_submenu_more_group_showing_log,
@@ -1167,13 +1207,15 @@ open class MainActivity : ConfiguratedActivity() {
                 val (id, state) = it
                 sub.setGroupVisible(id, state)
             }
-            sub.findItem(R.id.action_view_log).title = getString(
-                if (showingLog) {
-                    R.string.menu1_action_refresh_log
-                } else {
-                    R.string.menu1_action_view_log
-                }
-            )
+            if (logNotEmpty) {
+                sub.findItem(R.id.action_view_log).title = getString(
+                    if (showingLog) {
+                        R.string.menu1_action_refresh_log
+                    } else {
+                        R.string.menu1_action_view_log
+                    }
+                )
+            }
             if (showAdvancedDeveloperTools) {
                 sub.findItem(R.id.action_simulate_disconnection).setTitle(
                     if (simulatingDisconnection) {
@@ -1444,9 +1486,21 @@ open class MainActivity : ConfiguratedActivity() {
                 showDialogForLoadingHTML()
                 (true)
             }
+            R.id.action_stop_redirection_resolver -> run {
+                redirectionResolverCurrentJob?.cancel()
+                redirectionResolverCurrentJob = null
+                (true)
+            }
             R.id.menu1_tool_dns_resolver -> run {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                     showDNSResolver()
+                }
+                (true)
+            }
+            R.id.menu1_tool_redirection_resolver -> run {
+                if (redirectionResolverCurrentJob?.isCompleted ?: true) {
+                    redirectionResolverCurrentJob = null
+                    showRedirectionResolverUI()
                 }
                 (true)
             }
@@ -1456,6 +1510,7 @@ open class MainActivity : ConfiguratedActivity() {
 
     override fun onConfigurationChanged(config: Configuration) {
         super.onConfigurationChanged(config)
+        invalidateOptionsMenu()
     }
 
     override fun onDestroy() {
@@ -2012,7 +2067,7 @@ open class MainActivity : ConfiguratedActivity() {
                 return (AlertDialog.Builder(ctx).apply {
                     val v = layoutInflater.inflate(R.layout.code_input_dialog, null).apply {
                         findViewById<EditText>(R.id.code_input).apply {
-                            setHint("Enter URL")
+                            setHint(R.string.hint_enter_url)
                             text.apply {
                                 clear()
                                 append(url)
@@ -2152,7 +2207,7 @@ open class MainActivity : ConfiguratedActivity() {
                             append(textToDisplayInInputField)
                         }
                     }
-                    setPositiveButton(R.string.dns_resolver_resolve) { _, _ ->
+                    setPositiveButton(R.string.resolve) { _, _ ->
                         val input = v.findViewById<EditText>(R.id.domain_name).text.toString()
                         try {
                             DnsResolver.getInstance().query(null, input, DnsResolver.FLAG_EMPTY, Executors.newCachedThreadPool(), null,
@@ -2214,31 +2269,205 @@ open class MainActivity : ConfiguratedActivity() {
         }).show(supportFragmentManager, null)
     }
 
-    private fun alternativeApproachForViewingSource(url: String) {
+    private fun showRedirectionResolverUI() {
+        (object: DialogFragment() {
+            override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                val ctx = requireActivity()
+                return (AlertDialog.Builder(ctx).apply {
+                    val v = layoutInflater.inflate(R.layout.redirection_resolver, null)
+                    setView(v)
+                    setPositiveButton(R.string.resolve) { _, _ ->
+                        val input = v.findViewById<EditText>(R.id.redirection_resolver_url).text.toString().let {
+                            if (it.indexOf('.') != -1 && it.indexOf(':') == -1) {
+                                "https://$it"
+                            } else {
+                                it
+                            }
+                        }
+                        startRunningRedirectionResolver(input)
+                    }
+                    setNegativeButton(R.string.cancel) { _, _ -> }
+                }).create()
+            }
+        }).show(supportFragmentManager, null)
+    }
+
+    private fun startRunningRedirectionResolver(url: String) {
+        val msg1 = getString(R.string.redirection_resolver_log, getString(R.string.sending_request_for, url))
+        val maxMsgNum = maxLogMsgsAtomic.get()
         synchronized(logMsgs) {
-            logMsgs.add(getString(R.string.source_viewer_sending_request) + '\n')
+            logMsgs.apply {
+                if (size >= maxMsgNum) {
+                    removeFirst()
+                }
+                add(msg1)
+            }
         }
         if (!isShowingLog()) {
             showLog(scroll = true)
         }
         val userAgent = findViewById<WebView>(R.id.window).settings.userAgentString
+        val languages = languageTags
+        redirectionResolverCurrentJob = lifecycleScope.launch(Dispatchers.IO) {
+            var redirectionCount = 0
+            var urlToVisit = url
+            val visited = ArrayList<String>()
+            try {
+                while (isActive) {
+                    URL(urlToVisit).openConnection().also {
+                        if (it is HttpURLConnection) {
+                            it.setRequestProperty("User-Agent", userAgent)
+                            if (manuallySetLanguageTagsAtomic.get() && languages.isNotEmpty()) {
+                                it.setRequestProperty("Accept-Language", languages)
+                            }
+                            it.instanceFollowRedirects = false
+                            val headers = it.headerFields
+                            val newUrl = (
+                                if (it.responseCode in intArrayOf(301, 302, 303, 307, 308)) { // redirection
+                                    headers["Location"]?.let {
+                                        if (it.size != 1) { // 0 or >= 2
+                                            null
+                                        } else {
+                                            toAbsoluteUrlIfNotAbsolute(urlToVisit, it[0])
+                                        }
+                                    }
+                                } else {
+                                    null // no redirection
+                                }
+                            ) // null means: (1) there is no location header or (2) there is more than one or (3) the status code is not redirection
+                            visited.add(urlToVisit)
+                            if (newUrl == null) {
+                                withContext(Dispatchers.Main) {
+                                    val result = resources.getQuantityString(R.plurals.redirection_resolver_resolved, redirectionCount, url, urlToVisit, redirectionCount)
+                                    val logMsg = getString(R.string.redirection_resolver_log, result + '\n' + getString(R.string.hint_use_back_button_to_go_back))
+                                    val maxMsgNum = maxLogMsgsAtomic.get()
+                                    lifecycleScope.launch(loggingDispatcher) {
+                                        synchronized(logMsgs) {
+                                            logMsgs.apply {
+                                                if (size >= maxMsgNum) {
+                                                    removeFirst()
+                                                }
+                                                add(logMsg)
+                                            }
+                                        }
+                                        withContext(Dispatchers.Main) {
+                                            updateLogIfShowing()
+                                        }
+                                    }
+                                    // still on main thread
+                                    showRedirectionResolverResult(result)
+                                }
+                                break
+                            } else {
+                                val logMsg = getString(R.string.redirection_resolver_log, getString(R.string.redirects_to, urlToVisit, newUrl))
+                                val maxMsgNum = maxLogMsgsAtomic.get()
+                                withContext(loggingDispatcher) {
+                                    synchronized(logMsgs) {
+                                        logMsgs.apply {
+                                            if (size >= maxMsgNum) {
+                                                removeFirst()
+                                            }
+                                            add(logMsg)
+                                        }
+                                    }
+                                }
+                                withContext(Dispatchers.Main) {
+                                    updateLogIfShowing()
+                                }
+                                if (newUrl in visited) {
+                                    visited.add(newUrl)
+                                    val result = getString(R.string.cycle_is_detected) + visited.joinToString("\n-> ")
+                                    val logMsg = getString(R.string.redirection_resolver_log, result)
+                                    val maxMsgNum = maxLogMsgsAtomic.get()
+                                    lifecycleScope.launch(loggingDispatcher) {
+                                        synchronized(logMsgs) {
+                                            logMsgs.apply {
+                                                if (size >= maxMsgNum) {
+                                                    removeFirst()
+                                                }
+                                                add(logMsg)
+                                            }
+                                        }
+                                        withContext(Dispatchers.Main) {
+                                            updateLogIfShowing()
+                                        }
+                                    }
+                                    withContext(Dispatchers.Main) {
+                                        showRedirectionResolverResult(result)
+                                    }
+                                    break
+                                }
+                                redirectionCount += 1
+                                urlToVisit = newUrl
+                            }
+                        } else {
+                            withContext(Dispatchers.Main) {
+                                showMsg(getString(R.string.error, getString(R.string.unsupported_protocol)))
+                            }
+                            break
+                        }
+                    }
+                }
+            } catch (_: IOException) {
+                withContext(Dispatchers.Main) {
+                    showMsg(getString(R.string.unknown_error_occurred))
+                }
+            } catch (_: UnknownServiceException) {
+                withContext(Dispatchers.Main) {
+                    showMsg(getString(R.string.unknown_error_occurred))
+                }
+            } catch (_: Exception) {
+                withContext(Dispatchers.Main) {
+                    showMsg(getString(R.string.unknown_error_occurred))
+                }
+            }
+        }
+    }
+
+    private fun showRedirectionResolverResult(result: String) {
+        (object: DialogFragment() {
+            override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+                return (AlertDialog.Builder(requireActivity()).apply {
+                    setView(
+                        layoutInflater.inflate(R.layout.redirection_resolver_result_dialog, null).apply {
+                            findViewById<TextView>(R.id.redirection_resolver_result).text = result
+                        }
+                    )
+                    setPositiveButton(R.string.confirm) { _, _ -> }
+                }).create()
+            }
+        }).show(supportFragmentManager, null)
+    }
+
+    private fun alternativeApproachForViewingSource(url: String) {
+        val msg1 = getString(R.string.source_viewer_log, getString(R.string.sending_request))
+        synchronized(logMsgs) {
+            logMsgs.add(msg1)
+        }
+        if (!isShowingLog()) {
+            showLog(scroll = true)
+        }
+        val userAgent = findViewById<WebView>(R.id.window).settings.userAgentString
+        val languages = languageTags
         lifecycleScope.launch(Dispatchers.IO) {
             val result = ArrayList<Byte>()
             try {
                 URL(url).openConnection().also {
                     if (it is HttpURLConnection) {
                         it.setRequestProperty("User-Agent", userAgent)
-                        if (manuallySetLanguageTagsAtomic.get() && languageTags.isNotEmpty()) {
-                            it.setRequestProperty("Accept-Language", languageTags)
+                        if (manuallySetLanguageTagsAtomic.get() && languages.isNotEmpty()) {
+                            it.setRequestProperty("Accept-Language", languages)
                         }
                         it.instanceFollowRedirects = !shouldAskBeforeFollowingRedirection
                         val stream = it.inputStream // The request is launched here. This line should be before the following block.
                         val statusCode = it.responseCode
                         val statusMsg = it.responseMessage
                         lifecycleScope.launch(Dispatchers.Main) {
+                            val logMsg1 = getString(R.string.source_viewer_log, getString(R.string.status_code_with_msg, statusCode, statusMsg))
+                            val logMsg2 = getString(R.string.source_viewer_log, getString(R.string.receiving_data))
                             synchronized(logMsgs) {
-                                logMsgs.add(getString(R.string.source_viewer_status_code, statusCode, statusMsg) + '\n')
-                                logMsgs.add(getString(R.string.source_viewer_receiving) + '\n')
+                                logMsgs.add(logMsg1)
+                                logMsgs.add(logMsg2)
                             }
                             updateLogIfShowing()
                         }
@@ -2272,6 +2501,15 @@ open class MainActivity : ConfiguratedActivity() {
             } catch (_: Exception) {
                 withContext(Dispatchers.Main) {
                     showMsg(getString(R.string.unknown_error_occurred))
+                }
+            } finally {
+                lifecycleScope.launch(Dispatchers.Main) {
+                    if (isShowingLog()) {
+                        synchronized(logMsgs) {
+                            logMsgs.add(getString(R.string.source_viewer_log, getString(R.string.hint_use_back_button_to_go_back)))
+                        }
+                        updateLogIfShowing()
+                    }
                 }
             }
         }
@@ -2623,4 +2861,31 @@ private inline fun shouldNotBlockUserLoading(url: String): Boolean {
         arrayOf("http", "https", "javascript", "view-source", "data")
     )
     // Excluded: "file", "content", "blob", "intent", "android-app"
+}
+
+private inline fun toAbsoluteUrlIfNotAbsolute(originalUrl: String, newPathOrUrl: String): String {
+    val newUri = Uri.parse(newPathOrUrl)
+    return if (newUri.isRelative()) {
+        Uri.parse(originalUrl).let { originalUri ->
+            if (newUri.host?.isEmpty() ?: true) {
+                (originalUri.buildUpon().apply {
+                    path(
+                        if (newPathOrUrl.startsWith('/')) {
+                            newUri.path
+                        } else {
+                            (originalUri.path + newUri.path).replace("/./", "/").replace(Regex("/[^/?#]/\\.\\./"), "/")
+                        }
+                    )
+                    query(newUri.query)
+                    fragment(newUri.fragment)
+                }).build().toString()
+            } else {
+                (newUri.buildUpon().apply {
+                    scheme(originalUri.scheme.orEmpty().ifEmpty { "https" })
+                }).build().toString()
+            }
+        }
+    } else {
+        newUri.toString()
+    }
 }

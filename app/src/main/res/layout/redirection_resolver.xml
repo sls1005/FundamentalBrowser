@@ -14,29 +14,20 @@
             android:paddingTop="10dp"
             android:paddingBottom="15dp"
             android:textSize="18sp"
-            android:text="@string/dns_resolver_ui_title"
-            android:textColor="?android:attr/colorPrimary"
-            android:textStyle="bold"/>
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="10dp"
-            android:layout_marginBottom="1dp"
-            android:textSize="14sp"
-            android:text="@string/domain_name"
+            android:text="@string/redirection_resolver_ui_title"
             android:textColor="?android:attr/colorPrimary"
             android:textStyle="bold"/>
         <EditText
-            android:id="@+id/domain_name"
+            android:id="@+id/redirection_resolver_url"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:paddingStart="5dp"
             android:paddingEnd="5dp"
             android:layout_marginStart="15dp"
             android:layout_marginEnd="15dp"
-            android:inputType="text"
+            android:inputType="textUri"
             android:textSize="20sp"
-            android:fontFamily="monospace"/>
+            android:fontFamily="monospace"
+            android:hint="@string/hint_enter_url"/>
     </LinearLayout>
 </ScrollView>
