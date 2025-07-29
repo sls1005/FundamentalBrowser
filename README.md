@@ -6,7 +6,7 @@ Although not originally designed for, it can also be used as a JavaScript interp
 
 When used as a JavaScript interpreter, it can even work on platform API level 29 and above. (i.e. not subject to the W^X restriction, not at all, or at least not in technical aspects.)
 
-However, the functionality of this app will not exceed what it should have as a browser with built-in developer tools. (It is... was common for browsers to have a JavaScript console, wasn't it?)
+However, the functionality of this app will generally not exceed what it should have as a browser with built-in developer tools. (It is... was common for browsers to have a JavaScript console, wasn't it?)
 
 ### Screenshots
 
